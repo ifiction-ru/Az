@@ -17,7 +17,7 @@ gulp.task('compass', function() {
 gulp.task('images', function() {
     gulp.src('./img/**/*')
         .pipe(imagemin())
-        .pipe(gulp.dest('./img/'))
+        .pipe(gulp.dest('./img/'));
 });
 
 gulp.task('watch', function() {
