@@ -1,18 +1,14 @@
 /*  */
 
-(function (global) {
-
+define(function () {
     'use strict';
 
-    global.exports = global.exports || {};
+    var domReady = function (callback) {
 
-    var ui = {
-
-        init: function () {
-            console.log('az-ui loaded');
-        }
     };
 
-    global.exports['az-ui'] = ui;
+    return {
+        domReady: domReady
+    }
+});
 
-})(this);
