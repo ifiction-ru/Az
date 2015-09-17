@@ -1,8 +1,14 @@
-/*  */
+/**
+ *  UI module for Az.
+ *
+ *  */
 
 define(['modules/az-utils'], function (utils) {
     'use strict';
 
+    /*
+     * Inspired via Atom https://github.com/theshock/atomjs
+     */
     var dom = {
             regexp: {
                 'tag': /^[-_a-z0-9]+$/i,
@@ -229,6 +235,66 @@ define(['modules/az-utils'], function (utils) {
                         elem.parentNode.removeChild(elem);
                     }
                 });
+            },
+
+            offset: function (element) {
+                element = element.length ? element[0] : element;
+
+                if (element.offsetX != null) {
+                    return {
+                        x: element.offsetX,
+                        y: element.offsetY
+                    };
+                }
+
+                var box = element.getBoundingClientRect(),
+                    body    = document.body,
+                    docElem = document.documentElement,
+                    scrollLeft = window.pageXOffset || docElem.scrollLeft || body.scrollLeft,
+                    scrollTop  = window.pageYOffset || docElem.scrollTop  || body.scrollTop,
+                    clientLeft = docElem.clientLeft || body.clientLeft    || 0,
+                    clientTop  = docElem.clientTop  || body.clientTop     || 0;
+
+                return {
+                    x: Math.round(box.left + scrollLeft - clientLeft),
+                    y: Math.round(box.top  + scrollTop  - clientTop )
+                };
+            },
+
+            appendTo: function (elements, target) {
+                var fragment = document.createDocumentFragment();
+
+                dom.each(elements, function (elem) {
+                    fragment.appendChild(elem);
+                });
+                target.appendChild(fragment);
+            },
+
+            appendBefore: function (elements, target) {
+                var fragment = document.createDocumentFragment();
+
+                dom.each(elements, function (elem) {
+                    fragment.appendChild(elem);
+                });
+                target.parentNode.insertBefore(fragment, target);
+            },
+
+            appendAfter: function (elements, target) {
+                var parent = target.parentNode,
+                    next = target.nextSibling,
+                    fragment = document.createDocumentFragment();
+
+                dom.each(elements, function (elem) {
+                    fragment.appendChild(elem);
+                });
+
+                if (next) {
+                    parent.insertBefore(fragment, next);
+                } else {
+                    parent.appendChild(fragment);
+                }
+
+                return this;
             }
         };
 
