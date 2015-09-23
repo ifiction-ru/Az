@@ -8,12 +8,28 @@
     define('az', ['modules/az-utils', 'modules/az-ui'], function (utils, ui) {
         'use strict';
 
-        var az;
+        var az,
+            /* настройки по умолчанию */
+            settings = {
 
+            };
+
+        /* Достаем настройки из az.settings */
+        if (global.az && typeof global.az.settings === 'object') {
+            utils.extend(settings, global.az.settings);
+        }
+
+        /* готовим объект для экспорта в глобальное пространство */
         az = {
-
+            utils: utils,
+            ui: ui
         };
 
+        ui.init({
+
+        });
+
+        /* экспорт API движка в глобальное пространство */
         return global.az = az;
 
     });

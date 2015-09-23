@@ -115,12 +115,16 @@ define(['modules/az-utils'], function (utils) {
                 return !!(node && node.nodeName);
             },
 
-            create: function (tagName, attrs) {
+            create: function (tagName, properties) {
                 if (tagName) {
                     var elem = document.createElement(tagName);
 
-                    if (utils.typeOf(attrs) === 'object') {
-
+                    if (utils.typeOf(properties) === 'object') {
+                        for (var i in properties) {
+                            if (properties.hasOwnProperty(i)) {
+                                elem[i] = properties[i];
+                            }
+                        }
                     }
 
                     return elem;
@@ -325,11 +329,105 @@ define(['modules/az-utils'], function (utils) {
             }
         };
 
+    var settings = {
+            heading: 'Название игры', // допускается HTML-код
+            location: 'Название локации', // название локации
+            theme: '',   // путь к css-файлу со стилями, относительно index.html,
+            placeholder: '>',
+            executeTitle: 'Выполнить',
+            gameLookTitle: 'Осмотреться',
+            gameInventoryTitle: 'Инвентарь',
+            // Шаблон интерфейса
+            template: '<div class="az-heading">{{ this.heading }}</div>\
+                       <header class="az-location">{{ this.location }}</header>\
+                       <div class="az-story"></div>\
+                       <div class="az-parser">\
+                           <div class="az-suggestions"></div>\
+                           <div class="az-inputs">\
+                               <input type="text" class="az-inputs__text" placeholder="{{ this.placeholder }}">\
+                               <button type="button" class="az-inputs__btn az-inputs__execute" title="{{ this.executeTitle }}"></button>\
+                               <button type="button" class="az-inputs__btn az-inputs__game-look" title="{{ this.gameLookTitle }}"></button>\
+                               <button type="button" class="az-inputs__btn az-inputs__game-inv" title="{{ this.gameInventoryTitle }}"></button>\
+                           </div>\
+                       </div>'
+        },
+
+        selectors = {
+            main: '.az-main',
+            heading: '.az-heading',
+            location: '.az-location',
+            story: '.az-story',
+            suggestions: '.az-suggestions',
+            input: '.az-inputs__text',
+            execute: '.az-inputs__execute',
+            gameLook: '.az-inputs__game-look',
+            gameInventory: '.az-inputs__game-inv'
+        },
+        classes = {
+            main: 'az-main'
+        },
+        elements = {
+            // Заполняются в renderView
+        },
+
+        /**
+         * Строим базовый интерфейс игры.
+         */
+        renderView = function () {
+            var main = dom.create('div', {
+                    id: classes.main,
+                    className: classes.main,
+                    innerHTML: render(settings.template, settings)
+                });
+
+            document.body.appendChild(main);
+
+            utils.extend(elements, {
+                main: main,
+                heading: dom.query(selectors.heading, main),
+                location: dom.query(selectors.location, main),
+                story: dom.query(selectors.story, main),
+                suggestions: dom.query(selectors.suggestions, main),
+                input: dom.query(selectors.input, main),
+                execute: dom.query(selectors.submit, main),
+                gameLook: dom.query(selectors.submit, gameLook),
+                gameInventory: dom.query(selectors.submit, gameInventory)
+            });
+        },
+
+        /**
+         * Изменение настроек интерфейса
+         * @param options
+         */
+        changeSettings = function (options) {
+            utils.extend(settings, options);
+        },
+
+        /**
+         * Изменение placeholder у поля ввода
+         * @param {string} text
+         */
+        setPlaceholder = function (text) {
+            changeSettings({ placeholder: text });
+            elements.input.placeholder = text;
+        },
+
+        /**
+         * Инициализация интерфейса игры
+         * @param options Настройки интерфейса. Значения по умолчанию см. в переменной settings.
+         * */
+        init = function (options) {
+            changeSettings(options);
+            renderView();
+        };
+
     document.addEventListener('DOMContentLoaded', dom.readyCallback, false);
     window.addEventListener('load', dom.readyCallback, false);
 
     return {
-        dom: dom
+        dom: dom,
+        setPlaceholder: setPlaceholder,
+        render: render,
+        init: init
     }
 });
-

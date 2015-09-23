@@ -1,13 +1,14 @@
 var gulp = require('gulp'),
+    path = require('path'),
     concat = require('gulp-concat'),
     compass = require('gulp-compass');
 
 gulp.task('compass', function() {
-    gulp.src('./src/scss/**/*.scss')
+    gulp.src('./src/**/scss/*.scss')
         .pipe(compass({
-            config_file: 'config.rb',
-            css: 'src/css',
-            sass: 'src/scss'
+            project: path.join(__dirname, 'src/themes/default/'),
+            css: 'css',
+            sass: 'scss'
         }))
         .on('error', function(error) {
             console.log(error);
@@ -21,5 +22,5 @@ gulp.task('images', function() {
 });
 
 gulp.task('watch', function() {
-    gulp.watch('./src/scss/**/*.scss', ['compass']);
+    gulp.watch('./src/**/scss/*.scss', ['compass']);
 });
