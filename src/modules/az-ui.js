@@ -6,6 +6,33 @@
 define(['modules/az-utils'], function (utils) {
     'use strict';
 
+    /**
+     * Template Engine via Krasimir Tsonev
+     * https://github.com/krasimir/absurd/blob/master/lib/processors/html/helpers/TemplateEngine.js
+     * Usage: render( '{{ this.foo }}' , { foo: 'bar' });
+     * @param {string} tpl
+     * @param context
+     */
+    var render = function (tpl, context) {
+        var re = /\{\{([^%>]+)?}}/g,
+            reExp = /(^( )?(if|for|else|switch|case|break|{|}))(.*)?/g,
+            code = 'var r=[];\n',
+            cursor = 0,
+            match,
+            add = function(line, js) {
+                js? (code += line.match(reExp) ? line + '\n' : 'r.push(' + line + ');\n') :
+                    (code += line != '' ? 'r.push("' + line.replace(/"/g, '\\"') + '");\n' : '');
+                return add;
+            };
+        while(match = re.exec(tpl)) {
+            add(tpl.slice(cursor, match.index))(match[1], true);
+            cursor = match.index + match[0].length;
+        }
+        add(tpl.substr(cursor, tpl.length - cursor));
+        code += 'return r.join("");';
+        return new Function(code.replace(/[\r\t\n]/g, '')).apply(context);
+    };
+
     /*
      * Inspired via Atom https://github.com/theshock/atomjs
      */
