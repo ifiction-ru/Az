@@ -389,9 +389,9 @@ define(['modules/az-utils'], function (utils) {
                 story: dom.query(selectors.story, main),
                 suggestions: dom.query(selectors.suggestions, main),
                 input: dom.query(selectors.input, main),
-                execute: dom.query(selectors.submit, main),
-                gameLook: dom.query(selectors.submit, gameLook),
-                gameInventory: dom.query(selectors.submit, gameInventory)
+                execute: dom.query(selectors.execute, main),
+                gameLook: dom.query(selectors.gameLook, main),
+                gameInventory: dom.query(selectors.gameInventory, main)
             });
         },
 
