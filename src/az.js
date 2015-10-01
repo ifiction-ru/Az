@@ -5,6 +5,7 @@
  * */
 
 (function (global) {
+
     define('az', ['modules/az-utils', 'modules/az-ui'], function (utils, ui) {
         'use strict';
 
@@ -25,12 +26,13 @@
             ui: ui
         };
 
-        ui.init({
 
+        ui.init({}, function () {
+            ui.on('az.ui.submit', function (event) {
+                console.log(event.detail);
+            });
         });
 
-        /* экспорт API движка в глобальное пространство */
-        return global.az = az;
-
     });
+
 })(this);

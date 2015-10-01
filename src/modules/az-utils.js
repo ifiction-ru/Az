@@ -4,16 +4,23 @@ define(function () {
    'use strict';
 
     var extend = function (target, source) {
+            var src, copy;
+
             target = target || {};
 
-            for (var i in source) {
-                if (source.hasOwnProperty(i)) {
-                    if (typeof source[i] === 'object') {
-                        target[i] = Array.isArray(source[i]) ? [] : {};
-                        extend(target[i], source[i]);
-                    } else {
-                        target[i] = source[i];
-                    }
+            for (var name in source) {
+                src = target[name];
+                copy = source[name];
+
+                if (target === copy) {
+                    continue;
+                }
+
+                if (typeof copy === 'object') {
+                    target[name] = Array.isArray(src) ? [] : {};
+                    target[name] = extend(copy, src);
+                } else if (copy !== undefined) {
+                    target[name] = src;
                 }
             }
 

@@ -6,6 +6,24 @@
 define(['modules/az-utils'], function (utils) {
     'use strict';
 
+    /* Polyfill Custom Event */
+    (function () {
+        function CustomEvent (event, params) {
+            params = params || { bubbles: false, cancelable: false, detail: undefined };
+
+            var evt = document.createEvent( 'CustomEvent' );
+
+            evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+
+            return evt;
+        }
+
+        CustomEvent.prototype = window.Event.prototype;
+        window.CustomEvent = CustomEvent;
+    })();
+
+    var NAMESPACE = 'az.ui';
+
     /**
      * Template Engine via Krasimir Tsonev
      * https://github.com/krasimir/absurd/blob/master/lib/processors/html/helpers/TemplateEngine.js
@@ -70,6 +88,7 @@ define(['modules/az-utils'], function (utils) {
             },
 
             each: function (elements, func) {
+                elements = elements.length ? elements : [elements];
                 Array.prototype.forEach.call(elements, func);
             },
 
@@ -109,6 +128,10 @@ define(['modules/az-utils'], function (utils) {
                         context.querySelectorAll(selector);
                     }
                 }
+            },
+
+            get: function (selector, context) {
+                return dom.query(selector, context)[0];
             },
 
             isElement: function (node) {
@@ -384,14 +407,14 @@ define(['modules/az-utils'], function (utils) {
 
             utils.extend(elements, {
                 main: main,
-                heading: dom.query(selectors.heading, main),
-                location: dom.query(selectors.location, main),
-                story: dom.query(selectors.story, main),
-                suggestions: dom.query(selectors.suggestions, main),
-                input: dom.query(selectors.input, main),
-                execute: dom.query(selectors.execute, main),
-                gameLook: dom.query(selectors.gameLook, main),
-                gameInventory: dom.query(selectors.gameInventory, main)
+                heading: dom.get(selectors.heading, main),
+                location: dom.get(selectors.location, main),
+                story: dom.get(selectors.story, main),
+                suggestions: dom.get(selectors.suggestions, main),
+                input: dom.get(selectors.input, main),
+                execute: dom.get(selectors.execute, main),
+                gameLook: dom.get(selectors.gameLook, main),
+                gameInventory: dom.get(selectors.gameInventory, main)
             });
         },
 
@@ -412,22 +435,63 @@ define(['modules/az-utils'], function (utils) {
             elements.input.placeholder = text;
         },
 
+        triggerEvent = function (event, data) {
+            var eventObj;
+
+            data = utils.typeOf(data) === 'object' ? data : {};
+
+            if (event) {
+                eventObj = document.defaultView.CustomEvent(NAMESPACE + '.' + event, { detail: data });
+                document.dispatchEvent(eventObj);
+            }
+        },
+
+        submitInput = function () {
+            var input = elements.input,
+                text = input.value.trim();
+
+            input.value = '';
+            text && triggerEvent('submit', { value: text });
+        },
+
+        handleEvents = function () {
+            dom.on(elements.input, 'keyup', function (event) {
+                if (event.keyCode === 13) { // Enter
+                    submitInput();
+                }
+            })
+        },
+
+        on = function (event, callback) {
+            dom.on(document, event, callback);
+        },
+
         /**
          * Инициализация интерфейса игры
          * @param options Настройки интерфейса. Значения по умолчанию см. в переменной settings.
          * */
-        init = function (options) {
-            changeSettings(options);
-            renderView();
+        init = function (options, callback) {
+            dom.onReady(function () {
+                changeSettings(options);
+                renderView();
+                handleEvents();
+                callback();
+            });
         };
 
-    document.addEventListener('DOMContentLoaded', dom.readyCallback, false);
-    window.addEventListener('load', dom.readyCallback, false);
+    if (document.readyState == "complete") {
+        dom.ready = true;
+        dom.readyCallback();
+    } else {
+        document.addEventListener('DOMContentLoaded', dom.readyCallback, false);
+        window.addEventListener('load', dom.readyCallback, false);
+    }
 
     return {
         dom: dom,
         setPlaceholder: setPlaceholder,
         render: render,
+        on: on,
         init: init
     }
 });
