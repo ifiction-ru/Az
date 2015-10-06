@@ -498,7 +498,7 @@ define(['modules/az-utils'], function (utils) {
             data = utils.typeOf(data) === 'object' ? data : {};
 
             if (event) {
-                eventObj = document.defaultView.CustomEvent(NAMESPACE + '.' + event, { detail: data });
+                eventObj = new document.defaultView.CustomEvent(NAMESPACE + '.' + event, { detail: data });
                 document.dispatchEvent(eventObj);
             }
         },
