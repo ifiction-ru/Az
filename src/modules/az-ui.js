@@ -8,18 +8,17 @@ define(['modules/az-utils'], function (utils) {
 
     /* Polyfill Custom Event */
     (function () {
-        function CustomEvent (event, params) {
-            params = params || { bubbles: false, cancelable: false, detail: undefined };
-
-            var evt = document.createEvent( 'CustomEvent' );
-
-            evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
-
+        function CustomEvent(event, params) {
+            params = params || {bubbles: false, cancelable: false, detail: undefined};
+            var evt = document.createEvent('CustomEvent');
+            evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
             return evt;
         }
 
-        CustomEvent.prototype = window.Event.prototype;
-        window.CustomEvent = CustomEvent;
+        if (!window.CustomEvent) {
+            CustomEvent.prototype = window.Event.prototype;
+            window.CustomEvent = CustomEvent;
+        }
     })();
 
     var NAMESPACE = 'az.ui';
@@ -88,7 +87,7 @@ define(['modules/az-utils'], function (utils) {
             },
 
             each: function (elements, func) {
-                elements = elements.length ? elements : [elements];
+                elements = Array.isArray(elements) ? elements : [elements];
                 Array.prototype.forEach.call(elements, func);
             },
 
@@ -138,14 +137,22 @@ define(['modules/az-utils'], function (utils) {
                 return !!(node && node.nodeName);
             },
 
-            create: function (tagName, properties) {
-                if (tagName) {
-                    var elem = document.createElement(tagName);
+            create: function (str, properties) {
+                var elem;
 
-                    if (utils.typeOf(properties) === 'object') {
-                        for (var i in properties) {
-                            if (properties.hasOwnProperty(i)) {
-                                elem[i] = properties[i];
+                str = str ? str.toString() : undefined;
+
+                if (str) {
+                    if (str.indexOf('<') >=0 && str.indexOf('>') >=0) {
+                        elem = document.createRange().createContextualFragment(str);
+                    } else {
+                        elem = document.createElement(str);
+
+                        if (utils.typeOf(properties) === 'object') {
+                            for (var i in properties) {
+                                if (properties.hasOwnProperty(i)) {
+                                    elem[i] = properties[i];
+                                }
                             }
                         }
                     }
@@ -423,6 +430,7 @@ define(['modules/az-utils'], function (utils) {
          * @param options
          */
         changeSettings = function (options) {
+            options = options || {};
             utils.extend(settings, options);
         },
 
@@ -431,10 +439,59 @@ define(['modules/az-utils'], function (utils) {
          * @param {string} text
          */
         setPlaceholder = function (text) {
+            if (!text) {
+                return;
+            }
+
             changeSettings({ placeholder: text });
             elements.input.placeholder = text;
         },
 
+        /**
+         * Изменение заголовка игры
+         * @param {string} text Заголовок игры, допускается HTML-код
+         */
+        setHeading = function (text) {
+            if (!text) {
+                return;
+            }
+
+            changeSettings({ heading: text });
+            elements.heading.innerHtml = text;
+        },
+
+        /**
+         * Изменение заголовка локации
+         * @param {string} text Заголовок локации, допускается HTML-код
+         */
+        setLocation = function (text) {
+            if (!text) {
+                return;
+            }
+
+            changeSettings({ location: text });
+            elements.location.innerHtml = text;
+        },
+
+        /**
+         * Добавить фрагмент истории
+         * @param text Текст, допускается HTML-код
+         * @param template Шаблон для функции render.
+         */
+        write = function (text, template) {
+            if (!text) {
+                return;
+            }
+
+            template = ' ' + template || ' <p>{{ this }}</p>';
+            dom.appendTo( dom.create(render(template, text)), elements.story );
+        },
+
+        /**
+         * Вызов события интерфейса
+         * @param event Имя события
+         * @param data Объект данных события
+         */
         triggerEvent = function (event, data) {
             var eventObj;
 
@@ -446,29 +503,51 @@ define(['modules/az-utils'], function (utils) {
             }
         },
 
+        /**
+         * Подписка на событие
+         * @param event Имя события
+         * @param callback Обработчик
+         */
+        on = function (event, callback) {
+            dom.on(document, event, callback);
+        },
+
+        /**
+         * Обработчик ввода команды
+         */
         submitInput = function () {
             var input = elements.input,
                 text = input.value.trim();
 
-            input.value = '';
+            clearInput();
             text && triggerEvent('submit', { value: text });
+        },
+
+        /**
+         * Очистка поля ввода
+         */
+        clearInput = function () {
+            elements.input.value = '';
         },
 
         handleEvents = function () {
             dom.on(elements.input, 'keyup', function (event) {
                 if (event.keyCode === 13) { // Enter
                     submitInput();
+                } else if (event.keyCode === 27) {
+                    clearInput();
                 }
-            })
-        },
+            });
 
-        on = function (event, callback) {
-            dom.on(document, event, callback);
+            dom.on(elements.execute, 'click', function () {
+                submitInput();
+            });
         },
 
         /**
          * Инициализация интерфейса игры
          * @param options Настройки интерфейса. Значения по умолчанию см. в переменной settings.
+         * @param callback Функция, вызываемая после инициализации интерфейса.
          * */
         init = function (options, callback) {
             dom.onReady(function () {
@@ -489,9 +568,12 @@ define(['modules/az-utils'], function (utils) {
 
     return {
         dom: dom,
+        setHeading: setHeading,
+        setLocation: setLocation,
         setPlaceholder: setPlaceholder,
+        write: write,
         render: render,
         on: on,
         init: init
-    }
+    };
 });
