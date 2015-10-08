@@ -579,6 +579,7 @@ define(['modules/az-utils'], function (utils) {
         setLocation: setLocation,
         setPlaceholder: setPlaceholder,
         write: write,
+        clear: clear,
         render: render,
         on: on,
         init: init
