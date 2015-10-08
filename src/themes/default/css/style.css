@@ -1,198 +1,188 @@
-@charset "UTF-8";
 @font-face {
-    font-family: 'PT Sans';
-    src: url("../fonts/PTSans/PTS55F_W.eot");
-    src: local("PT Sans"), url("../fonts/PTSans/PTS55F_W.eot?#iefix") format("embedded-opentype"), url("../fonts/PTSans/PTS55F_W.woff") format("woff"), url("../fonts/PTSans/PTS55F_W.ttf") format("truetype"), url("../fonts/PTSans/PTS55F_W.svg#PTSans-Regular") format("svg");
+  font-family: 'PT Sans';
+  src: url("../fonts/PTSans/PTS55F_W.eot");
+  src: local("PT Sans"), url("../fonts/PTSans/PTS55F_W.eot?#iefix") format("embedded-opentype"), url("../fonts/PTSans/PTS55F_W.woff") format("woff"), url("../fonts/PTSans/PTS55F_W.ttf") format("truetype"), url("../fonts/PTSans/PTS55F_W.svg#PTSans-Regular") format("svg");
 }
-
 @font-face {
-    font-family: 'PT Sans';
-    font-style: italic;
-    src: url("../fonts/PTSans/PTS56F_W.eot");
-    src: local("PT Sans Italic"), url("../fonts/PTSans/PTS56F_W.eot?#iefix") format("embedded-opentype"), url("../fonts/PTSans/PTS56F_W.woff") format("woff"), url("../fonts/PTSans/PTS56F_W.ttf") format("truetype"), url("../fonts/PTSans/PTS56F_W.svg#PTSans-Italic") format("svg");
+  font-family: 'PT Sans';
+  font-style: italic;
+  src: url("../fonts/PTSans/PTS56F_W.eot");
+  src: local("PT Sans Italic"), url("../fonts/PTSans/PTS56F_W.eot?#iefix") format("embedded-opentype"), url("../fonts/PTSans/PTS56F_W.woff") format("woff"), url("../fonts/PTSans/PTS56F_W.ttf") format("truetype"), url("../fonts/PTSans/PTS56F_W.svg#PTSans-Italic") format("svg");
 }
-
 @font-face {
-    font-family: 'PT Sans';
-    src: url("../fonts/PTSans/PTS75F_W.eot");
-    font-style: normal;
-    font-weight: bold;
-    src: local("PT Sans Bold"), url("../fonts/PTSans/PTS75F_W.eot?#iefix") format("embedded-opentype"), url("../fonts/PTSans/PTS75F_W.woff") format("woff"), url("../fonts/PTSans/PTS75F_W.ttf") format("truetype"), url("../fonts/PTSans/PTS75F_W.svg#PTSans-Bold") format("svg");
+  font-family: 'PT Sans';
+  src: url("../fonts/PTSans/PTS75F_W.eot");
+  font-style: normal;
+  font-weight: bold;
+  src: local("PT Sans Bold"), url("../fonts/PTSans/PTS75F_W.eot?#iefix") format("embedded-opentype"), url("../fonts/PTSans/PTS75F_W.woff") format("woff"), url("../fonts/PTSans/PTS75F_W.ttf") format("truetype"), url("../fonts/PTSans/PTS75F_W.svg#PTSans-Bold") format("svg");
 }
-
 html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 
 body {
-    display: -webkit-flex;
-    -webkit-flex-direction: column;
-    -webkit-flex-frow: 1;
-    -webkit-justify-content: space-between;
-    display: flex;
-    flex-direction: column;
-    flex-frow: 1;
-    justify-content: space-between;
-    position: relative;
-    min-height: 480px;
-    background: #f8f8f8;
-    font: 1em/1.4 "PT Sans", "sans-serif" normal;
-    color: #3a3a3a;
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  -webkit-flex-frow: 1;
+  -webkit-justify-content: space-between;
+  display: flex;
+  flex-direction: column;
+  flex-frow: 1;
+  justify-content: space-between;
+  position: relative;
+  min-height: 480px;
+  background: #f8f8f8;
+  font: 1em/1.4 "PT Sans", "sans-serif" normal;
+  color: #3a3a3a;
 }
 
 a {
-    color: #4682b4;
+  color: #4682b4;
 }
 
 p {
-    margin: 0.8em 0;
+  margin: 0.8em 0;
 }
 
 .az-main {
-    display: -webkit-flex;
-    -webkit-flex-direction: column;
-    -webkit-flex-grow: 1;
-    -webkit-justify-content: space-between;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    justify-content: space-between;
-    box-sizing: border-box;
-    width: 50em;
-    height: 100%;
-    margin: 0 auto;
-    padding: 2em;
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  -webkit-flex-grow: 1;
+  -webkit-justify-content: space-between;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: space-between;
+  box-sizing: border-box;
+  width: 50em;
+  height: 100%;
+  margin: 0 auto;
+  padding: 2em;
 }
 
 .az-heading {
-    height: 60px;
-    font-size: 2em;
-    font-weight: bold;
+  height: 60px;
+  font-size: 2em;
+  font-weight: bold;
 }
 
 .az-location {
-    height: 40px;
-    font-size: 1.4em;
+  height: 40px;
+  font-size: 1.4em;
 }
 
 .az-story {
-    -webkit-flex-grow: 1;
-    flex-grow: 1;
-    overflow-x: hidden;
-    overflow-y: auto;
-    margin: 0.5em 0;
-    padding-right: 0.5em;
+  -webkit-flex-grow: 1;
+  flex-grow: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  margin: 0.5em 0;
+  padding-right: 0.5em;
 }
 
 .az-parser {
-    display: -webkit-flex;
-    -webkit-flex-direction: column;
-    -webkit-justify-content: space-between;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  -webkit-justify-content: space-between;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .az-suggestions {
-    -webkit-flex-grow: 1;
-    flex-grow: 1;
-    height: 2em;
-    margin-bottom: 0.5em;
+  -webkit-flex-grow: 1;
+  flex-grow: 1;
+  height: 2em;
+  margin-bottom: 0.5em;
 }
 
 .az-inputs {
-    display: -webkit-flex;
-    -webkit-justify-content: space-between;
-    -webkit-align-items: stretch;
-    -webkit-flex-grow: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: stretch;
-    flex-grow: 1;
-    -moz-box-shadow: inset 0 1px 8px rgba(0, 0, 0, 0.15);
-    -webkit-box-shadow: inset 0 1px 8px rgba(0, 0, 0, 0.15);
-    box-shadow: inset 0 1px 8px rgba(0, 0, 0, 0.15);
-    height: 3em;
-    box-sizing: border-box;
-    border: 1px solid #e6e6e6;
-    border-radius: 3px;
-    background: #fff;
+  display: -webkit-flex;
+  -webkit-justify-content: space-between;
+  -webkit-align-items: stretch;
+  -webkit-flex-grow: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  flex-grow: 1;
+  -moz-box-shadow: inset 0 1px 8px rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: inset 0 1px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: inset 0 1px 8px rgba(0, 0, 0, 0.15);
+  height: 3em;
+  box-sizing: border-box;
+  padding: 0 0.4em;
+  border: 1px solid #e6e6e6;
+  border-radius: 3px;
+  background: #fff;
 }
 
 .az-inputs__text {
-    -webkit-flex-grow: 1;
-    -webkit-order: 3;
-    flex-grow: 1;
-    order: 3;
-    background: #fff;
-    border: 0;
-    padding: 0.2em;
-    font-size: 1.5rem;
-    letter-spacing: 0.1rem;
-    color: #555;
+  -webkit-flex-grow: 1;
+  -webkit-order: 3;
+  flex-grow: 1;
+  order: 3;
+  background: #fff;
+  border: 0;
+  padding: 0.2em;
+  font-size: 1.5rem;
+  letter-spacing: 0.1rem;
+  color: #555;
 }
-
 .az-inputs__text:-moz-placeholder {
-    color: #b8b8b8;
+  color: #b8b8b8;
 }
-
 .az-inputs__text::-moz-placeholder {
-    color: #b8b8b8;
+  color: #b8b8b8;
 }
-
 .az-inputs__text:-ms-input-placeholder {
-    color: #b8b8b8;
+  color: #b8b8b8;
 }
-
 .az-inputs__text::-webkit-input-placeholder {
-    color: #b8b8b8;
+  color: #b8b8b8;
 }
-
 .az-inputs__text:focus {
-    outline: 0;
+  outline: 0;
 }
 
 .az-inputs__text,
 .az-inputs__btn {
-    margin: 0.1em 0.25em;
+  margin: 0.1em 0.25em;
 }
 
 .az-inputs__btn {
-    position: relative;
-    width: 40px;
-    margin: 0 0.1rem;
-    padding: 0;
-    border: 0;
-    background: 50% 50% no-repeat;
-    background-size: 32px;
-    cursor: pointer;
-    opacity: 0.4;
+  position: relative;
+  width: 32px;
+  margin: 0 0.1rem;
+  padding: 0;
+  border: 0;
+  background: 50% 50% no-repeat;
+  background-size: 24px;
+  cursor: pointer;
+  opacity: 0.3;
 }
-
 .az-inputs__btn:focus {
-    outline: none;
+  outline: none;
 }
-
 .az-inputs__btn:hover {
-    opacity: 0.5;
+  opacity: 0.4;
 }
 
 .az-inputs__execute {
-    -webkit-order: 4;
-    order: 4;
-    background-image: url(../images/go.png);
+  -webkit-order: 4;
+  order: 4;
+  background-image: url(../images/go.png);
 }
 
 .az-inputs__game-look {
-    -webkit-order: 1;
-    order: 1;
-    background-image: url(../images/look.png);
+  -webkit-order: 1;
+  order: 1;
+  background-image: url(../images/look.png);
 }
 
 .az-inputs__game-inv {
-    -webkit-order: 2;
-    order: 2;
-    background-image: url(../images/inv.png);
+  -webkit-order: 2;
+  order: 2;
+  background-image: url(../images/inv.png);
 }

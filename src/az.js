@@ -31,6 +31,10 @@
             ui.on('az.ui.submit', function (event) {
                 console.log(event.detail);
             });
+
+            ui.on('az.ui.input', function (event) {
+                console.log(event.detail);
+            });
         });
 
         global.az = az;

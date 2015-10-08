@@ -35,10 +35,15 @@ define(function () {
             }
 
             return typeof arg;
+        },
+
+        toArray = function (element) {
+            return Array.prototype.slice.call(element);
         };
 
     return {
         extend: extend,
-        typeOf: typeOf
+        typeOf: typeOf,
+        toArray: toArray
     }
 });

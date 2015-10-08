@@ -124,8 +124,28 @@ define(['modules/az-utils'], function (utils) {
                     } else if (selector.match(dom.regexp.tag)) {
                         return context.getElementsByTagName(selector);
                     } else {
-                        context.querySelectorAll(selector);
+                        return context.querySelectorAll(selector);
                     }
+                }
+            },
+
+            is: function (element, selector) {
+                var filter;
+
+                if (!selector) {
+                    return;
+                }
+
+                if (element.length) {
+                    element = elements[0];
+                }
+
+                filter = dom.query(selector, element.parentNode);
+
+                if (Array.isArray(filter) ? filter.length : filter) {
+                    return utils.toArray(filter).indexOf(element) >= 0;
+                } else {
+                    return false;
                 }
             },
 
@@ -379,7 +399,8 @@ define(['modules/az-utils'], function (utils) {
                                <button type="button" class="az-inputs__btn az-inputs__game-look" title="{{ this.gameLookTitle }}"></button>\
                                <button type="button" class="az-inputs__btn az-inputs__game-inv" title="{{ this.gameInventoryTitle }}"></button>\
                            </div>\
-                       </div>'
+                       </div>',
+            templateSuggestion: '<span class="az-suggestions__item">{{ this }}</span>'
         },
 
         selectors = {
@@ -388,6 +409,7 @@ define(['modules/az-utils'], function (utils) {
             location: '.az-location',
             story: '.az-story',
             suggestions: '.az-suggestions',
+            suggestionItem: '.az-suggestions__item',
             input: '.az-inputs__text',
             execute: '.az-inputs__execute',
             gameLook: '.az-inputs__game-look',
@@ -495,6 +517,66 @@ define(['modules/az-utils'], function (utils) {
         },
 
         /**
+         * Вывести догадки парсера
+         * @param {Array} data Массив догадок
+         */
+        setSuggestions = function (data) {
+            var i = 0,
+                result = '';
+
+            if (data && Array.isArray(data)) {
+                for (i; i < data.length; i++) {
+                    result += render(settings.templateSuggestion, data[i]);
+                }
+
+                elements.suggestions.innerHTML = result;
+            }
+        },
+
+        /**
+         * Применение догадки
+         * @param {string} text Текст догадки
+         */
+        applySuggestion = function (text) {
+            var value,
+                words;
+
+            if (text && typeof text === 'string') {
+                text.trim();
+                value = elements.input.value.trim().replace(/\s+/g, ' ');
+                words = value.split(' ');
+                words[words.length] = text;
+                elements.input.value = words.join(' ');
+                clearSuggestions();
+            }
+        },
+
+        /**
+         * Очистка догадок
+         */
+        clearSuggestions = function () {
+            elements.suggestions.innerHTML = '';
+        },
+
+        /**
+         * Обработчик ввода команды
+         */
+        submitInput = function () {
+            var input = elements.input,
+                text = input.value.trim();
+
+            clearInput();
+            text && triggerEvent('submit', { value: text });
+        },
+
+        /**
+         * Очистка поля ввода
+         */
+        clearInput = function () {
+            elements.input.value = '';
+        },
+
+        /**
          * Вызов события интерфейса
          * @param event Имя события
          * @param data Объект данных события
@@ -519,35 +601,36 @@ define(['modules/az-utils'], function (utils) {
             dom.on(document, event, callback);
         },
 
-        /**
-         * Обработчик ввода команды
-         */
-        submitInput = function () {
-            var input = elements.input,
-                text = input.value.trim();
-
-            clearInput();
-            text && triggerEvent('submit', { value: text });
-        },
-
-        /**
-         * Очистка поля ввода
-         */
-        clearInput = function () {
-            elements.input.value = '';
-        },
-
         handleEvents = function () {
             dom.on(elements.input, 'keyup', function (event) {
-                if (event.keyCode === 13) { // Enter
+                var key = event.keyCode,
+                    item;
+
+                if (key === 13) { // Enter
                     submitInput();
-                } else if (event.keyCode === 27) {
+                } else if (key === 27) {
                     clearInput();
+                } else if (key === 9) {
+                    item = elements.suggestions.query(elements.suggestionItem)[0];
+
+                    if (item) {
+                        applySuggestion(item.innerHTML);
+                    }
                 }
+            });
+
+            dom.on(elements.input, 'input', function (event) {
+                triggerEvent('input', { text : elements.input.value.trim() });
             });
 
             dom.on(elements.execute, 'click', function () {
                 submitInput();
+            });
+
+            dom.on(elements.suggestions, 'click', function (event) {
+                if (dom.is(event.target, settings.suggestionItem)) {
+                    applySuggestion(event.target.innerHTML.trim());
+                }
             });
         },
 
@@ -580,6 +663,7 @@ define(['modules/az-utils'], function (utils) {
         setPlaceholder: setPlaceholder,
         write: write,
         clear: clear,
+        setSuggestions: setSuggestions,
         render: render,
         on: on,
         init: init
