@@ -474,7 +474,7 @@ define(['modules/az-utils'], function (utils) {
         },
 
         /**
-         * Добавить фрагмент истории
+         * Добавить фрагмент текста
          * @param text Текст, допускается HTML-код
          * @param template Шаблон для функции render.
          */
@@ -485,6 +485,13 @@ define(['modules/az-utils'], function (utils) {
 
             template = ' ' + template || ' <p>{{ this }}</p>';
             dom.appendTo( dom.create(render(template, text)), elements.story );
+        },
+
+        /**
+         * Очистка текста
+         */
+        clear = function () {
+            elements.story.innerHTML = '';
         },
 
         /**
