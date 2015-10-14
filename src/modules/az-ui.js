@@ -505,7 +505,7 @@ define(['modules/az-utils'], function (utils) {
                 return;
             }
 
-            template = ' ' + template || ' <p>{{ this }}</p>';
+            template = template ? ' ' + template : '<p>{{ this }}</p>';
             dom.appendTo( dom.create(render(template, text)), elements.story );
         },
 
