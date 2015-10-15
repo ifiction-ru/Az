@@ -606,7 +606,7 @@ define(['modules/az-utils'], function (utils) {
         },
 
         handleEvents = function () {
-            dom.on(elements.input, 'keyup', function (event) {
+            dom.on(elements.input, 'keydown', function (event) {
                 var key = event.keyCode,
                     item;
 
@@ -615,7 +615,7 @@ define(['modules/az-utils'], function (utils) {
                 } else if (key === 27) {
                     clearInput();
                 } else if (key === 9) {
-                    item = elements.suggestions.query(elements.suggestionItem)[0];
+                    item = dom.query(selectors.suggestionItem)[0];
 
                     if (item) {
                         applySuggestion(item.innerHTML);
@@ -632,7 +632,7 @@ define(['modules/az-utils'], function (utils) {
             });
 
             dom.on(elements.suggestions, 'click', function (event) {
-                if (dom.is(event.target, settings.suggestionItem)) {
+                if (dom.is(event.target, selectors.suggestionItem)) {
                     applySuggestion(event.target.innerHTML.trim());
                 }
             });
