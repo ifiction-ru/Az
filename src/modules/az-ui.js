@@ -380,7 +380,7 @@ define(['modules/az-utils'], function (utils) {
         };
 
     var settings = {
-            heading: 'Название игры', // допускается HTML-код
+            title: 'Название игры', // допускается HTML-код
             location: 'Название локации', // название локации
             theme: '',   // путь к css-файлу со стилями, относительно index.html,
             placeholder: '>',
@@ -388,24 +388,28 @@ define(['modules/az-utils'], function (utils) {
             gameLookTitle: 'Осмотреться',
             gameInventoryTitle: 'Инвентарь',
             // Шаблон интерфейса
-            template: '<div class="az-heading">{{ this.heading }}</div>\
-                       <header class="az-location">{{ this.location }}</header>\
+            template: '<header class="az-header">\
+                           <div class="az-title">{{ this.title }}</div>\
+                           <div class="az-location">{{ this.location }}</div>\
+                       </header>\
                        <div class="az-story"></div>\
-                       <div class="az-parser">\
-                           <div class="az-suggestions"></div>\
-                           <div class="az-inputs">\
-                               <input type="text" class="az-inputs__text" placeholder="{{ this.placeholder }}">\
-                               <button type="button" class="az-inputs__btn az-inputs__execute" title="{{ this.executeTitle }}"></button>\
-                               <button type="button" class="az-inputs__btn az-inputs__game-look" title="{{ this.gameLookTitle }}"></button>\
-                               <button type="button" class="az-inputs__btn az-inputs__game-inv" title="{{ this.gameInventoryTitle }}"></button>\
+                       <footer class="az-footer">\
+                           <div class="az-parser">\
+                               <div class="az-suggestions"></div>\
+                               <div class="az-inputs">\
+                                   <input type="text" class="az-inputs__text" placeholder="{{ this.placeholder }}">\
+                                   <button type="button" class="az-inputs__btn az-inputs__execute" title="{{ this.executeTitle }}"></button>\
+                                   <button type="button" class="az-inputs__btn az-inputs__game-look" title="{{ this.gameLookTitle }}"></button>\
+                                   <button type="button" class="az-inputs__btn az-inputs__game-inv" title="{{ this.gameInventoryTitle }}"></button>\
+                               </div>\
                            </div>\
-                       </div>',
+                       </footer>',
             templateSuggestion: '<span class="az-suggestions__item">{{ this }}</span>'
         },
 
         selectors = {
             main: '.az-main',
-            heading: '.az-heading',
+            title: '.az-title',
             location: '.az-location',
             story: '.az-story',
             suggestions: '.az-suggestions',
@@ -436,7 +440,7 @@ define(['modules/az-utils'], function (utils) {
 
             utils.extend(elements, {
                 main: main,
-                heading: dom.get(selectors.heading, main),
+                title: dom.get(selectors.title, main),
                 location: dom.get(selectors.location, main),
                 story: dom.get(selectors.story, main),
                 suggestions: dom.get(selectors.suggestions, main),
@@ -473,13 +477,13 @@ define(['modules/az-utils'], function (utils) {
          * Изменение заголовка игры
          * @param {string} text Заголовок игры, допускается HTML-код
          */
-        setHeading = function (text) {
+        setTitle = function (text) {
             if (!text) {
                 return;
             }
 
-            changeSettings({ heading: text });
-            elements.heading.innerHtml = text;
+            changeSettings({ title: text });
+            elements.title.innerHtml = text;
         },
 
         /**
@@ -658,7 +662,7 @@ define(['modules/az-utils'], function (utils) {
 
     return {
         dom: dom,
-        setHeading: setHeading,
+        setTitle: setTitle,
         setLocation: setLocation,
         setPlaceholder: setPlaceholder,
         write: write,

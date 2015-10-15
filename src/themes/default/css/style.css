@@ -23,14 +23,6 @@ html, body {
 }
 
 body {
-  display: -webkit-flex;
-  -webkit-flex-direction: column;
-  -webkit-flex-frow: 1;
-  -webkit-justify-content: space-between;
-  display: flex;
-  flex-direction: column;
-  flex-frow: 1;
-  justify-content: space-between;
   position: relative;
   min-height: 480px;
   background: #f8f8f8;
@@ -46,24 +38,39 @@ p {
   margin: 0.8em 0;
 }
 
-.az-main {
-  display: -webkit-flex;
-  -webkit-flex-direction: column;
-  -webkit-flex-grow: 1;
-  -webkit-justify-content: space-between;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  justify-content: space-between;
+.az-main,
+.az-header,
+.az-footer {
   box-sizing: border-box;
-  width: 50em;
-  height: 100%;
+  width: 100%;
   margin: 0 auto;
-  padding: 2em;
+  padding: 0 5%;
 }
 
-.az-heading {
+.az-main {
+  height: 100%;
+  padding: 120px 5% 20px;
+}
+
+.az-header,
+.az-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  background: #f8f8f8;
+}
+
+.az-header {
+  top: 0;
+}
+
+.az-footer {
+  bottom: 0;
+}
+
+.az-title {
   height: 60px;
+  margin-top: 20px;
   font-size: 2em;
   font-weight: bold;
 }
@@ -74,12 +81,7 @@ p {
 }
 
 .az-story {
-  -webkit-flex-grow: 1;
-  flex-grow: 1;
-  overflow-x: hidden;
-  overflow-y: auto;
   margin: 0.5em 0;
-  padding-right: 0.5em;
 }
 
 .az-parser {
@@ -89,13 +91,25 @@ p {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  margin: 10px 0 20px;
 }
 
 .az-suggestions {
-  -webkit-flex-grow: 1;
-  flex-grow: 1;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
   height: 2em;
-  margin-bottom: 0.5em;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 -10px 20px rgba(255, 255, 255, 0.6);
+}
+.az-suggestions:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
 }
 
 .az-inputs {

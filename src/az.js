@@ -35,6 +35,8 @@
             ui.on('az.ui.input', function (event) {
                 console.log(event.detail);
             });
+
+            ui.write(new Array(200).join('Test '));
         });
 
         global.az = az;
