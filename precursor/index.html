@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+<html lang="ru">
+<head>
+		<meta charset="utf-8">
+		<title>Дик и Боб: Начало</title>
+		<!-- ---------- -->
+		<meta name="viewport" content="user-scalable=no, width=device-width">
+		<!-- ---------- -->
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<!-- ---------- -->
+		<script type="text/javascript" src="include/taffy-min.js"></script>
+		<!-- ---------- -->
+		<script type="text/javascript" src="az/az-constants.js"></script>
+		<script type="text/javascript" src="az/az-layers.js"></script>
+		<script type="text/javascript" src="az/az-debug.js"></script>
+		<script type="text/javascript" src="az/az-engine.js"></script>
+		<script type="text/javascript" src="az/az-events.js"></script>
+		<script type="text/javascript" src="az/az-objects.js"></script>
+		<script type="text/javascript" src="az/az-functions.js"></script>
+		<script type="text/javascript" src="az/az-mentions.js"></script>
+		<script type="text/javascript" src="az/az-descriptions.js"></script>
+		<script type="text/javascript" src="az/az-containers.js"></script>
+		<script type="text/javascript" src="az/az-properties.js"></script>
+		<script type="text/javascript" src="az/az-characters.js"></script>
+		<script type="text/javascript" src="az/az-dictionary.js"></script>
+		<script type="text/javascript" src="az/az-parser.js"></script>
+		<script type="text/javascript" src="az/az-autocomplete.js"></script>
+		<script type="text/javascript" src="az/az-screen.js"></script>
+		<script type="text/javascript" src="az/az-decor.js"></script>
+		<script type="text/javascript" src="az/az-lang-ru.js"></script>
+		<!-- ---------- -->
+		<script type="text/javascript" src="dictionary/dictionary.js"></script>
+		<!-- ---------- -->
+		<script type="text/javascript" src="game.js"></script>
+		<!-- ---------- -->
+		<link rel="stylesheet" media="screen" href="game.css">
+</head>
+<body onload="START()">
+<!-- ---------- -->
+<div id="main-output"></div>
+<!-- ---------- -->
+<div align="center">
+	<!-- <DEBUG>  -->
+	<div id="debug-words-list-short" align="left"></div>
+	<!-- </DEBUG> -->
+	<!-- ---------- -->
+	<input autofocus name="user_command" id="user_command" class="longinput" type="text" name="phrase" id="phrase" value="" size="" maxlength="200" onkeyup="preparsing(this);" onkeypress="return userInput(this, event)" style="width:100%; max-width:415px;" placeholder="Введите команду" />
+	<!-- ---------- -->
+	<!-- <DEBUG>  -->
+	<table border="0"><tr>
+		<td valign="top"><div id="debug-objects-list">&hellip;<div></td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top"><div id="debug-words-list-full">&hellip;<div></td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top"><div id="debug-preparsing-objects">&hellip;<div></td>
+	</tr></table>
+	<!-- </DEBUG> -->
+</div>
+<!-- ---------- -->
+</body>
+</html>
