@@ -6,6 +6,14 @@
 
 (function (global) {
 
+    requirejs.config({
+        shim: {
+            taffy: {
+                exports: 'TAFFY'
+            }
+        }
+    });
+
     define('az', ['modules/az-utils', 'modules/az-ui'], function (utils, ui) {
         'use strict';
 
