@@ -54,7 +54,7 @@ window.CONTAINERS = (function() {
             var result  = []; // Перечень результатов
             var list    = []; // Перечень уже добавленных объектов (чтобы пропускать нижние слои)
             //----------
-            db_arrangement({'where':_where}).order('what asec, layer desc').each(function (rec) {
+            db_arrangement({'where':_where, 'quantity':{'>':0}}).order('what asec, layer desc').each(function (rec) {
                 if (list.indexOf(rec.what) == -1) {
                     result.push({'what':rec.what, 'where':_where, 'quantity':rec.quantity});
                     list.push(rec.what);
@@ -70,7 +70,7 @@ window.CONTAINERS = (function() {
             var result  = []; // Перечень результатов
             var list    = []; // Перечень уже добавленных объектов (чтобы пропускать нижние слои)
             //----------
-            db_arrangement({'what':_what}).order('where asec, layer desc').each(function (rec) {
+            db_arrangement({'what':_what, 'quantity':{'>':0}}).order('where asec, layer desc').each(function (rec) {
                 if (list.indexOf(rec.where) == -1) {
                     result.push({'what':_what, 'where':rec.where, 'quantity':rec.quantity});
                     list.push(rec.where);
@@ -133,7 +133,7 @@ tContainer.prototype.put = function(_where, _quantity, _events) { // Containers
     return true;
 }; // end function "tContainer.put"
 //--------------------------------------------------
-tContainer.prototype.remove = function(_where, _quantity, _move) { // Containers
+tContainer.prototype.remove = function(_where, _quantity, _events) { // Containers
     //----------
     _where  = _where || null;
     //----------
@@ -148,10 +148,10 @@ tContainer.prototype.remove = function(_where, _quantity, _move) { // Containers
     var remove_list = [];
     //----------
     var event = null;
-    if (_move === undefined) {
+    if (_events === undefined) {
         event = {'event':EVENT_REMOVE, 'what':[this.OWNER, null]};
     } else {
-        event = _move;
+        event = _events;
     } // end if
     //----------
     var events_list = []; // Перечень событий для последующей передачи далее по процессу "Переместить"
@@ -241,7 +241,7 @@ tContainer.prototype.move = function(_from, _to, _quantity) { // Containers
     //----------
     // +++ Событие "После перемещения объекта откуда-либо куда-либо"
     //----------
-    return result;
+    return true;
 }; // end function "tContainer.move"
 //--------------------------------------------------
 tContainer.prototype.where = function(_as_array) {
