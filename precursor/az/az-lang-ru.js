@@ -79,6 +79,8 @@
     //----------
     EVENTS.setLocalization ({
         'событие': 'event',
+        'локация': 'location',
+        'место':   'location',
         'когда':   'when',
         'что':     'what',
         'кто':     'what',
