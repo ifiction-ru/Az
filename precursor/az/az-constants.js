@@ -12,7 +12,9 @@ window.ForItems = 'I';
 //----------
 window.BEFORE   = 'before';
 window.AFTER    = 'after';
+window.DURING   = 'during';
 //----------
+// СОБЫТИЯ
 window.EVENT_PUT    = 'put';
 window.EVENT_REMOVE = 'remove';
 window.EVENT_MOVE   = 'move';
