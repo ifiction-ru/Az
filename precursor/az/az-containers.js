@@ -48,13 +48,29 @@ window.CONTAINERS = (function() {
             return true;
         }, // end function "CONTAINERS.remove"
         //--------------------------------------------------
+        // Функция вызывается из методов REMOVE и MOVE объекта и предназачена для проверки параметра ОТКУДА. Он может быть незаполнен,
+        // тогда нужно удалять объект отовсюду, а следовательно нужен перечень контейнеров.
+        checkParamWhere: function (_what, _where) {
+            //----------
+            var result = null;
+            //----------
+            if ((_where || null) == null) {
+                result = CONTAINERS.getWhere(_what);
+            } else {
+                result = [{'what':_what, 'where':_where}];
+            } // end if
+            //----------
+            return result;
+            //----------
+        }, // end function "CONTAINERS.checkParamWhere"
+        //--------------------------------------------------
         getContent: function (_where) {
             if ((_where || null) == null) {return [];} // end if
             //----------
             var result  = []; // Перечень результатов
             var list    = []; // Перечень уже добавленных объектов (чтобы пропускать нижние слои)
             //----------
-            db_arrangement({'where':_where}).order('what asec, layer desc').each(function (rec) {
+            db_arrangement({'where':_where, 'quantity':{'>':0}}).order('what asec, layer desc').each(function (rec) {
                 if (list.indexOf(rec.what) == -1) {
                     result.push({'what':rec.what, 'where':_where, 'quantity':rec.quantity});
                     list.push(rec.what);
@@ -70,7 +86,7 @@ window.CONTAINERS = (function() {
             var result  = []; // Перечень результатов
             var list    = []; // Перечень уже добавленных объектов (чтобы пропускать нижние слои)
             //----------
-            db_arrangement({'what':_what}).order('where asec, layer desc').each(function (rec) {
+            db_arrangement({'what':_what, 'quantity':{'>':0}}).order('where asec, layer desc').each(function (rec) {
                 if (list.indexOf(rec.where) == -1) {
                     result.push({'what':_what, 'where':rec.where, 'quantity':rec.quantity});
                     list.push(rec.where);
@@ -90,8 +106,7 @@ window.tContainer = function (_object) {
     //--------------------------------------------------
 } // end class "tContainer"
 /* --------------------------------------------------------------------------- */
-tContainer.prototype.put = function(_where, _quantity, _events) { // Containers
-    //_events = _from || null; // Данный реквизит нужен для генерации события
+tContainer.prototype.put = function(_where, _quantity) { // Containers
     //----------
     // Приводим переданный объект к однозначному значению, содержащему идентификатор
     _where = AZ.getID(_where);
@@ -103,107 +118,75 @@ tContainer.prototype.put = function(_where, _quantity, _events) { // Containers
     //----------
     _quantity = _quantity || 1;
     //----------
-    // +++ Событие "Перед помещением объекта куда-либо"
-    if (_events === undefined) {
-        _events = [{'event':EVENT_PUT, 'when':BEFORE, 'what':[this.OWNER, null], 'to':[_where, null]}];
-        //----------
-        var result = true;
-        //----------
-        result = EVENTS.checkReactions(_events[0]);
-        //----------
-        // Если реакция на событие "ПЕРЕД ПОМЕЩЕНИЕМ ОБЪЕКТА КУДА-ЛИБО" возвратило FALSE, то отбой
-        if (result = false) {return false;} // end if
-    } // end if
+    // Запись для события "Перед удалением объекта"
+    var event = {'event':EVENT_PUT, 'when':BEFORE, 'what':this.OWNER, 'to':_where};
     //----------
-    var how_many = CONTAINERS.get(this.OWNER, _where);
+    // Вызываем событие "Перед добавлением объекта"
+    result = EVENTS.checkReactions(event);
     //----------
-    CONTAINERS.set(this.OWNER, _where, (how_many + _quantity));
+    // Если событие вернуло "Отбой", то пропускаем добавление
+    if (result = false) {return false;} // end if
     //----------
+    var how_many = CONTAINERS.get(this.OWNER, _where); // Получаем количество, сколько было
+    //----------
+    CONTAINERS.set(this.OWNER, _where, (how_many + _quantity)); // Устанавливаем новое количество
+    //----------
+    // Если помещаем куда-либо ГЕРОЯ игры, то меняем его локацию.
     if (this.OWNER == AZ.getProtagonist(true)) {AZ.setLocation(_where);} // end if
     //----------
-    // +++ Событие "После помещения объекта куда-либо"
-    for (var x=0; x<_events.length; x++) {
-        var event = _events[x];
-        //----------
-        event['when'] = AFTER;
-        //----------
-        EVENTS.checkReactions(event);
-    } // end for x
+    event['when'] = AFTER; // Дополняем запись для события "ПОСЛЕ добавления объекта"
+    //----------
+    EVENTS.checkReactions(event); // Вызываем событие "ПОСЛЕ добавления объекта"
     //----------
     return true;
 }; // end function "tContainer.put"
 //--------------------------------------------------
-tContainer.prototype.remove = function(_where, _quantity, _move) { // Containers
-    //----------
-    _where  = _where || null;
+tContainer.prototype.remove = function(_where, _quantity) { // Containers
     //----------
     if (typeof(_where) == 'number') {
         _quantity   = _where;
         _where      = null;
+    } else if (_where === undefined) {
+        _where = null;
     } // end if
     //----------
     var remove_all = (_quantity === undefined ? true : false);
     //----------
-    // Список объектов, откуда нужно удалить переданный объект
-    var remove_list = [];
+    from_list = CONTAINERS.checkParamWhere(this.OWNER, AZ.getID(_where)); // Список объектов, откуда нужно удалить объект
     //----------
-    var event = null;
-    if (_move === undefined) {
-        event = {'event':EVENT_REMOVE, 'what':[this.OWNER, null]};
-    } else {
-        event = _move;
-    } // end if
+    var counter = from_list.length; // Счётчик необходимых удалений
     //----------
-    var events_list = []; // Перечень событий для последующей передачи далее по процессу "Переместить"
+    event = {'event':EVENT_REMOVE, 'what':this.OWNER}; // Запись для события "Перед удалением объекта"
     //----------
-    // Определяемся, откуда убирать объект:
-        // Если параметр "откуда перемещать" не заполнен, то убираем объект отовсюду
-        if (_where == null) {
-            remove_list = CONTAINERS.getWhere(this.OWNER);
-        
-        } else {
-            _where = AZ.getID(_where);
-            //----------
-            if (_where == null) {return false;} // end if
-            //----------
-            //remove_list.push({'what':this.OWNER, 'where':_where, 'quantity':CONTAINERS.get(this.OWNER, _where)});
-            remove_list.push({'what':this.OWNER, 'where':_where}); // Параметр 'quantity' в данном случае не нужен.
-            
-        } // end if
-    //----------
-    var counter = remove_list.length;
-    //----------
-    for (var x=0; x<remove_list.length; x++) {
+    for (var x=0; x<from_list.length; x++) {
         //----------
-        // +++ Событие "Перед удалением объекта откуда-либо"
+        // Дополняем запись для события "ПЕРЕД удалением объекта"
         event['when'] = BEFORE;
-        event['from'] = [remove_list[x].where, null];
+        event['from'] = from_list[x].where;
         //----------
-        if (event['event'] == EVENT_MOVE) {
-            events_list.push(event);
-        } // end if
-        //----------
+        // Вызываем событие "Перед удалением объекта"
         var result = EVENTS.checkReactions(event);
         //----------
+        // Если событие вернуло "Отбой", то пропускаем удаление
         if (result == false) {continue;} // end if
         //----------
-        CONTAINERS.remove(this.OWNER, remove_list[x].where, _quantity, remove_all);
-        counter--;
+        CONTAINERS.remove(this.OWNER, from_list[x].where, _quantity, remove_all);
         //----------
-        // +++ Событие "После удаления объекта откуда-либо"
-        if (event['event'] == EVENT_REMOVE) {
-            event['when'] = AFTER;
-            //----------
-            EVENTS.checkReactions(event);
-        } // end if
+        // Дополняем запись для события "ПОСЛЕ удаления объекта"
+        event['when'] = AFTER;
+        //----------
+        // Вызываем событие "ПОСЛЕ удаления объекта"
+        EVENTS.checkReactions(event);
+        //----------
+        counter--;
         //----------
     } // end for x
     //----------
-    //return (remove_list.length == 0 ? null : (remove_list.length ==1 ? remove_list[0] : remove_list));
-    if (remove_list.length == 0) {
+    if (from_list.length == 0) {
         return false;
     } else {
-        return (counter == 0 ? events_list: false);
+        // Если хоть одно удаление не прошло, то возвращаем FALSE, иначе TRUE
+        return (counter == 0 ? true : false);
     } // end if
     //----------
 }; // end function "tContainer.remove"
@@ -222,26 +205,70 @@ tContainer.prototype.move = function(_from, _to, _quantity) { // Containers
             console.error('Некорректно указано содержимое ("'+_from+'"), откуда нужно перемещать объект "'+this.OWNER+'"!');
             return false;
         } // end if
-    }
+    } // end if
     //----------
     if (object_to == null) {
         console.error('Не указано содержимое, куда нужно перемещать объект "'+this.OWNER+'"!');
         return false;
     } // end if
     //----------
-    var result  = true;
+    var remove_all = (_quantity === undefined ? true : false);
     //----------
-    // +++ Событие "Перед перемещением объекта откуда-либо куда-либо"
+    var from_list = CONTAINERS.checkParamWhere(this.OWNER, object_from); // Список объектов, откуда нужно переместить объект
     //----------
-    var events = this.remove(object_from, quantity, {'event':EVENT_MOVE, 'what':[this.OWNER, null], 'to':[object_to, null]});
+    var success = null; // Было ли хоть одно успешное удаление
     //----------
-    if (events == false) {return false;} // end if
+    var event = {'event':EVENT_MOVE, 'what':this.OWNER, 'to':object_to}; // Запись для события "ПЕРЕД перемещением объекта"
     //----------
-    this.put(object_to, quantity, events);
+    var list4put = []; // Список контейнеров, откуда удалялся объект, для события "ПОСЛЕ перемещения объекта"
     //----------
-    // +++ Событие "После перемещения объекта откуда-либо куда-либо"
+    for (var x=0; x<from_list.length; x++) {
+        //----------
+        var where = from_list[x].where;
+        //----------
+        // Дополняем запись для события "ПЕРЕД перемешением объекта"
+        event['when'] = BEFORE;
+        event['from'] = where;
+        //----------
+        // Вызываем событие "Перед перемещением объекта"
+        var result = EVENTS.checkReactions(event);
+        //----------
+        // Если событие вернуло "Отбой", то пропускаем перемещение
+        if (result == false) {
+            // Отмечаем неудачу, только если нет удачных вариантов.
+            if (success == null) {success = false;} // end if
+            //----------
+            continue;
+        } // end if
+        //----------
+        CONTAINERS.remove(this.OWNER, where, _quantity, remove_all);
+        //----------
+        list4put.push(where);
+        //----------
+        success = true;
+        //----------
+    } // end for x
     //----------
-    return result;
+    if (success == false) {return false;} // end if
+    //----------
+    // ??? Нужно ли вызывать какое-либо событие после удаления перемещаемого объекта, но до его добавления?
+    //----------
+    _quantity = _quantity || 1;
+    //----------
+    var how_many = CONTAINERS.get(this.OWNER, object_to); // Получаем количество, сколько было
+    //----------
+    CONTAINERS.set(this.OWNER, object_to, (how_many+_quantity)); // Устанавливаем новое количество
+    //----------
+    // Если помещаем куда-либо ГЕРОЯ игры, то меняем его локацию.
+    if (this.OWNER == AZ.getProtagonist(true)) {AZ.setLocation(object_to);} // end if
+    //----------
+    // Дополняем запись для события "ПОСЛЕ добавления объекта"
+    event['when'] = AFTER;
+    event['from'] = list4put;
+    //----------
+    EVENTS.checkReactions(event); // Вызываем событие "ПОСЛЕ добавления объекта"
+    //----------
+    return true;
 }; // end function "tContainer.move"
 //--------------------------------------------------
 tContainer.prototype.where = function(_as_array) {

@@ -11,16 +11,31 @@ window.iNN = function (param, value) {
     } // end if
 }; // end function "iNN"
 /* --------------------------------------------------------------------------- */
-window.arr2str = function (arr, fields, i) {
-    if (i===undefined) {i=''};
+window.arr2str = function (arr, limit, level, fields, i) {
+    if (level === undefined) {level = 0;} // end if
+    if (i === undefined) {i=''};
+    //----------
+    level++;
+    if (limit !== undefined && level > limit) {return '';} // end if
     //----------
     var result='';
     //----------
     for (var k in arr) {
         if (fields !== undefined && fields.indexOf(k) == -1) {continue;} // end if
-        result+=''+i+k+': '+arr[k]+'\n';
-        if (typeof(arr[k])=='object') {
-            result+=arr2str(arr[k], fields, i+'    ');
+        //----------
+        var value = arr[k];
+        //----------
+        result += ''+i+k+': ';
+        if (typeof(value) == 'object') {
+            if (AZ.isObject(value)) {
+                result += '#'+AZ.getID(value)+'\n';
+            } else {
+                result += arr2str(value, limit, level, fields, i+'    ');
+            } // end if
+        } else if (typeof(value) == 'function') {
+            result += 'function(...)\n';
+        } else {
+            result += value+'\n';
         }
     } // end for
     //----------

@@ -98,17 +98,17 @@ window.tSimpleObject = function (_id) {
     //--------------------------------------------------
     // Помещает объект в контейнер. Параметры: КУДА, <КОЛИЧЕСТВО = 1>
     tSimpleObject.prototype.Put = function () {
-        this.container.put.apply(this.container, arguments);
+        return this.container.put.apply(this.container, arguments);
     }; // end function "Поместить"
     //--------------------------------------------------
     // Убирает объект из контейнера. Параметры: ОТКУДА, <КОЛИЧЕСТВО = ВСЁ>
     tSimpleObject.prototype.Remove = function () {
-        this.container.remove.apply(this.container, arguments);
+        return this.container.remove.apply(this.container, arguments);
     }; // end function "Убрать"
     //--------------------------------------------------
     // Перемещает объект из одного контейнера в другой. Параметры: ОТКУДА, КУДА, <КОЛИЧЕСТВО = ВСЁ> / КУДА, <КОЛИЧЕСТВО = ВСЁ>
     tSimpleObject.prototype.Move = function () {
-        this.container.move.apply(this.container, arguments);
+        return this.container.move.apply(this.container, arguments);
     }; // end function "Переместить"
     //--------------------------------------------------
     tSimpleObject.prototype.Where = function (_as_array) {

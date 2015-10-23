@@ -44,7 +44,12 @@ window.AUTOCOMPLETE = (function() {
         _start(0);
         _start(1);
         //----------
-        ac_exclude  = db_autocomplete({'bid':_bids_list, 'inc':false}).select('fid');
+        if (_bids_list === undefined) {
+            ac_exclude = [];
+        } else {
+            ac_exclude = db_autocomplete({'bid':_bids_list, 'inc':false}).select('fid');
+        } // end if
+        //----------
         ac_morphs   = {};
         ac_action   = false;
         //----------
@@ -186,7 +191,7 @@ window.AUTOCOMPLETE = (function() {
         //--------------------------------------------------
         // Получение признака возможного выполнения команды игрока.
         getActionFlag: function() {
-            return ac_action == true ? true : false;
+            return (ac_action == true ? true : false);
         }, // end function "AUTOCOMPLETE.getActionFlag"
         //--------------------------------------------------
     };

@@ -58,7 +58,7 @@ window.PARSER = (function() {
         var rec = db_words_and_objects(search).first();
         //----------
         if (rec == false) {
-            search.L = null;
+            search.loc = null;
             //----------
             rec = db_words_and_objects(search).first();
         } // end if
@@ -314,7 +314,7 @@ window.PARSER = (function() {
                 search['nums']      = _options.nums || null;
                 //----------
                 //if (search.priority != 0) {
-                    /*console.log(
+                   /*console.log(
                         'id:'+search.obj+', t:'+search.priority+', n:'+search.nums+
                         ', L:'+search.loc+
                         ', v:'+(search.vid == null ? '-' : DICTIONARY.getBase(search.vid).base+' ('+search.vid+')')+

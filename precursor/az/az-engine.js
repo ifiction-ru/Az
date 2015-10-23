@@ -221,6 +221,7 @@ window.parseIt = function (field) {
     var CMD = PARSER.parse(field.value);
     //----------
     field.value='';
+    AUTOCOMPLETE.init();
     //----------
     /*if (CMD.verb===null && CMD.noun1===null && CMD.noun2===null && CMD.noun3===null) {
         SCREEN.Out('Ничего не понятно'+br+br);
