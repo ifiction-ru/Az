@@ -6,6 +6,8 @@
 
 (function (global) {
 
+    'use strict';
+
     requirejs.config({
         shim: {
             taffy: {
@@ -14,13 +16,16 @@
         }
     });
 
-    define('az', ['modules/az-utils', 'modules/az-ui'], function (utils, ui) {
-        'use strict';
+    define('az', ['modules/az-constants', 'modules/az-utils', 'modules/az-ui'],
+    function (cons, utils, ui) {
 
         var az,
-            /* настройки по умолчанию */
             settings = {
 
+            },
+
+            exportToGlobal = function () {
+                utils.extend(window, cons);
             };
 
         /* Достаем настройки из az.settings */
@@ -30,10 +35,9 @@
 
         /* готовим объект для экспорта в глобальное пространство */
         az = {
-            utils: utils,
-            ui: ui
+            settings: settings,
+            'export': exportToGlobal
         };
-
 
         ui.init({}, function () {
             ui.on('az.ui.submit', function (event) {
