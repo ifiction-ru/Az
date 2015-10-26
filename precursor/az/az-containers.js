@@ -119,10 +119,10 @@ tContainer.prototype.put = function(_where, _quantity) { // Containers
     _quantity = _quantity || 1;
     //----------
     // Запись для события "Перед удалением объекта"
-    var event = {'event':EVENT_PUT, 'when':BEFORE, 'what':this.OWNER, 'to':_where};
+    var event = {'when':EVENTS.BEFORE, 'what':this.OWNER, 'to':_where};
     //----------
     // Вызываем событие "Перед добавлением объекта"
-    result = EVENTS.checkReactions(event);
+    result = EVENTS.checkReactions(EVENTS.PUT, event);
     //----------
     // Если событие вернуло "Отбой", то пропускаем добавление
     if (result = false) {return false;} // end if
@@ -132,11 +132,11 @@ tContainer.prototype.put = function(_where, _quantity) { // Containers
     CONTAINERS.set(this.OWNER, _where, (how_many + _quantity)); // Устанавливаем новое количество
     //----------
     // Если помещаем куда-либо ГЕРОЯ игры, то меняем его локацию.
-    if (this.OWNER == AZ.getProtagonist(true)) {AZ.setLocation(_where);} // end if
+    if (this.OWNER == AZ.getProtagonist(true)) {AZ.moveProtagonist(_where);} // end if
     //----------
-    event['when'] = AFTER; // Дополняем запись для события "ПОСЛЕ добавления объекта"
+    event['when'] = EVENTS.AFTER; // Дополняем запись для события "ПОСЛЕ добавления объекта"
     //----------
-    EVENTS.checkReactions(event); // Вызываем событие "ПОСЛЕ добавления объекта"
+    EVENTS.checkReactions(EVENTS.PUT, event); // Вызываем событие "ПОСЛЕ добавления объекта"
     //----------
     return true;
 }; // end function "tContainer.put"
@@ -156,27 +156,30 @@ tContainer.prototype.remove = function(_where, _quantity) { // Containers
     //----------
     var counter = from_list.length; // Счётчик необходимых удалений
     //----------
-    event = {'event':EVENT_REMOVE, 'what':this.OWNER}; // Запись для события "Перед удалением объекта"
+    event = {'what':this.OWNER}; // Запись для события "Перед удалением объекта"
     //----------
     for (var x=0; x<from_list.length; x++) {
         //----------
         // Дополняем запись для события "ПЕРЕД удалением объекта"
-        event['when'] = BEFORE;
+        event['when'] = EVENTS.BEFORE;
         event['from'] = from_list[x].where;
         //----------
         // Вызываем событие "Перед удалением объекта"
-        var result = EVENTS.checkReactions(event);
+        var result = EVENTS.checkReactions(EVENTS.REMOVE, event);
         //----------
         // Если событие вернуло "Отбой", то пропускаем удаление
         if (result == false) {continue;} // end if
         //----------
         CONTAINERS.remove(this.OWNER, from_list[x].where, _quantity, remove_all);
         //----------
+        // Если убираем откуда-либо ГЕРОЯ игры, то очищаем его локацию.
+        if (this.OWNER == AZ.getProtagonist(true)) {AZ.setLocation(null);} // end if
+        //----------
         // Дополняем запись для события "ПОСЛЕ удаления объекта"
-        event['when'] = AFTER;
+        event['when'] = EVENTS.AFTER;
         //----------
         // Вызываем событие "ПОСЛЕ удаления объекта"
-        EVENTS.checkReactions(event);
+        EVENTS.checkReactions(EVENTS.REMOVE, event);
         //----------
         counter--;
         //----------
@@ -218,7 +221,7 @@ tContainer.prototype.move = function(_from, _to, _quantity) { // Containers
     //----------
     var success = null; // Было ли хоть одно успешное удаление
     //----------
-    var event = {'event':EVENT_MOVE, 'what':this.OWNER, 'to':object_to}; // Запись для события "ПЕРЕД перемещением объекта"
+    var event = {'what':this.OWNER, 'to':object_to}; // Запись для события "ПЕРЕД перемещением объекта"
     //----------
     var list4put = []; // Список контейнеров, откуда удалялся объект, для события "ПОСЛЕ перемещения объекта"
     //----------
@@ -227,11 +230,11 @@ tContainer.prototype.move = function(_from, _to, _quantity) { // Containers
         var where = from_list[x].where;
         //----------
         // Дополняем запись для события "ПЕРЕД перемешением объекта"
-        event['when'] = BEFORE;
+        event['when'] = EVENTS.BEFORE;
         event['from'] = where;
         //----------
         // Вызываем событие "Перед перемещением объекта"
-        var result = EVENTS.checkReactions(event);
+        var result = EVENTS.checkReactions(EVENTS.MOVE, event);
         //----------
         // Если событие вернуло "Отбой", то пропускаем перемещение
         if (result == false) {
@@ -260,13 +263,13 @@ tContainer.prototype.move = function(_from, _to, _quantity) { // Containers
     CONTAINERS.set(this.OWNER, object_to, (how_many+_quantity)); // Устанавливаем новое количество
     //----------
     // Если помещаем куда-либо ГЕРОЯ игры, то меняем его локацию.
-    if (this.OWNER == AZ.getProtagonist(true)) {AZ.setLocation(object_to);} // end if
+    if (this.OWNER == AZ.getProtagonist(true)) {AZ.moveProtagonist(object_to);} // end if
     //----------
     // Дополняем запись для события "ПОСЛЕ добавления объекта"
-    event['when'] = AFTER;
+    event['when'] = EVENTS.AFTER;
     event['from'] = list4put;
     //----------
-    EVENTS.checkReactions(event); // Вызываем событие "ПОСЛЕ добавления объекта"
+    EVENTS.checkReactions(EVENTS.MOVE, event); // Вызываем событие "ПОСЛЕ добавления объекта"
     //----------
     return true;
 }; // end function "tContainer.move"
