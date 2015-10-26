@@ -106,3 +106,44 @@ window.length2symbol = function (_list) {
     //----------
 }; // end function "any2arr"
 /* --------------------------------------------------------------------------- */
+window.object2table = function (data, result, fields, level, max, elem1) {
+    // Начальная инициализация данных
+        if (level == undefined)  {level = 0;} // end if
+        //----------
+        if (fields == undefined) {
+            fields = [];
+            for (var k in data)  {fields.push(k);} // end for
+        } // end if
+        //----------
+        if (max == undefined)    {max = fields.length-1;} // end if
+        //----------
+        if (elem1 == undefined)  {elem1 = {};} // end if
+        if (result == undefined) {result = [];} // end if
+    //----------
+    var field = fields[level];
+    var value = data[field];
+    //----------
+    if (value === null || typeof(value) != 'object' || value.length === undefined) {
+        value = [value];
+    } // end if
+    //----------
+    var elem2 = {};
+    for (var k in elem1) {elem2[k] = elem1[k];} // end for
+    //----------
+    for (var x=0; x<value.length; x++) {
+        var value2 = value[x];
+        //----------
+        elem2[field] = value2;
+        //----------
+        if (level == max) {
+            var elem3 = {};
+            for (var k in elem2) {elem3[k] = elem2[k];} // end for
+            result.push(elem3);
+        } else {
+            object2table(data, result, fields, level+1, max, elem2);
+        } // end if
+    } // end for
+    //----------
+} // end function "next_level"
+//----------
+
