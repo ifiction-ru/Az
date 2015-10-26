@@ -7,12 +7,7 @@ define(function () {
         FOR_CONT     : 'для содержимого',
         FOR_ALL      : 'A',
         FOR_CHARS    : 'C',
-        FOR_ITEMS    : 'I',
-        BEFORE       : 'before',
-        AFTER        : 'after',
-        EVENT_PUT    : 'put',
-        EVENT_REMOVE : 'remove',
-        EVENT_MOVE   : 'move'
+        FOR_ITEMS    : 'I'
     };
 
 });
