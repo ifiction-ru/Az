@@ -15,6 +15,10 @@ window.AZ = (function() {
     //----------
     var objects_list = {}; // Ассоциативный массив для хранения ссылок на объекты игры по их строковому ID.
     //--------------------------------------------------
+    // Инициализация параметров, которые должны сохраняться в игровой сессии:
+    setProperty('turns.all', 0);
+    setProperty('turns.loc', 0);
+    //--------------------------------------------------
     function updateAvailableObjects () {
         var objects1 = position.object.container.getContent();
         var objects2 = protagonist.object.container.getContent();
@@ -36,8 +40,27 @@ window.AZ = (function() {
             available_objects_IDs.push(AZ.getID(object));
         } // end for x
         //----------
-        //return this.available_objects;
-    }; // end function "CONTAINERS.get_available_objects"
+        var arr = protagonist.object.what_he_exam.now;
+        for (var x=0; x<arr.length; x++) {
+            var container    = AZ.getObject(arr[x]);
+            var container_id = AZ.getObject(arr[x]);
+            //----------
+            if (AZ.getID(container_id) == position.ID) {continue;} // end if
+            //----------
+            var content = container.getContent();
+            //----------
+            for (var y=0; y<content.length; y++) {
+                var object = content[y].what;
+                var id     = AZ.getID(object);
+                //----------
+                if (available_objects_IDs.indexOf(id) == -1) {
+                    available_objects.push(object);
+                    available_objects_IDs.push(id);
+                } // end if
+            } // end for
+        } // end for x
+        //----------
+    }; // end function "AZ.get_available_objects"
     //--------------------------------------------------
     return {
         //--------------------------------------------------
@@ -145,13 +168,22 @@ window.AZ = (function() {
                 return protagonist.object == null ? null : (_as_id == false ? protagonist.object : protagonist.ID);
             }, // end function "AZ.getProtagonist"
             //--------------------------------------------------
+            moveProtagonist: function(_location) {
+                this.setLocation(_location);
+                //----------
+                setProperty('turns.loc', 0);
+            }, // end function "AZ.getProtagonist"
+            //--------------------------------------------------
             setLocation: function(_location) {
                 var loc = AZ.getObject(_location);
                 //----------
-                if (loc != null) {
+                if (loc == null) {
+                    position.object = null;
+                    position.ID     = null;
+                } else {
                     position.object = loc;
                     position.ID     = AZ.getID(loc);
-                }// end if
+                } // end if
             }, // end function "AZ.setProtagonist"
             //--------------------------------------------------
             getLocation: function(_as_id) {
@@ -166,6 +198,11 @@ window.AZ = (function() {
                 if (DEBUG.isEnable() == true) {
                     DEBUG.updatePanelForObjects();
                 } // end if
+                //----------
+                // ...
+                //----------
+                // Данная команда должна идти в самом конце, чтобы все изменения (по событиям, например), происходили на предыдущем слое.
+                LAYERS.add();
             }, // end function "AZ.doBeforeUserAction"
         //--------------------------------------------------
         available_objects: function (_only_id) {
@@ -249,7 +286,13 @@ window.parseIt = function (field) {
         if (action_id != null) {
             var _action = CMD.objects[priority].actions_list[action_id-1];
             //----------
-            _action(CMD);
+            // Вызываем событие "Перед выполнением действия с объектом"
+            if (EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.objects[priority], 'when':EVENTS.BEFORE}, {'parameter': CMD}) == true) {
+                //----------
+                _action(CMD);
+                //----------
+                EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.objects[priority], 'when':EVENTS.AFTER}, {'parameter': CMD});
+            } // end if
             //----------
             break;
         } // end if
@@ -258,6 +301,9 @@ window.parseIt = function (field) {
     //----------
     if (action_id == null) {
         print('Ничего не понятно.');
+    } else {
+        incProperty('turns.all');
+        incProperty('turns.loc');
     } // end if
     //----------
     AZ.doBeforeUserAction();
@@ -297,5 +343,7 @@ window.START = function (_param) {
     SCREEN.Out(loc.getTitle(null, true) + loc.getDescription());
     //----------
     preparsing({value:''});
+    //----------
+    LAYERS.add();
 }; // end function "START"
 /* --------------------------------------------------------------------------- */
