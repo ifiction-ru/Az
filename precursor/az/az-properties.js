@@ -26,7 +26,9 @@ window.PROPERTIES = (function() {
                 get: function() {
                     var value = PROPERTIES.get(false, AZ.getID(this), _name);
                     //----------
-                    // +++ При получении свойства объекта
+                    // Вызываем событие "При получении свойства объекта"
+                    var result = EVENTS.checkReactions(EVENTS.PROPERTY, {'what':this, 'property':_name}, {'parameter': value} );
+                    if (result !== undefined) {value = result} // end if
                     //----------
                     return value;
                 }
@@ -41,37 +43,92 @@ window.PROPERTIES = (function() {
             //----------
         }, // end function "PROPERTIES.set"
         //--------------------------------------------------
-        get: function(_simple, _object, _name) {
+        get: function (_simple, _object, _name) {
             //----------
             return LAYERS.get(db_values, {'simple':_simple, 'object':_object, 'name':_name}, 'value', undefined);
             //----------
         }, // end function "PROPERTIES.get"
         //--------------------------------------------------
+        checkARGS: function (_options, _gos, _defvalue) {
+            var result = {object:null, name:undefined, value:undefined};
+            //----------
+            if (_options.length == 3) {
+                //----------
+                result.object = _options[0];
+                if (result.object != null && AZ.isObject(result.object) == true) {
+                    result.object = AZ.getID(result.object);
+                } // end if
+                //----------
+                result.name  = _options[1];
+                //----------
+                result.value = _options[2];
+                
+            } else if (_options.length == 2) {
+                if (_gos == 'set') {
+                    result.name  = _options[0];
+                    result.value = _options[1];
+                } else {
+                    result.object = _options[0];
+                    if (result.object != null && AZ.isObject(result.object) == true) {
+                        result.object = AZ.getID(result.object);
+                    } // end if
+                    //----------
+                    result.name = _options[1];
+                } // end if
+            } else {
+                result.name = _options[0];
+            } // end if
+            //----------
+            if (result.name === undefined) {
+                console.error('Ошибка при передаче параметов записи свойства: '+arguments);
+                return null;
+            } // end if
+            //----------
+            if (result.value === undefined && _defvalue !== undefined) {
+                result.value = _defvalue;
+            } // end if
+            //----------
+            return result;
+        },
+        //--------------------------------------------------
     };
 })(); // end object "PROPERTIES"
 /* --------------------------------------------------------------------------- */
-window.setProperty = function (_name, _object, _value) {
-    if (arguments.length == 2) {
-        _value  = _object;
-        _object = null;
-    } else {
-        _object = _object || null;
-    } // end if
+// Присваивание значения "свободному" свойству. Свойство может быть привязано к объекту.
+window.setProperty = function () {
+    var params = PROPERTIES.checkARGS(arguments, 'set', null);
     //----------
-    if (_object != null && AZ.isObject(_object) == true) {
-        _object = AZ.getID(_object);
-    } // end if
+    if (params == null) {return;} // end if
     //----------
-    PROPERTIES.set(true, _object, _name, _value);
+    PROPERTIES.set(true, params.object, params.name, params.value);
 }; // end function "setProperty"
 /* --------------------------------------------------------------------------- */
-window.getProperty = function (_name, _object) {
-    _object = _object || null;
+window.incProperty = function () {
+    var params = PROPERTIES.checkARGS(arguments, 'get', 1);
     //----------
-    if (_object != null && AZ.isObject(_object) == true) {
-        _object = AZ.getID(_object);
+    if (params == null) {return;} // end if
+    //----------
+    PROPERTIES.set(true, params.object, params.name, PROPERTIES.get(true, params.object, params.name) + params.value);
+}; // end function "setProperty"
+/* --------------------------------------------------------------------------- */
+window.decProperty = function (_name, _object, _value) {
+    var params = PROPERTIES.checkARGS(arguments, 'get', 1);
+    //----------
+    if (params == null) {return;} // end if
+    //----------
+    PROPERTIES.set(true, params.object, params.name, PROPERTIES.get(true, params.object, params.name) - params.value);
+}; // end function "setProperty"
+/* --------------------------------------------------------------------------- */
+window.getProperty = function () {
+    var params = PROPERTIES.checkARGS(arguments, 'get', null);
+    //----------
+    if (params == null) {return;} // end if
+    //----------
+    var value = PROPERTIES.get(true, params.object, params.name);
+    if (value === undefined && params.value !== undefined) {
+        value = params.value;
     } // end if
     //----------
-    return PROPERTIES.get(true, _object, _name);
+    return value;
 }; // end function "getProperty"
 /* --------------------------------------------------------------------------- */
