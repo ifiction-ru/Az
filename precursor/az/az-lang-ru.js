@@ -5,13 +5,6 @@
     window.БезРазницы       = ANYTHING;
     window.ДляОписания      = for_description;
     window.ДляСодержимого   = for_container;
-    //----------
-    window.Перед            = BEFORE;
-    window.После            = AFTER;
-    //----------
-    window.СобытиеПоместить     = EVENT_PUT;
-    window.СобытиеУбрать        = EVENT_REMOVE;
-    window.СобытиеПереместить   = EVENT_MOVE;
 /* --------------------------------------------------------------------------- */
 // ТИПЫ ОБЪЕКТОВ
     window.Локация  = Location;
@@ -39,8 +32,10 @@
 // РАБОТА СО СВОЙСТВАМИ ОБЪЕКТОВ
     //--------------------------------------------------
     tSimpleObject.prototype.Свойство = tSimpleObject.prototype.Property;
-    window.Установить   = setProperty;
-    window.Получить = getProperty;
+    window.Установить = setProperty;
+    window.Получить   = getProperty;
+    window.Увеличить  = incProperty;
+    window.Уменьшить  = decProperty;
 /* --------------------------------------------------------------------------- */
 // РАБОТА С МЕСТОНАХОЖДЕНИЕМ ОБЪЕКТОВ
     //--------------------------------------------------
@@ -75,20 +70,46 @@
     window.ВывестиОписание  = printDescription;
     window.ВывестиИнвентарь = printInventory;
 /* --------------------------------------------------------------------------- */
-// РАБОТА С СОБЫТИЯМИ
+// СОБЫТИЯ
+    window.События = EVENTS;
+    //----------
+    Object.defineProperty(EVENTS, 'Перед',   {configurable:false, writable:false, value:EVENTS.BEFORE});
+    Object.defineProperty(EVENTS, 'После',   {configurable:false, writable:false, value:EVENTS.AFTER});
+    Object.defineProperty(EVENTS, 'ВоВремя', {configurable:false, writable:false, value:EVENTS.DURING});
+    //----------
+    Object.defineProperty(EVENTS, 'Поместить',   {configurable:false, writable:false, value:EVENTS.PUT});
+    Object.defineProperty(EVENTS, 'Убрать',      {configurable:false, writable:false, value:EVENTS.REMOVE});
+    Object.defineProperty(EVENTS, 'Переместить', {configurable:false, writable:false, value:EVENTS.MOVE});
+    //----------
+    Object.defineProperty(EVENTS, 'Свойство',    {configurable:false, writable:false, value:EVENTS.PROPERTY});
+    //----------
+    Object.defineProperty(EVENTS, 'Действие',    {configurable:false, writable:false, value:EVENTS.ACTION});
     //----------
     EVENTS.setLocalization ({
-        'событие': 'event',
-        'локация': 'location',
-        'место':   'location',
-        'когда':   'when',
-        'что':     'what',
-        'кто':     'what',
-        'кого':    'what',
-        'чего':    'what',
-        'где':     'where',
-        'откуда':  'from',
-        'куда':    'to',
+        //'имя':     'name',
+        //'событие': 'event',
+        'локация':  'location',
+        'место':    'location',
+        'когда':    'when',
+        'что':      'what',
+        'кто':      'what',
+        'кого':     'what',
+        'чего':     'what',
+        'объект':   'what',
+        'предмет':  'what',
+        'персонаж': 'what',
+        'где':      'where',
+        'откуда':   'from',
+        'куда':     'to',
+        'свойство': 'property',
+        'значение': 'parameter',
+        'параметр': 'parameter',
     });
     //----------
-    var РеакцияНаСобытие = EVENTS.addReaction;
+    window.Событие          = runEvent;
+    window.РеакцияНаСобытие = ReactionOnEvent;
+    //----------
+    ReactionOnEvent.prototype.Включить  = ReactionOnEvent.prototype.Enable;
+    ReactionOnEvent.prototype.Выключить = ReactionOnEvent.prototype.Disable;
+    ReactionOnEvent.prototype.Включена  = ReactionOnEvent.prototype.IsEnable;
+/* --------------------------------------------------------------------------- */
