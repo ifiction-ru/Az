@@ -152,6 +152,8 @@ tDescription.prototype.getText = function (_param, _html) {
         //----------
     } // end for
     //----------
+    AZ.getProtagonist().markContainerAsExam(this.OWNER);
+    //----------
     return DECOR.Description.getText(descr, this.OWNER);
     //----------
 }; // end function "<Объект>.description.getText"
