@@ -1,4 +1,4 @@
-define(function () {
+define(['modules/az-utils'], function (utils) {
     'use strict';
 
     /*
