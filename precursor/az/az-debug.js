@@ -92,7 +92,7 @@ window.DEBUG = (function() {
                 var word    = AUTOCOMPLETE.word(0);
                 var morph   = AUTOCOMPLETE.morph(0);
                 //----------
-                output += '<a href="#" onclick="AZ.addWordToCommand(\''+word+'\'); return false;" style="text-decoration:none; color: '+colors[morph]+'">'+word+'</a><br/>';
+                output += '<a href="#" onclick="INTERFACE.addWordToCommand(\''+word+'\'); return false;" style="text-decoration:none; color: '+colors[morph]+'">'+word+'</a><br/>';
             } // end for
             //----------
             SCREEN.Clear(words.full_list.panel);
@@ -111,12 +111,12 @@ window.DEBUG = (function() {
                 var word    = AUTOCOMPLETE.word(1);
                 var morph   = AUTOCOMPLETE.morph(1);
                 //----------
-                output += '<div class="acword"><a href="#" onclick="AZ.addWordToCommand(\''+word+'\'); return false;" style="text-decoration:none; color: '+colors[morph]+'">'+word+'</a></div>';
+                output += '<div class="acword"><a href="#" onclick="INTERFACE.addWordToCommand(\''+word+'\'); return false;" style="text-decoration:none; color: '+colors[morph]+'">'+word+'</a></div>';
             } // end for
             //----------
-            if (AUTOCOMPLETE.getActionFlag() == true) {
+            /*if (AUTOCOMPLETE.getActionFlag() == true) {
                 output += '<b>&lt;ввод&gt;</b>';
-            } // end if
+            } // end if*/
             //----------
             SCREEN.Clear(words.short_list.panel);
             SCREEN.Out(output,words.short_list.panel);
