@@ -28,6 +28,24 @@
 
             exportToGlobal = function () {
                 utils.extend(window, cons);
+            },
+            start = function () {
+                var character = AZ.getProtagonist() || null,
+                    loc       = AZ.getLocation();
+
+                if (character == null) {
+                    console.error('Не задан текущий персонаж игры!');
+                    return;
+                }
+
+                if (loc == null) {
+                    console.error('Не задано местонахождение текущего персонажа игры!');
+                    return;
+                }
+
+                AZ.startNewTurn();
+                INTERFACE.preparsing({value:''});
+                layers.add();
             };
 
         /* Достаем настройки из az.settings */
@@ -37,11 +55,12 @@
 
         /* готовим объект для экспорта в глобальное пространство */
         az = {
-            settings: settings,
-            'export': exportToGlobal
+            settings : settings,
+            'export' : exportToGlobal,
+            start    : start
         };
 
-        ui.init({}, function () {
+        ui.init(settings.ui, function () {
             ui.on('az.ui.submit', function (event) {
                 console.log(event.detail);
             });

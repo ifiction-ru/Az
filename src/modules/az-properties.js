@@ -1,9 +1,9 @@
-define(['modules/az-utils', 'modules/az-layers', 'modules/az-events'], function (utils, layers, events) {
+define(['modules/az-utils'], function (utils) {
     'use strict';
 
     /* Формат базы данных "db_values":
      layer   Номер слоя данных
-     simple  Признак свойства: false — свойство объекта "Объект.Имя", true — произвольное свойство Получить(Имя, Объект)
+     simple  Признак свойства: false — свойство объекта "Объект.Имя", true — произвольное свойство "getProperty"
      object  Уникальный идентификатор объекта
      name    Имя свойства
      value   Значение свойства
@@ -79,7 +79,7 @@ define(['modules/az-utils', 'modules/az-layers', 'modules/az-events'], function 
         },
 
 
-        checkArgs = function (options, gos, defaultValue) {
+        checkArgs = function (options, op, defaultValue) {
             var result = {
                 object: null,
                 name: undefined,
@@ -96,7 +96,7 @@ define(['modules/az-utils', 'modules/az-layers', 'modules/az-events'], function 
                 result.name  = options[1];
                 result.value = options[2];
             } else if (options.length === 2) {
-                if (gos == 'set') {
+                if (op == 'set') {
                     result.name  = options[0];
                     result.value = options[1];
                 } else {
