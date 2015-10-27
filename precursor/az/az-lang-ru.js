@@ -59,6 +59,17 @@
     //--------------------------------------------------
     tSimpleObject.prototype.Описывается = tSimpleObject.prototype.Notation;
     tSimpleObject.prototype.Действие    = tSimpleObject.prototype.Action;
+    //--------------------------------------------------
+    window.localizeCMD = function (CMD) {
+        //----------
+        CMD.глагол = CMD.verb;
+        CMD.объект = CMD.object;
+        CMD.А      = {объект:CMD.A.object, слово:CMD.A.word, предлог:CMD.A.prep};
+        CMD.Б      = {объект:CMD.B.object, слово:CMD.B.word, предлог:CMD.B.prep};
+        CMD.В      = {объект:CMD.C.object, слово:CMD.C.word, предлог:CMD.C.prep};
+        //----------
+    }
+    //localizeCMD = _localizeCMD;
 /* --------------------------------------------------------------------------- */
 // РАБОТА С АВТОДОПОЛНЕНИЕМ
     //--------------------------------------------------
