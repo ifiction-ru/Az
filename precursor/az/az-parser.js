@@ -26,17 +26,6 @@ window.PARSER = (function() {
         ---------- */
         var db_words_and_objects = TAFFY();
     /* --------------------------------------------------------------------------- */
-    /* ОПРЕДЕЛЕНИЯ ОБЪЕКТА ПО СЛОВУ
-        Определение объекта по слову используется в следующих случаях:
-            1. Анализ текстов описаний для формирования перечня упомянутых объектов. В этом случае по ID локации и ID слова мы находим ID объекта.
-            2. Определения объекта манипуляции при анализе команды игрока. В этом случае у нас есть:
-                - ID локации
-                - ID глагола / null если не указан
-                - ID предлога / null если не указан
-                - ID слова
-        -------------------------------------------------- */
-    //>>>
-    /* --------------------------------------------------------------------------- */
     function _get_link_to_object (_options) {
         var priority    = _options['priority'] || 0;
         //----------
@@ -73,7 +62,7 @@ window.PARSER = (function() {
         //----------
     } // end function "_get_link_to_object"
     /* --------------------------------------------------------------------------- */
-    function _get_objects_by_word (_search) {
+    function _get_objects_by_word (_search, _morph) {
         _search.obj = AZ.available_objects(true);
         //----------
         var list = db_words_and_objects(_search).get();
@@ -86,6 +75,38 @@ window.PARSER = (function() {
         //----------
         return result;
     } // end function "_get_objects_by_word"
+    /* --------------------------------------------------------------------------- */
+    function _get_noun_of_object_by_pronoun (_wid) {
+        var result = null;
+        //----------
+        var search = {
+            priority: 0,
+            obj:      AZ.available_objects(true),
+            loc:      [AZ.getLocation(true), null],
+            wid:      _wid,
+        }; // end search
+        //----------
+        var list = db_words_and_objects(search).get();
+        if (list.length == 0) {return null;} // end if
+        //----------
+        var object = list[0].obj;
+        //----------
+        search.obj = list[0].obj;
+        delete search.wid;
+        //----------
+        var list = db_words_and_objects(search).get();
+        for (var x=0; x<list.length; x++) {
+            var wid = list[x].wid;
+            //----------
+            var rec = DICTIONARY.getBase(wid);
+            if (rec.morph == 'С') {
+                result = rec;
+                break;
+            } // end if
+        } // end for
+        //----------
+        return result;
+    } // end function "_get_noun_of_object_by_pronoun"
     /* --------------------------------------------------------------------------- */
     // Добавляем наречие в перечень наречий
     function _add_adverb (_adverbs, _word) {
@@ -313,7 +334,7 @@ window.PARSER = (function() {
                 search['action']    = _options.action || null;
                 search['nums']      = _options.nums || null;
                 //----------
-                //if (search.priority != 0) {
+                //if (search.priority == 0) {
                    /*console.log(
                         'id:'+search.obj+', t:'+search.priority+', n:'+search.nums+
                         ', L:'+search.loc+
@@ -335,7 +356,9 @@ window.PARSER = (function() {
         }, // end function "add_link_to_object"
         //--------------------------------------------------
         get_link_to_object: _get_link_to_object,
-        get_objects_by_word: _get_objects_by_word,
+        //--------------------------------------------------
+        get_objects_by_word:            _get_objects_by_word,
+        get_noun_of_object_by_pronoun: _get_noun_of_object_by_pronoun,
         //--------------------------------------------------
         parse: function (_phrase, _preparsing, _prepart2) {
             _prepart2 = _prepart2 || false;
@@ -370,8 +393,9 @@ window.PARSER = (function() {
             var priority    = null; // Приоритет параметра команды
             var objrec      = null;
             //----------
-            var buffer      = [];
-            var preposition = null;
+            var buffer       = [];
+            var preposition  = null;
+            var buffer_after = []; // Буфер существительных для (пост)постобработки ("кто я такой" -> "кто такой я")
             //----------
             var have_a_space = (_phrase.substr(-1) == ' ') ? true : false;
             //----------
@@ -474,6 +498,10 @@ window.PARSER = (function() {
                         // Если предлог ещё и наречие, то удаляем его из списка
                         _remove_adverb(preposition);
                     } // end if
+                    //----------
+                    if (priority == null) {
+                        buffer_after.push(word);
+                    } // end if
                 
                 // Обрабатываем местоимение
                 } else if (word.morph == 'М') {
@@ -483,7 +511,9 @@ window.PARSER = (function() {
                         //----------
                         priority = _check_param_priority(CMD, noun2, prep2, nouns4pronouns, pr_occupied);
                         //----------
-                        if (priority !== null) {
+                        if (priority == null) {
+                            buffer_after.push(noun2);
+                        } else {
                             if (preposition !== null) {
                                 _remove_adverb(preposition);
                             } // end if
@@ -517,6 +547,8 @@ window.PARSER = (function() {
             //----------
             // Если после разбора фразы остались наречия, которые не были использованы как предлоги
             _check_adverbs(CMD, adverbs, nouns4pronouns, pr_occupied);
+            //----------
+            buffer = buffer.concat(buffer_after);
             //----------
             // Попробуем обработать накопишуюся в буфере очередь
             if (buffer.length > 0) {
@@ -644,9 +676,39 @@ window.PARSER = (function() {
                 } // end for priority
             } // end if
             //----------
+            CMD.object = null;
+            CMD.action = null;
+            CMD.A      = {object:null, word:null, prep:null};
+            CMD.B      = {object:null, word:null, prep:null};
+            CMD.C      = {object:null, word:null, prep:null};
+            //----------
+            if (CMD.objects[1] != null) {CMD.A.object = CMD.objects[1];} // end if
+            if (CMD.objects[2] != null) {CMD.B.object = CMD.objects[2];} // end if
+            if (CMD.objects[3] != null) {CMD.B.object = CMD.objects[3];} // end if
+            //----------
+            if (CMD.params[1] != null) {CMD.A.word = CMD.params[1]; CMD.A.prep = CMD.params[1].prep;} // end if
+            if (CMD.params[2] != null) {CMD.B.word = CMD.params[2]; CMD.B.prep = CMD.params[2].prep;} // end if
+            if (CMD.params[3] != null) {CMD.C.word = CMD.params[3]; CMD.C.prep = CMD.params[3].prep;} // end if
+            //----------
+            for (var priority=1; priority<=3; priority++) {
+                var obj = CMD.objects[priority];
+                var act = CMD.actions[priority];
+                //----------
+                if (obj != null && act != null) {
+                    CMD.object = obj;
+                    CMD.action = obj.actions_list[act-1];
+                    //----------
+                    break;
+                } // end if
+            } // end for priority
+            //----------
             for (var key in nouns4pronouns) {
                 last_params[key] = nouns4pronouns[key];
             } // end for
+            //----------
+            if (typeof(localizeCMD) == 'function') {
+                localizeCMD(CMD);
+            } // end if
             //----------
             if (_preparsing == true) {
                 this.pre_parse(word_str, iNN(CMD.verb, 'bid'), iNN(preposition, 'bid'), CMD, _prepart2);
@@ -1028,4 +1090,13 @@ window.PARSER = (function() {
 /* --------------------------------------------------------------------------- */
 /*
 "привязать пистолет за деревом " - "за деревом" попадает в третий слот
+
+
+CMD
+    phrase
+    object
+    action
+    A: object, word
+    B
+    C
 */
