@@ -1,7 +1,7 @@
 /**
  *  UI module for Az.
  *
- *  */
+ **/
 
 define(['modules/az-utils'], function (utils) {
     'use strict';
