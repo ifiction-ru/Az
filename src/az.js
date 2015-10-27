@@ -21,7 +21,9 @@
 
         var az,
             settings = {
+                ui: {
 
+                }
             },
 
             exportToGlobal = function () {
