@@ -3,7 +3,7 @@ window.PROPERTIES = (function() {
     /* --------------------------------------------------------------------------- */
     /* Формат базы данных "db_values":
         layer   Номер слоя данных
-        simple  Признак свойства: false — свойство объекта "Объект.Имя", true — произвольное свойство Получить(Имя, Объект)
+        simple  Признак свойства: false — свойство объекта "Объект.Имя", true — произвольное свойство "getProperty"
         object  Уникальный идентификатор объекта
         name    Имя свойства
         value   Значение свойства */
@@ -49,7 +49,7 @@ window.PROPERTIES = (function() {
             //----------
         }, // end function "PROPERTIES.get"
         //--------------------------------------------------
-        checkARGS: function (_options, _gos, _defvalue) {
+        checkARGS: function (_options, _op, _defvalue) {
             var result = {object:null, name:undefined, value:undefined};
             //----------
             if (_options.length == 3) {
@@ -64,7 +64,7 @@ window.PROPERTIES = (function() {
                 result.value = _options[2];
                 
             } else if (_options.length == 2) {
-                if (_gos == 'set') {
+                if (_op == 'set') {
                     result.name  = _options[0];
                     result.value = _options[1];
                 } else {
@@ -89,7 +89,7 @@ window.PROPERTIES = (function() {
             } // end if
             //----------
             return result;
-        },
+        }, // end function "PROPERTIES.checkARGS"
         //--------------------------------------------------
     };
 })(); // end object "PROPERTIES"
@@ -109,15 +109,15 @@ window.incProperty = function () {
     if (params == null) {return;} // end if
     //----------
     PROPERTIES.set(true, params.object, params.name, PROPERTIES.get(true, params.object, params.name) + params.value);
-}; // end function "setProperty"
+}; // end function "incProperty"
 /* --------------------------------------------------------------------------- */
-window.decProperty = function (_name, _object, _value) {
+window.decProperty = function () {
     var params = PROPERTIES.checkARGS(arguments, 'get', 1);
     //----------
     if (params == null) {return;} // end if
     //----------
     PROPERTIES.set(true, params.object, params.name, PROPERTIES.get(true, params.object, params.name) - params.value);
-}; // end function "setProperty"
+}; // end function "decProperty"
 /* --------------------------------------------------------------------------- */
 window.getProperty = function () {
     var params = PROPERTIES.checkARGS(arguments, 'get', null);
