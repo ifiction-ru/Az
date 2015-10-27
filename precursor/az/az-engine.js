@@ -192,7 +192,9 @@ window.AZ = (function() {
                 return position.object == null ? null : (_as_id == false ? position.object : position.ID);
             }, // end function "AZ.getLocation"
             //--------------------------------------------------
-            doBeforeUserAction: function() {
+            startNewTurn: function() {
+                AUTOCOMPLETE.init();
+                //----------
                 updateAvailableObjects();
                 //----------
                 if (DEBUG.isEnable() == true) {
@@ -203,125 +205,14 @@ window.AZ = (function() {
                 //----------
                 // Данная команда должна идти в самом конце, чтобы все изменения (по событиям, например), происходили на предыдущем слое.
                 LAYERS.add();
-            }, // end function "AZ.doBeforeUserAction"
+            }, // end function "AZ.startNewTurn"
         //--------------------------------------------------
         available_objects: function (_only_id) {
             return ((_only_id || false) == false) ? available_objects.slice() : available_objects_IDs.slice();
         }, // end function "AZ.available_objects"
-        //--------------------------------------------------
-        addWordToCommand : function (_text) {
-            var field = document.getElementById('user_command');
-            //----------
-            if (field == null) {return;}
-            //----------
-            var value   = field.value;
-            var lsymbol = value.substr(-1);
-            if (lsymbol == ' ' || lsymbol == '\t') {
-                field.value = value + _text + ' ';
-            } else {
-                var pos = value.lastIndexOf(' ');
-                if (pos == -1) {
-                    field.value = _text + ' ';
-                } else {
-                    field.value = value.substr(0, pos)+ ' ' + _text + ' ';
-                } // end if
-            } // end if
-            //----------
-            preparsing(field);
-            //----------
-            field.focus();
-        }, // end function "AZ.addWordToCommand"
         /* --------------------------------------------------------------------------- */
     };
 })(); // end object "AZ"
-/* --------------------------------------------------------------------------- */
-// Обработка нажатия клавиш игроком
-window.userInput = function (field, event) {
-    if (event.which == null) { // IE
-        if (event.keyCode == 13) {
-            parseIt(field);
-        } // end if
-    } // end if
-    //----------
-    if (event.which != 0 && event.charCode != 0) { // все кроме IE
-        if (event.which == 13) {
-            parseIt(field);
-        } // end if
-    } // end if
-    //----------
-    return true; // спец. символ
-}; // end function "user_input"
-/* --------------------------------------------------------------------------- */
-window.parseIt = function (field) {
-    printCommand(field.value);
-    //----------
-    var CMD = PARSER.parse(field.value);
-    //----------
-    field.value='';
-    AUTOCOMPLETE.init();
-    //----------
-    /*if (CMD.verb===null && CMD.noun1===null && CMD.noun2===null && CMD.noun3===null) {
-        SCREEN.Out('Ничего не понятно'+br+br);
-        return false;
-    }*/ // end if
-    //----------
-    /*console.log('------------------------------');
-    console.log('Команда: "'+CMD.phrase+'"');
-    console.log('глагол: '+(CMD.verb == null ? null : '"'+CMD.verb.base+'" ('+CMD.verb.bid+')'));
-    //----------
-    for (var x=1; x<=3; x++) {
-        if (CMD.params[x] != null || CMD.objects[x] != null ) {
-            var prep_txt = CMD.params[x] == null ? '' : (CMD.params[x].prep == null ? '' : ' "'+CMD.params[x].prep.base+'" ('+CMD.params[x].prep.bid+') + ');
-            console.log('объект #'+x+': '+(CMD.params[x] == null ? '---' : 'слово '+prep_txt+'"'+CMD.params[x].base+'" ('+CMD.params[x].bid+')')+(CMD.objects[x] == null ? '' : ' [ '+CMD.objects[x].ID+', действие #'+CMD.actions[x]+' ]'));
-        } // end if
-    } // end for x*/
-    //----------
-    var action_id = null;
-    //----------
-    for (var priority=1; priority<=3; priority++) {
-        if (CMD.objects[priority] == null) {continue;} // end if
-        //----------
-        action_id = CMD.actions[priority];
-        //----------
-        if (action_id != null) {
-            var _action = CMD.objects[priority].actions_list[action_id-1];
-            //----------
-            // Вызываем событие "Перед выполнением действия с объектом"
-            if (EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.objects[priority], 'when':EVENTS.BEFORE}, {'parameter': CMD}) == true) {
-                //----------
-                _action(CMD);
-                //----------
-                EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.objects[priority], 'when':EVENTS.AFTER}, {'parameter': CMD});
-            } // end if
-            //----------
-            break;
-        } // end if
-        //----------
-    } // end for priority
-    //----------
-    if (action_id == null) {
-        print('Ничего не понятно.');
-    } else {
-        incProperty('turns.all');
-        incProperty('turns.loc');
-    } // end if
-    //----------
-    AZ.doBeforeUserAction();
-};
-/* --------------------------------------------------------------------------- */
-window.preparsing = function (field) {
-    //----------
-    var command = field.value || '';
-    //----------
-    if (command.trim() == '') {
-        PARSER.pre_parse();
-    } else {
-        PARSER.parse(command, true);
-    } // end if
-    //----------
-    DEBUG.updateWordsFullList();
-    DEBUG.updateWordsShortList();
-}; // end function "preparsing"
 /* --------------------------------------------------------------------------- */
 window.START = function (_param) {
     var character = AZ.getProtagonist() || null;
@@ -336,13 +227,13 @@ window.START = function (_param) {
         return;
     } // end if
     //----------
-    AZ.doBeforeUserAction();
+    AZ.startNewTurn();
     //----------
     var loc = AZ.getLocation();
     //----------
     SCREEN.Out(loc.getTitle(null, true) + loc.getDescription());
     //----------
-    preparsing({value:''});
+    INTERFACE.preparsing({value:''});
     //----------
     LAYERS.add();
 }; // end function "START"
