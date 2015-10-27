@@ -622,7 +622,7 @@ window.DICTIONARY = (function() {
                     // Дополняем сведения о слове информацией о роде, падежах и числах
                     result.gender   = _get_word_gender(result.bid);
                     //----------
-                    result.cases = _get_word_cases(result.fid);
+                    result.cases    = _get_word_cases(result.fid);
                     //----------
                     result.numbers  = _get_word_numbers(result.fid);
                     //----------
@@ -670,6 +670,10 @@ window.DICTIONARY = (function() {
                                 //----------
                             } // end-for
                         } // end if
+                        //----------
+                        if (noun == null) {
+                            noun = PARSER.get_noun_of_object_by_pronoun(result.bid);
+                        } // end if "noun == null"
                         //----------
                         if (noun !== null) {
                             // Прореживаем с учётом числа местоимения
