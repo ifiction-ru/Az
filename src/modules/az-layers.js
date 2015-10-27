@@ -130,5 +130,5 @@ define(['modules/az-utils'], function (utils) {
         add: add,
         cut: cut,
         addHandler: addHandler
-    }
+    };
 });
