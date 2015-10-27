@@ -26,8 +26,9 @@
     <script type="text/javascript" src="az/az-dictionary.js"></script>
     <script type="text/javascript" src="az/az-parser.js"></script>
     <script type="text/javascript" src="az/az-autocomplete.js"></script>
-    <script type="text/javascript" src="az/az-screen.js"></script>
+    <script type="text/javascript" src="az/az-interface.js"></script>
     <script type="text/javascript" src="az/az-decor.js"></script>
+    <script type="text/javascript" src="az/az-typograph.js"></script>
     <script type="text/javascript" src="az/az-lang-ru.js"></script>
     <!-- ---------- -->
     <script type="text/javascript" src="dictionary/dictionary.js"></script>
@@ -45,7 +46,7 @@
     <div id="debug-words-list-short" align="left"></div>
     <!-- </DEBUG> -->
     <!-- ---------- -->
-    <input autofocus name="user_command" id="user_command" class="longinput" type="text" name="phrase" id="phrase" value="" size="" maxlength="200" onkeyup="preparsing(this);" onkeypress="return userInput(this, event)" style="width:100%; max-width:415px;" placeholder="Введите команду" />
+    <input autofocus name="user_command" id="user_command" class="longinput" type="text" name="phrase" id="phrase" value="" size="" maxlength="200" onkeyup="INTERFACE.preparsing(this);" onkeypress="return INTERFACE.userInput(this, event)" style="width:100%; max-width:415px; color:#00F;" placeholder="Введите команду" />
     <!-- ---------- -->
     <!-- <DEBUG>  -->
     <table border="0"><tr>
