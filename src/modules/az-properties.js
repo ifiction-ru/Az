@@ -13,43 +13,12 @@ define(['modules/az-utils'], function (utils) {
 
         /**
          *
-         * @param name
-         * @param value
-         */
-        create = function(name, value) {
-            set(false, AZ.getID(this), name, value);
-
-            Object.defineProperty(this, name, {
-                set: function(value) {
-                    //При записи свойства объекта
-                    set(false, AZ.getID(this), name, value);
-                },
-                get: function() {
-                    var value = get(false, AZ.getID(this), name),
-                        result = events.checkReactions(events.PROPERTY, { // Вызываем событие "При получении свойства объекта"
-                            what: this, property: name
-                        }, {
-                            parameter: value
-                        });
-
-                    if (result !== undefined) {
-                        value = result;
-                    }
-
-                    return value;
-                }
-            });
-
-        },
-
-        /**
-         *
          * @param simple
          * @param object
          * @param name
          * @param value
          */
-        set = function (simple, object, name, value) {
+        _set = function (simple, object, name, value) {
             if (value === undefined) {
                 value = null;
             }
@@ -70,7 +39,7 @@ define(['modules/az-utils'], function (utils) {
          * @param name
          * @returns {*}
          */
-        get = function (simple, object, name) {
+        _get = function (simple, object, name) {
             return layers.get(dbValues, {
                 simple: simple,
                 object: object,
@@ -122,6 +91,88 @@ define(['modules/az-utils'], function (utils) {
             }
 
             return result;
+        },
+
+        /**
+         *
+         * @param name
+         * @param value
+         */
+        create = function(name, value) {
+            _set(false, AZ.getID(this), name, value);
+
+            Object.defineProperty(this, name, {
+                set: function(value) {
+                    //При записи свойства объекта
+                    _set(false, AZ.getID(this), name, value);
+                },
+                get: function() {
+                    var value = get(false, AZ.getID(this), name),
+                        result = events.checkReactions(events.PROPERTY, { // Вызываем событие "При получении свойства объекта"
+                            what: this, property: name
+                        }, {
+                            parameter: value
+                        });
+
+                    if (result !== undefined) {
+                        value = result;
+                    }
+
+                    return value;
+                }
+            });
+        },
+
+        /**
+         * // Присваивание значения "свободному" свойству. Свойство может быть привязано к объекту.
+         * @param name
+         * @param object
+         * @param value
+         */
+        set = function (name, object, value) {
+            var params = checkArgs(arguments, 'set', null);
+
+            if (params == null) {
+                return;
+            }
+
+            _set(true, params.object, params.name, params.value);
+        },
+
+        get = function (name, object, value) {
+            var params = checkArgs(arguments, 'get', null);
+
+            if (params == null) {
+                return;
+            }
+
+            var savedValue = get(true, params.object, params.name);
+
+            if (savedValue === undefined && params.value !== undefined) {
+                savedValue = params.value;
+            }
+
+            return savedValue;
+        },
+
+        increment = function (name, object, value) {
+            var params = checkArgs(arguments, 'get', 1);
+
+            if (params == null) {
+                return;
+            }
+
+            _set(true, params.object, params.name, get(true, params.object, params.name) + params.value);
+        },
+
+        decrement = function (name, object, value) {
+            var params = checkArgs(arguments, 'get', 1);
+
+            if (params == null) {
+                return;
+            }
+
+            _set(true, params.object, params.name, PROPERTIES.get(true, params.object, params.name) - params.value);
         };
 
     layers.addHandler('move', {
@@ -130,60 +181,12 @@ define(['modules/az-utils'], function (utils) {
         filter: ['object', 'name', 'simple']
     });
 
-    // TODO: перенести из глобальной области видимости
-    // Присваивание значения "свободному" свойству. Свойство может быть привязано к объекту.
-    window.setProperty = function (name, object, value) {
-        var params = checkArgs(arguments, 'set', null);
-
-        if (params == null) {
-            return;
-        }
-
-        set(true, params.object, params.name, params.value);
-    };
-
-    window.incProperty = function (name, object, value) {
-        var params = checkArgs(arguments, 'get', 1);
-
-        if (params == null) {
-            return;
-        }
-
-        set(true, params.object, params.name, get(true, params.object, params.name) + params.value);
-    };
-
-    window.decProperty = function (name, object, value) {
-        var params = checkArgs(arguments, 'get', 1);
-
-        if (params == null) {
-            return;
-        }
-
-        set(true, params.object, params.name, PROPERTIES.get(true, params.object, params.name) - params.value);
-    };
-
-    window.getProperty = function (name, object, value) {
-        var params = checkArgs(arguments, 'get', null);
-
-        if (params == null) {
-            return;
-        }
-
-        var savedValue = get(true, params.object, params.name);
-
-        if (savedValue === undefined && params.value !== undefined) {
-            savedValue = params.value;
-        }
-
-        return savedValue;
-    };
-
-
     return {
-        create: create,
-        set: set,
-        get: get,
-        checkArgs: checkArgs
+        create:     create,
+        set:        set,
+        get:        get,
+        increment:  increment,
+        decrement:  decrement,
+        checkArgs:  checkArgs
     };
-
 });
