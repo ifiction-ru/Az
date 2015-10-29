@@ -22,7 +22,10 @@ define(['modules/az-utils'], function (utils) {
 
         objectsList = {}, // Объект для хранения ссылок на объекты игры по их строковому ID.
         updateAvailableObjects = function () {
-            var posObjects = position.object.container.getContent(),
+            var // Добавляем в перечень доступных объектов содержимое локации
+                // ??? Может, стоит это делатьтолько после того, как игрок посмотрел инвентарь?
+                posObjects = position.object.container.getContent(),
+                // Добавляем в перечень доступных объектов содержимое инвентаря
                 proObjects = protagonist.object.container.getContent(),
                 objects = posObjects.concat(proObjects),
                 object,
@@ -31,11 +34,13 @@ define(['modules/az-utils'], function (utils) {
                 content,
                 id;
 
+            // Добавляем в перечень доступных объектов персонажа игрока
             objects.unshift({
                 what: protagonist.object,
                 where: position.object,
                 quantity: 1
             });
+            // Добавляем в перечень доступных объектов текущую локацию
             objects.unshift({
                 what: position.object,
                 where: position.object,
@@ -278,8 +283,8 @@ define(['modules/az-utils'], function (utils) {
             layers.add();
         },
 
-        availableObjects = function (idsOnly) {
-            return !idsOnly ? availableObjects.slice() : availableObjectsIds.slice();
+        getAvailableObjects = function (idsOnly) {
+            return !idsOnly ? getAvailableObjects.slice() : availableObjectsIds.slice();
         };
 
     // Инициализация параметров, которые должны сохраняться в игровой сессии
@@ -299,7 +304,7 @@ define(['modules/az-utils'], function (utils) {
         setLocation: setLocation,
         getLocation: getLocation,
         startNewTurn: startNewTurn,
-        availableObjects: availableObjects
+        getAvailableObjects: getAvailableObjects
     };
 
 });
