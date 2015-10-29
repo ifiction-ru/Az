@@ -20,13 +20,20 @@ window.AZ = (function() {
     setProperty('turns.loc', 0);
     //--------------------------------------------------
     function updateAvailableObjects () {
+        // Добавляем в перечень доступных объектов содержимое локации
+        // ??? Может, стоит это делатьтолько после того, как игрок посмотрел инвентарь?
         var objects1 = position.object.container.getContent();
+        //----------
+        // Добавляем в перечень доступных объектов содержимое инвентаря
         var objects2 = protagonist.object.container.getContent();
         //----------
         var objects=objects1.concat(objects2);
         //----------
-        objects.unshift({'what': protagonist.object, 'where': position.object, 'quanity':1});
-        objects.unshift({'what': position.object, 'where': position.object, 'quanity':1});
+        // Добавляем в перечень доступных объектов персонажа игрока
+        objects.unshift({'what': protagonist.object, 'where': position.object, 'quantity':1});
+        //----------
+        // Добавляем в перечень доступных объектов текущую локацию
+        objects.unshift({'what': position.object, 'where': position.object, 'quantity':1});
         //----------
         // +++ Известные игроку контейнеры в инвентаре и локации
         //----------
