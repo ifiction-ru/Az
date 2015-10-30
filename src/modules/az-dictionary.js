@@ -460,7 +460,7 @@ define(['modules/az-utils'], function (utils) {
 
                 // Если специфические падежи для данного предлога не указаны, то берём падежи самого предлога
                 if (prep !== null && cases === null) {
-                    cases = _getWordCases(prep.bid, '-');
+                    cases = getWordCases(prep.bid, '-');
                 }
 
                 // Записываем данные глагола: тип объекта, bid предлога и падежи
@@ -709,9 +709,8 @@ define(['modules/az-utils'], function (utils) {
          * @param id
          * @param number
          * @returns {*|{singular: (*|Array), plural: (*|Array)}}
-         * @private
          */
-        _getWordCases = function (id, number) {
+        getWordCases = function (id, number) {
             number = number || false;
 
             var result;
@@ -791,7 +790,7 @@ define(['modules/az-utils'], function (utils) {
 
             // Если получили предлог
             if (result.morph === 'ПР') {
-                result.cases = _getWordCases(result.bid, '-');
+                result.cases = getWordCases(result.bid, '-');
                 result.tags = _getWordTags(result.bid);
             // Если получили наречие
             } else if (result.morph == 'Н') {
@@ -799,13 +798,13 @@ define(['modules/az-utils'], function (utils) {
                 result.canBePrep = _getAdverbAndPrep(result.bid);
 
                 if (result.canBePrep === true) {
-                    result.cases = _getWordCases(result.bid, '-');
+                    result.cases = getWordCases(result.bid, '-');
                 }
             // Если получили существительное или местоимение
             } else if (result.morph === 'С' || result.morph === 'М') {
                 // Дополняем сведения о слове информацией о роде, падежах и числах
                 result.gender = _getWordGender(result.bid);
-                result.cases = _getWordCases(result.fid);
+                result.cases = getWordCases(result.fid);
                 result.numbers = _getWordNumbers(result.fid);
 
                 if (prep !== null) {
@@ -857,7 +856,7 @@ define(['modules/az-utils'], function (utils) {
                             }
                         }
                     }
-                    //----------
+
                     if (noun == null) {
                         noun = PARSER.get_noun_of_object_by_pronoun(result.bid);
                     }
@@ -897,7 +896,7 @@ define(['modules/az-utils'], function (utils) {
                                         base:       wordBase.base,
                                         form:       formRec.form,
                                         gender:     _getWordGender(noun.bid),
-                                        cases:      _getWordCases(rec.fid),
+                                        cases:      getWordCases(rec.fid),
                                         numbers:    _getWordNumbers(rec.fid),
                                         nounsList:  null
                                     };
@@ -923,89 +922,123 @@ define(['modules/az-utils'], function (utils) {
          * @returns {*}
          */
         getNounPriority = function (verb, noun, prepBid, already) {
-            var result = null;
-            //----------
-            // Отбираем данные по объектам всех типов для переданного глагола
-            var objects_list = dbObjectsOfVerbs({'bid': verb.bid}).get();
-            //----------
-            for (var x = 0; x < objects_list.length; x++) {
-                var object = objects_list[x];
-                //----------
+            var result = null,
+                // Отбираем данные по объектам всех типов для переданного глагола
+                objectsList = dbObjectsOfVerbs({ bid: verb.bid }).get(),
+                object, cases, caseObj, noun2, adverbs;
+
+            for (var i = 0; i < objectsList.length; i++) {
+                object = objectsList[i];
+
                 if (already.indexOf(object.priority) >= 0) {
                     continue;
-                } // end if
-                //----------
-                var cases = object.cases || [];
-                //----------
+                }
+
+                cases = object.cases || [];
+
                 if (object.prep !== null && object.prep !== prepBid) {
                     continue;
-                } // end if
-                //----------
-                if (noun.morph == 'С') {
-                    for (var z = 0; z < cases.length; z++) {
-                        var case_obj = cases[z];
-                        if (noun.cases.united.indexOf(case_obj) >= 0) {
-                            result = {
-                                'priority': object.priority,
-                                'noun': noun,
-                            };
-                            break;
-                        } // end if
-                    } // end for
+                }
 
-                } else if (noun.morph == 'М' && noun.nounsList !== null) {
-                    for (var y = 0; y < noun.nounsList.length; y++) {
-                        var noun2 = noun.nounsList[y];
-                        //----------
-                        for (var z = 0; z < cases.length; z++) {
-                            var case_obj = cases[z];
-                            if (noun2.cases.indexOf(case_obj) >= 0) {
+                if (noun.morph === 'С') {
+                    for (var j = 0; j < cases.length; j++) {
+                        caseObj = cases[j];
+
+                        if (noun.cases.united.indexOf(caseObj) >= 0) {
+                            result = {
+                                priority: object.priority,
+                                noun: noun
+                            };
+
+                            break;
+                        }
+                    }
+
+                } else if (noun.morph === 'М' && noun.nounsList !== null) {
+                    for (j = 0; j < noun.nounsList.length; j++) {
+                        noun2 = noun.nounsList[j];
+
+                        for (var k = 0; k < cases.length; k++) {
+                            caseObj = cases[k];
+
+                            if (noun2.cases.indexOf(caseObj) >= 0) {
                                 result = {
-                                    'priority': object.priority,
-                                    'noun': noun2,
+                                    priority: object.priority,
+                                    noun: noun2
                                 };
+
                                 break;
-                            } // end if
-                        } // end for z
-                        //----------
+                            }
+                        }
+
                         if (result != null) {
                             break;
-                        } // end if
-                    } // end for y
+                        }
+                    }
                 } else if (noun.morph == 'Н') {
-                    var adverbs = object.adverbs || [];
-                    //----------
+                    adverbs = object.adverbs || [];
+
                     if (adverbs.length > 0) {
                         if (adverbs.indexOf(noun.bid) >= 0) {
                             result = {
-                                'priority': object.priority,
-                                'noun': noun,
+                                priority: object.priority,
+                                noun: noun
                             };
+
                             break;
-                        } // end if
-                    } // end if
-                } // end if
-            } // end for x
-            //----------
+                        }
+                    }
+                }
+            }
+
             return result;
-            //----------
-        }, // end function "getNounPriority"
-        //------------------------------
-        getObjectsOfVerbs = function (_search) {
-            return dbObjectsOfVerbs(_search).get();
         },
-        //------------------------------
+
+        /**
+         *
+         * @param search
+         * @returns {*}
+         */
+        getObjectsOfVerbs = function (search) {
+            return dbObjectsOfVerbs(search).get();
+        },
+
         /*get_forms_list: function (_search) {
          return db_search_form(_search).get();
          },*/
-        //------------------------------
-        getFormsListByCaseAndNumber = function (_search) {
-            return dbSearchForm(_search).get();
-        }, // end function "getFormsListByCaseAndNumber"
-        //------------------------------
-        getFormsListByBID = function (_search) {
-            return dbForms(_search).get();
-        }; // end function "getFormsListByBID"
 
-    return {};
+        /**
+         *
+         * @param search
+         * @returns {*}
+         */
+        getFormsListByCaseAndNumber = function (search) {
+            return dbSearchForm(search).get();
+        },
+
+        /**
+         *
+         * @param search
+         * @returns {*}
+         */
+        getFormsListByBid = function (search) {
+            return dbForms(search).get();
+        };
+
+    return {
+        addNoun: addNoun,
+        addPronoun: addPronoun,
+        addAdverb: addAdverb,
+        addPreposition: addPreposition,
+        addVerb: addVerb,
+        getBase: getBase,
+        getForm: getForm,
+        getFormIds: getFormIds,
+        getWordCases: getWordCases,
+        getWord: getWord,
+        getNounPriority: getNounPriority,
+        getObjectsOfVerbs: getObjectsOfVerbs,
+        getFormsListByCaseAndNumber: getFormsListByCaseAndNumber,
+        getFormsListByBid: getFormsListByBid
+    };
 });
