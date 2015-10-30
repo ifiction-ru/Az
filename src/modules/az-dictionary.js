@@ -141,13 +141,510 @@ define(['modules/az-utils'], function (utils) {
             }
         },
 
+
+
+        _getWordTags = function (bid) {
+            return dbTagsForBase[bid] || [];
+        },
+
+        /**
+         * Добавляет в Словарь отдельную словоформу слова
+         * @param bid
+         * @param form
+         * @returns {*}
+         * @private
+         */
+        _addForm = function (bid, form) {
+            // Приводим к нижнему регистру
+            form = form.toLowerCase().trim();
+
+            // Проверяем форму слова на наличие флагов включения/исключения слова из автодополнения
+            var first = form.substr(1, 1),
+                last = form.slice(-1),
+                acInc = (first === '+' || last === '+') ? true : ((first === '-' || last === '-') ? false : null),
+                search,
+                rec;
+
+            if (first === '+' || first === '-') {
+                form = form.substr(2).trim();
+            }
+
+            if (last === '+' || last === '-') {
+                form = form.slice(0, -1).trim();
+            }
+
+            search = {
+                bid: bid,
+                form: form
+            };
+            rec = dbForms(search).first();
+
+            if (rec == false) {
+                // Увеличиваем счётчик "fid"
+                search.fid = ++idForForm;
+                // Сохраняем данные о словоформе
+                dbForms.insert(search);
+                rec = search;
+            }
+
+            if (acInc !== null) {
+                AUTOCOMPLETE.addWordWithFlag(bid, rec.fid, acInc);
+            }
+
+            return rec.fid;
+
+        },
+
+
+
+        /**
+         * Добавляет в Словарь род основы слова
+         * @param bid
+         * @param gender
+         * @private
+         */
+        _addWordGender = function (bid, gender) {
+            dbWordGenders[String(bid)] = gender.trim().toUpperCase();
+        },
+
+        /**
+         * Возвращает из Словаря род основы слова по его bid
+         * @param bid
+         * @returns {*}
+         * @private
+         */
+        _getWordGender = function (bid) {
+            var result = dbWordGenders[String(bid)];
+
+            if (result === undefined) {
+                result = '';
+            }
+
+            return result;
+        },
+
+        // Функция добавляет в Словарь падежи словоформы
+        /**
+         * Добавляет в Словарь падежи словоформы
+         * @param id
+         * @param number
+         * @param cases
+         * @private
+         */
+        _addWordCases = function (id, number, cases) {
+            dbWordCases[String(id) + ':' + number] = cases.slice();
+        },
+
+
+
+        /**
+         * Добавляет в Словарь числа словоформы
+         * @param fid
+         * @param numbers
+         * @private
+         */
+        _addWordNumbers = function (fid, numbers) { //, _cases
+            dbWordNumbers[String(fid)] = numbers.slice();
+        },
+
+        /**
+         * Возвращает из Словаря падежи словоформы по её fid
+         * @param fid
+         * @returns {*}
+         * @private
+         */
+        _getWordNumbers = function(fid) {
+            var result = dbWordNumbers[String(fid)];
+
+            if (result === undefined) {
+                result = [];
+            } else {
+                result = result.slice();
+            }
+
+            return result;
+        },
+
+        /**
+         * Добавляет в Словарь информацию, может ли наречие быть предлогом
+         * @param bid
+         * @param canBePrep
+         * @private
+         */
+        _addAdverbAndPrep = function (bid, canBePrep) {
+            dbAdverbAndPrep[String(bid)] = canBePrep;
+        },
+
+        /**
+         * Возвращает из Словаря информацию, может ли наречие быть предлогом, по его bid
+         * @param bid
+         * @returns {*|boolean}
+         * @private
+         */
+        _getAdverbAndPrep = function (bid) {
+            return dbAdverbAndPrep[String(bid)] || false;
+        },
+
+        /**
+         * Добавляет в БД существительное или местоимение
+         * @param base
+         * @param gender
+         * @param data
+         * @param morph
+         * @private
+         */
+        _addNounOrPronoun = function (base, gender, data, morph) {
+            // TODO: Проверка на заполненность параметров функции
+
+                // Перечень уникальных словоформ. Массив строковых значений.
+            var formsList = [],
+                // Перечень падежей для каждой уникальной словоформы. Структура: casesList['словоформа'] = ['падеж1', 'падеж2', ...]
+                casesList = {},
+                // Перечень чисел для каждой уникальной словоформы. Структура: numbersList['словоформа'] = ['число1', 'число2', ...]
+                numbersList = {},
+                // Сохраняем данные об основе слова
+                bid = _addBase(base, morph),
+                wForm, wCase, wNumber, fid;
+
+            // Сохраняем данные о роде слова
+            _addWordGender(bid, gender);
+
+            // Перебираем все словоформы и сворачиваем перечень до уникальных записей, у которых падежи и числа свёрнуты в массивы
+            for (var i = 0; i < data.length; i++) {
+                wForm   = data[i][0].trim().toLowerCase();  // словоформа
+                wCase   = data[i][1].trim().toUpperCase();  // падеж словоформы
+                wNumber = data[i][2].trim().toUpperCase();  // число словоформы
+
+                // TODO: Проверка на заполненность и корректность данных
+
+                if (formsList.indexOf(wForm) == -1) {
+                    formsList.push(wForm);
+
+                    casesList[wForm + ':Е'] = [];
+                    casesList[wForm + ':М'] = [];
+
+                    numbersList[wForm] = [];
+                }
+
+                if (casesList[wForm + ':' + wNumber].indexOf(wCase) < 0) {
+                    casesList[wForm + ':' + wNumber].push(wCase);
+                }
+
+                if (numbersList[wForm].indexOf(wNumber) < 0) {
+                    numbersList[wForm].push(wNumber);
+                }
+
+            }
+
+            // Записываем сведения о словоформах в базу данных
+            for (i = 0; i < formsList.length; i++) {
+                wForm = formsList[i];
+                // Сохраняем данные о словоформе слова
+                fid = _addForm(bid, wForm);
+
+                // Сохраняем данные о падежах словоформы слова в единственном числе
+                if (casesList[wForm + ':Е'].length > 0) {
+                    _addWordCases(fid, 'Е', casesList[wForm + ':Е']);
+
+                    for (var j = 0; j < casesList[wForm + ':Е'].length; j++) {
+                        dbSearchForm.insert({
+                            bid: bid,
+                            case: casesList[wForm + ':Е'][j],
+                            number: 'Е',
+                            fid: fid
+                        });
+                    }
+                }
+
+                // Сохраняем данные о падежах словоформы слова во множественном числе
+                if (casesList[wForm + ':М'].length > 0) {
+                    _addWordCases(fid, 'М', casesList[wForm + ':М']);
+
+                    for (j = 0; j < casesList[wForm + ':М'].length; j++) {
+                        dbSearchForm.insert({
+                            bid: bid,
+                            case: casesList[wForm + ':М'][j],
+                            number: 'М',
+                            fid: fid
+                        });
+                    }
+                }
+
+                // Сохраняем данные о числах словоформы слова
+                _addWordNumbers(fid, numbersList[wForm]);
+            }
+        },
+
+        /**
+         * Привязывает к глаголу объекты (1-2-3) по связкам "предлог + падеж"
+         * @param verbId
+         * @param priority
+         * @param data
+         * @private
+         */
+        _addObjectsToVerb = function (verbId, priority, data) {
+            // Если вообще не передали этот параметр в родительскую функцию
+            if (data === undefined) {
+                return;
+            }
+
+            // TODO: Проверка на заполненность и корректность параметров
+            
+            var rec, prep, cases, adverbsList, tag, bidsList, bid, word;
+
+            for (var i = 0; i < data.length; i++) {
+                rec = data[i];
+                prep = null;
+                cases = null;
+                adverbsList = [];
+
+                if (typeof rec === 'string') {
+                    // с предлогом, без падежей
+                    if (rec.trim().substr(0, 1) == '#') {
+                        tag = rec.trim().toLowerCase();
+                        // Получаем перечень bid слов по переданному тегу
+                        bidsList = dbBasesForTag[tag] || [];
+
+                        // Перебираем перечень слов
+                        for (var y = 0; y < bidsList.length; y++) {
+                            bid = bidsList[y];
+                            word = getBase(bid);
+
+                            // Если это наречие, и оно может быть предлогом, то добавляем его как есть
+                            if (word.morph == 'Н') {
+                                word.canBePrep = _getAdverbAndPrep(bid);
+                                if (word.canBePrep === true) {
+                                    _addObjectsToVerb(verbId, priority, [word.base]);
+                                }
+
+                                adverbsList.push(bid);
+                            } else if (word.morph == 'П') {
+                                _addObjectsToVerb(verbId, priority, [word.base]);
+                            }
+                        }
+                        //tags.push();
+                    } else {
+                        prep = getFormIds(rec);
+
+                        if (prep.bid === null) {
+                            // TODO: Нет такого предлога
+                            console.error('При заполнении данных глагола "' + getBase(verbId).base + '", предлог: "' + rec + '" не найден.');
+                            continue;
+                        }
+                    }
+
+                    //} else if (typeof(rec) == 'number') {
+                    //prep = _get_form_ids(rec);
+                } else if (rec !== null) {
+                    // Анализируем предлог - rec[0]
+                    if (rec[0] !== null) {
+                        prep = getFormIds(rec[0]);
+
+                        if (prep.bid === null) {
+                            // TODO: Нет такого предлога!
+                            console.error('При заполнении данных глагола "' + getBase(verbId).base + '", предлог: "' + rec + '" не найден.');
+                            continue;
+                        }
+                    }
+
+                    // Анализируем падежи - rec[1]
+                    if (rec[1] !== null) {
+                        if (typeof rec[1] === 'string') {
+                            cases = [ rec[1].trim().toUpperCase() ];
+                        } else {
+                            // TODO: Добавить приведения каждого элемента (падежа) к верхнему регистру
+                            cases = (rec[1].length == 0 ? null : rec[1].slice());
+                        }
+                    }
+                }
+
+                // Если специфические падежи для данного предлога не указаны, то берём падежи самого предлога
+                if (prep !== null && cases === null) {
+                    cases = _getWordCases(prep.bid, '-');
+                }
+
+                // Записываем данные глагола: тип объекта, bid предлога и падежи
+                dbObjectsOfVerbs.insert({
+                    bid: verbId,
+                    priority: priority,
+                    prep: prep === null ? null : prep.bid,
+                    cases: cases,
+                    adverbs: adverbsList
+                });
+            }
+        },
+
+        // ДОБАВЛЕНИЕ СЛОВ В СЛОВАРЬ
+
+        /* Существительное (параметры) — Добавляет существительное в словарь.
+            Параметры:
+                _base:      основа, то есть к чему приводится всё многообразие словоформ данного существительного
+                _gender:    род основы слова: М|Ж|С
+                _data:      данные, описывающие различные словоформы основы данного существительного. Структура данных:
+                    [ ['словоформа1', 'падеж1', 'число1'], ['словоформа2', 'падеж2', 'число2'], ... ]
+
+                Пример использования:
+                    Существительное('кошелёк','м',[
+                        ['кошелёк',     'И','е'], ['кошельки',      'И','м'],
+                        ['кошелька',    'Р','е'], ['кошельков',     'Р','м'],
+                        ['кошельку',    'Д','е'], ['кошелькам',     'Д','м'],
+                        ['кошелёк',     'В','е'], ['кошельки',      'В','м'],
+                        ['кошельком',   'Т','е'], ['кошельками',    'Т','м'],
+                        ['кошельке',    'П','е'], ['кошельках',     'П','м'],
+
+                        ['кошелек',     'И','е'],
+                        ['кошелек',     'В','е'],
+                        ]);
+
+                Примечание: Не нужно заморачиваться с объединением нескольких словоформ в одну с указанием нескольких падежей
+                (например, "кошелёк" — это и Именительный, и Винительный падеж) — это неудобно для автора и выглядит не особо наглядно.
+        */
+
+        /**
+         * Добавление существительного в базу
+         * @param base
+         * @param gender
+         * @param data
+         */
+        addNoun = function (base, gender, data) {
+            return _addNounOrPronoun(base, gender, data, 'С');
+        },
+
+        /**
+         * Добавление местоимения в базу
+         * @param base
+         * @param gender
+         * @param data
+         */
+        addPronoun = function (base, gender, data) {
+            return _addNounOrPronoun(base, gender, data, 'М');
+        },
+
+        /**
+         * Добавление наречия в базу
+         * @param forms
+         * @param aTags
+         * @param cases
+         * @param pTags
+         */
+        addAdverb = function (forms, aTags, cases, pTags) {
+            // TODO: Проверка на заполненность и корректность параметров
+
+            if (typeof forms === 'string') {
+                forms = [forms];
+            }
+
+            aTags = aTags || [];
+            pTags = pTags || [];
+
+            // Сохраняем данные об основе слова и получаем bid основы
+            var bid = _addBase(forms[0], 'Н', aTags.concat(pTags));
+
+            cases = cases || [];
+
+            if (typeof cases === 'string') {
+                cases = [cases];
+            }
+
+            if (cases.length > 0) {
+                _addAdverbAndPrep(bid, true);
+                // Сохраняем данные о падежах наречия-предлога
+                _addWordCases(bid, '-', cases);
+            }
+
+            // Перебираем перечень наречий
+            for (var i = 0; i < forms.length; i++) {
+                // TODO: Проверка на заполненность и корректность параметров
+                // Сохраняем данные о словоформе слова и получаем fid словоформы
+                _addForm(bid, forms[i]);
+            }
+        },
+
+        /* Предлог (параметры) — Добавляет предлог в словарь.
+            Параметры:
+                forms:  написание предлога. Строка или массив строк: ['предлог1', 'предлог2', ...]
+
+                Пример использования:
+                    Предлог('около');
+                или
+                    Предлог(['в','за','из','из-за','из-под','к','на','с','со']);
+        */
+
+        /**
+         * Добавление предлога в базу
+         * @param forms
+         * @param cases
+         * @param tags
+         */
+        addPreposition = function (forms, cases, tags) {
+            // TODO: Проверка на заполненность и корректность параметров
+            // TODO: Заменить на any2arr
+            if (typeof forms === 'string') {
+                forms = [forms];
+            }
+            if (typeof cases === 'string') {
+                cases = [cases];
+            }
+            if (typeof tags === 'string') {
+                tags = [tags];
+            }
+
+            // Сохраняем данные об основе слова и получаем bid основы
+            var bid = _addBase(forms[0], 'ПР', tags);
+
+            //if (_canBeAdverb == true) {_addAdverbAndPrep(bid, true);} // end if
+
+            // Сохраняем данные о падежах предлога
+            _addWordCases(bid, '-', cases);
+
+            // Перебираем формы предлога
+            for (var i = 0; i < forms.length; i++) {
+                // TODO: Проверка на заполненность и корректность параметров
+                // Сохраняем данные о словоформе слова и получаем fid словоформы
+                 _addForm(bid, forms[i]);
+            }
+        },
+
+        /**
+         * Добавление глагола в базу
+         * @param base
+         * @param forms
+         * @param dataWords
+         * @param dataCase
+         * @param dataPreps
+         */
+        addVerb = function (base, forms, dataWords, dataCase, dataPreps) {
+            if (typeof forms === 'string') {
+                forms = [forms]
+            }
+
+            var form;
+
+            // TODO: Проверка на заполненность и корректность параметров
+
+            // Сохраняем данные об основе слова
+            var bid = _addBase(base, 'Г');
+
+            for (var i = 0; i < forms.length; i++) {
+                form = forms[i];
+
+                //var ac = _check_autocomplete(form);
+                _addForm(bid, form); // Сохраняем данные о словоформе слова
+            }
+
+            _addObjectsToVerb(bid, 1, dataWords);
+            _addObjectsToVerb(bid, 2, dataCase);
+            _addObjectsToVerb(bid, 3, dataPreps);
+        },
+
+        // РАБОТА СО СЛОВАМИ
         /**
          * Возвращает morph и base (основу слова) из Словаря по bid
          * @param bid
          * @returns {*}
          * @private
          */
-        _getBase = function (bid) {
+        getBase = function (bid) {
             // Ищем в БД запись с такой же базой
             var rec = dbBases({ bid: bid }).first();
 
@@ -164,624 +661,272 @@ define(['modules/az-utils'], function (utils) {
                     base:  rec.base
                 };
             }
-        };
+        },
 
-        function _get_word_tags(bid) {
-            return dbTagsForBase[bid] || [];
-        } // end function "_get_word_tags"
-        //------------------------------
-        // Функция добавляет в Словарь отдельную словоформу слова
-        function _add_form(_bid, _form) {
-            _form = _form.trim().toLowerCase(); // Приводим к нижнему регистру
-            //----------
-            // Проверяем форму слова на наличие флагов включения/исключения слова из автодополнения
-            var first = _form.substr(1, 1);
-            var last = _form.slice(-1);
-            //----------
-            var ac_inc = (first == '+' || last == '+') ? true : ((first == '-' || last == '-') ? false : null);
-            //----------
-            if (first == '+' || first == '-') {
-                _form = _form.substr(2).trim();
-            } // end if
-            //----------
-            if (last == '+' || last == '-') {
-                _form = _form.slice(0, -1).trim();
-            } // end if
-            //----------
-            var search = {'bid': _bid, 'form': _form};
-            //----------
-            var rec = dbForms(search).first();
-            //----------
-            if (rec == false) {
-                search.fid = ++idForForm; // Увеличиваем счётчик "fid"
-                //----------
-                dbForms.insert(search); // Сохраняем данные о словоформе
-                //----------
-                rec = search;
-            }
-            //----------
-            if (ac_inc !== null) {
-                AUTOCOMPLETE.addWordWithFlag(_bid, rec.fid, ac_inc);
-            } // end if
-            //----------
-            return rec.fid;
-            //----------
-        } // end function "_add_form"
-        //------------------------------
-        // Функция возвращает словоформу из Словаря по fid
-        function _get_form(_fid) {
-            var rec = dbForms({'fid': _fid}).first();
-            //----------
-            return rec === false ? {'bid': null, 'fid': null, 'form': null} : {
-                'bid': rec.bid,
-                'fid': rec.fid,
-                'form': rec.form
+        /**
+         * Возвращает словоформу из Словаря по fid
+         * @param fid
+         * @returns {*}
+         * @private
+         */
+        getForm = function(fid) {
+            var rec = dbForms({ fid: fid}).first();
+
+            return rec === false ? {
+                bid:  null,
+                fid:  null,
+                form: null
+            } : {
+                bid:  rec.bid,
+                fid:  rec.fid,
+                form: rec.form
             };
-        } // end function "_get_form"
-        //------------------------------
-        // Функция возвращает bid и fid из Словаря по словоформе слова
-        function _get_form_ids(_form) {
-            // !!! используется в Описании!
-            _form = _form.trim().toLowerCase(); // Приводим к нижнему регистру
-            //----------
-            var rec = dbForms({'form': _form}).first();
-            //----------
-            return rec === false ? {'bid': null, 'fid': null} : {'bid': rec.bid, 'fid': rec.fid};
-        } // end function "_get_form_ids"
-        //------------------------------
-        // Функция добавляет в Словарь род основы слова
-        function _add_word_gender(_bid, _gender) {
-            db_word_genders[String(_bid)] = _gender.trim().toUpperCase();
-        } // end function "_add_word_gender"
-        //------------------------------
-        // Функция возвращает из Словаря род основы слова по его bid
-        function _get_word_gender(_bid) {
-            var result = db_word_genders[String(_bid)];
-            //----------
-            if (result === undefined) {
-                result = '';
-            } // end if
-            //----------
-            return result;
-        } // end function "_get_word_gender"
-        //------------------------------
-        // Функция добавляет в Словарь падежи словоформы
-        function _add_word_cases(_id, _number, _cases) {
-            dbWordCases[String(_id) + ':' + _number] = _cases.slice();
-            //----------
-        } // end function "_add_word_cases"
-        //------------------------------
-        // Функция возвращает из Словаря падежи словоформы по её fid
-        function _get_word_cases(_id, _number) {
-            _number = _number || false;
-            //----------
+        },
+
+        /**
+         * Возвращает bid и fid из Словаря по словоформе слова. Используется в Описании!
+         * @param form
+         * @returns {*}
+         * @private
+         */
+        getFormIds = function (form) {
+            // Приводим к нижнему регистру
+            form = form.trim().toLowerCase();
+
+            var rec = dbForms({ form: form}).first();
+
+            return rec === false ? {
+                bid:  null,
+                fid:  null
+            } : {
+                bid:  rec.bid,
+                fid:  rec.fid
+            };
+        },
+
+        /**
+         * Возвращает из Словаря падежи словоформы по её fid
+         * @param id
+         * @param number
+         * @returns {*|{singular: (*|Array), plural: (*|Array)}}
+         * @private
+         */
+        _getWordCases = function (id, number) {
+            number = number || false;
+
+            var result;
+
             // Если число слова указано, то возвращаем соответствующий набор падежей
-            if (_number !== false) {
-                var result = dbWordCases[String(_id) + ':' + _number];
+            if (number !== false) {
+                result = dbWordCases[String(id) + ':' + number];
                 if (result === undefined) {
                     result = [];
                 } else {
                     result = result.slice();
-                } // end if
-
-                // Если число слова НЕ указано, то возвращаем все наборы падежей
+                }
+            // Если число слова НЕ указано, то возвращаем все наборы падежей
             } else {
-                var result = {
-                    singular: dbWordCases[String(_id) + ':Е'] || [],
-                    plural: dbWordCases[String(_id) + ':М'] || []
+                result = {
+                    singular: dbWordCases[String(id) + ':Е'] || [],
+                    plural:   dbWordCases[String(id) + ':М'] || []
                 };
                 result.singular = result.singular.slice();
                 result.plural = result.plural.slice();
-                //----------
                 result.united = result.singular.concat(result.plural);
-            } // end if
-            //----------
+            }
+
             return result;
-        } // end function "_get_word_cases"
-        //------------------------------
-        // Функция добавляет в Словарь числа словоформы
-        function _add_word_numbers(_fid, _numbers) {
-            //, _cases
-            dbWordNumbers[String(_fid)] = _numbers.slice();
-            //----------
-        } // end function "_add_word_numbers"
-        //------------------------------
-        // Функция возвращает из Словаря падежи словоформы по её fid
-        function _get_word_numbers(_fid) {
-            var result = dbWordNumbers[String(_fid)];
-            if (result === undefined) {
-                result = [];
-            } else {
-                result = result.slice();
-            } // end if
-            //----------
-            return result;
-        } // end function "_get_word_numbers"
-        //------------------------------
-        // Функция добавляет в Словарь информацию, может ли наречие быть предлогом
-        function _add_adverb_and_prep(_bid, _can_be) {
-            //----------
-            dbAdverbAndPrep[String(_bid)] = _can_be;
-            //----------
-        } // end function "_add_prep_data"
-        //------------------------------
-        // Функция возвращает из Словаря информацию, может ли наречие быть предлогом, по его bid
-        function _get_adverb_and_prep(_bid) {
-            var result = dbAdverbAndPrep[String(_bid)] || false;
-            //----------
-            return result;
-        } // end function "_get_adverb_and_prep"
-        //------------------------------
-        // Функция добавляет в БД существительное или местоимение
-        function _add_noun_or_pronoun(_base, _gender, _data, _morph) {
-            var forms_list = []; // Перечень уникальных словоформ. Массив строковых значений.
-            var cases_list = {}; // Перечень падежей для каждой уникальной словоформы. Структура: cases_list['словоформа'] = ['падеж1', 'падеж2', ...]
-            var numbers_list = {}; // Перечень чисел для каждой уникальной словоформы. Структура: numbers_list['словоформа'] = ['число1', 'число2', ...]
-            //----------
-            // +++ Проверка на заполненность параметров функции
-            //----------
-            var bid = _addBase(_base, _morph); // Сохраняем данные об основе слова
-            //----------
-            _add_word_gender(bid, _gender); // Сохраняем данные о роде слова
-            //----------
-            // Перебираем все словоформы и сворачиваем перечень до уникальных записей, у которых падежи и числа свёрнуты в массивы
-            for (var x = 0; x < _data.length; x++) {
-                var wform = _data[x][0];  // словоформа
-                var wcase = _data[x][1];  // падеж словоформы
-                var wnumber = _data[x][2];  // число словоформы
-                //----------
-                // +++ Проверка на заполненность и корректность данных
-                //----------
-                // Приводим данные к требуемому виду
-                wform = wform.trim().toLowerCase();
-                wcase = wcase.trim().toUpperCase();
-                wnumber = wnumber.trim().toUpperCase();
-                //----------
-                if (forms_list.indexOf(wform) == -1) {
-                    forms_list.push(wform);
-                    //----------
-                    cases_list[wform + ':Е'] = [];
-                    cases_list[wform + ':М'] = [];
-                    //----------
-                    numbers_list[wform] = [];
-                } // end if
-                //----------
-                if (cases_list[wform + ':' + wnumber].indexOf(wcase) == -1) {
-                    cases_list[wform + ':' + wnumber].push(wcase);
-                } // end if
-                //----------
-                if (numbers_list[wform].indexOf(wnumber) == -1) {
-                    numbers_list[wform].push(wnumber);
-                } // end if
-                //----------
-            } // end for: Закончили перебирать словоформы
-            //----------
-            // Записываем сведения о словоформах в базу данных
-            for (var x = 0; x < forms_list.length; x++) {
-                wform = forms_list[x];
-                //----------
-                var fid = _add_form(bid, wform); // Сохраняем данные о словоформе слова
-                //----------
-                // Сохраняем данные о падежах словоформы слова в единственном числе
-                if (cases_list[wform + ':Е'].length > 0) {
-                    _add_word_cases(fid, 'Е', cases_list[wform + ':Е']);
-                    //----------
-                    for (var y = 0; y < cases_list[wform + ':Е'].length; y++) {
-                        dbSearchForm.insert({
-                            'bid': bid,
-                            'case': cases_list[wform + ':Е'][y],
-                            'number': 'Е',
-                            'fid': fid,
-                        });
-                    } // end for y
-                } // end if
-                //----------
-                // Сохраняем данные о падежах словоформы слова во множественном числе
-                if (cases_list[wform + ':М'].length > 0) {
-                    _add_word_cases(fid, 'М', cases_list[wform + ':М']);
-                    //----------
-                    for (var y = 0; y < cases_list[wform + ':М'].length; y++) {
-                        dbSearchForm.insert({
-                            'bid': bid,
-                            'case': cases_list[wform + ':М'][y],
-                            'number': 'М',
-                            'fid': fid,
-                        });
-                    } // end for y
-                } // end if
-                //----------
-                // Сохраняем данные о числах словоформы слова
-                _add_word_numbers(fid, numbers_list[wform]);
-                //----------
-            } // end for x: Закончили запись существительного в базу данных
-            //----------
-        } // end function "_add_noun_or_pronoun"
-        // ---------------------------------------------------------------------------
-        // Функция привязывает к глаголу объекты (1-2-3) по связкам "предлог + падеж"
-        function _add_objects_to_verb(verb_id, priority, data) {
-            if (data === undefined) {
-                return;
-            } // Если вообще не передали этот параметр в родительскую функцию
-            //----------
-            // +++ Проверка на заполненность и корректность параметров
-            //----------
-            for (var x = 0; x < data.length; x++) {
-                var rec = data[x];
-                var prep = null;
-                var cases = null;
-                var adverbs_list = [];
-                //----------
-                if (typeof(rec) == 'string') { // с предлогом, без падежей
-                    if (rec.trim().substr(0, 1) == '#') {
-                        var tag = rec.trim().toLowerCase();
-                        //----------
-                        // Получаем перечень bid слов по переданному тегу
-                        var bids_list = dbBasesForTag[tag] || [];
-                        //----------
-                        // Перебираем перечень слов
-                        for (var y = 0; y < bids_list.length; y++) {
-                            var bid = bids_list[y];
-                            var word = _getBase(bid);
-                            //----------
-                            // Если это наречие, и оно может быть предлогом, то добавляем его как есть
-                            if (word.morph == 'Н') {
-                                word.can_be_prep = _get_adverb_and_prep(bid);
-                                if (word.can_be_prep === true) {
-                                    _add_objects_to_verb(verb_id, priority, [word.base]);
-                                } else {
+        },
 
-                                } // end if
-                                adverbs_list.push(bid);
-                            } else if (word.morph == 'П') { // end if
-                                _add_objects_to_verb(verb_id, priority, [word.base]);
-                            }
-                        } // end for y
-                        //tags.push();
-                    } else {
-                        prep = _get_form_ids(rec);
-                        if (prep.bid === null) {
-                            // +++ Нет такого предлога!
-                            console.error('При заполнении данных глагола "' + _getBase(verb_id).base + '", предлог: "' + rec + '" не найден.');
-                            continue;
-                        } // end if
-                    } // end if
+        /**
+         * Функция по переданной словоформе определяет слово из словаря. Если это местоимение,
+         * то здесь же происходит привязка существительного
+         * Если не найдено — возвращает "null"
+         * @param word
+         * @param fullInfo
+         * @param prep
+         * @param lastNouns
+         * @returns {*}
+         */
+        getWord = function (word, fullInfo, prep, lastNouns) {
+            fullInfo = fullInfo || false;
+            prep = prep || null;
 
-                    //} else if (typeof(rec) == 'number') {
-                    //prep = _get_form_ids(rec);
+            var form = word.trim().toLowerCase();
 
-                } else if (rec !== null) {
-                    // Анализируем предлог - rec[0]
-                    if (rec[0] !== null) {
-                        prep = _get_form_ids(rec[0]);
-                        if (prep.bid === null) {
-                            // +++ Нет такого предлога!
-                            console.error('При заполнении данных глагола "' + _getBase(verb_id).base + '", предлог: "' + rec + '" не найден.');
-                            continue;
-                        } // end if
-                    } // end if
-                    //----------
-                    // Анализируем падежи - rec[1]
-                    if (rec[1] !== null) {
-                        if (typeof(rec[1]) == 'string') {
-                            cases = [rec[1].trim().toUpperCase()];
-                        } else {
-                            // +++ Добавить приведения каждого элемента (падежа) к верхнему регистру
-                            cases = (rec[1].length == 0 ? null : rec[1].slice());
-                        } // end if
-                    } // end if
-                } // end if
-                //----------
-                // Если специфические падежи для данного предлога не указаны, то берём падежи самого предлога
-                if (prep !== null && cases === null) {
-                    cases = _get_word_cases(prep.bid, '-');
-                } // end if
-                //----------
-                // Записываем данные глагола: тип объекта, bid предлога и падежи
-                dbObjectsOfVerbs.insert({
-                    'bid': verb_id,
-                    'priority': priority,
-                    'prep': (prep === null ? null : prep.bid),
-                    'cases': cases,
-                    'adverbs': adverbs_list,
-                });
-                //----------
-            } // end for x
-            //----------
-        } // end function "_add_objects_to_verb"
-        //------------------------------
-
-    //------------------------------
-    // ДОБАВЛЕНИЕ СЛОВ В СЛОВАРЬ
-    //----------
-    // Добавление существительного в базу
-    var addNoun = function (_base, _gender, _data) {
-            //----------
-            return _add_noun_or_pronoun(_base, _gender, _data, 'С');
-            //----------
-        }, // end function "addNoun"
-    //------------------------------
-    // Добавление местоимения в базу
-        addPronoun = function (_base, _gender, _data) {
-            //----------
-            return _add_noun_or_pronoun(_base, _gender, _data, 'М');
-            //----------
-        }, // end function "addPronoun"
-    //------------------------------
-    // Добавление наречия в базу
-        addAdverb = function (_forms, _atags, _cases, _ptags) {
-            // +++ Проверка на заполненность и корректность параметров
-            //----------
-            if (typeof(_forms) == 'string') {
-                _forms = [_forms];
-            }
-            _atags = _atags || [];
-            _ptags = _ptags || [];
-            //----------
-            var bid = _addBase(_forms[0], 'Н', _atags.concat(_ptags)); // Сохраняем данные об основе слова и получаем bid основы
-            //----------
-            _cases = _cases || [];
-            if (typeof(_cases) == 'string') {
-                _cases = [_cases];
-            } // end if
-            //----------
-            if (_cases.length > 0) {
-                _add_adverb_and_prep(bid, true);
-                //----------
-                _add_word_cases(bid, '-', _cases); // Сохраняем данные о падежах наречия-предлога
-            } // end if
-            //----------
-            // Перебираем перечень наречий
-            for (var x = 0; x < _forms.length; x++) {
-                // +++ Проверка на заполненность и корректность параметров
-                //----------
-                var fid = _add_form(bid, _forms[x]); // Сохраняем данные о словоформе слова и получаем fid словоформы
-            } // end for x
-            //----------
-        }, // end function "addAdverb"
-    //------------------------------
-    // Добавление предлога в базу
-        addPreposition = function (_forms, _cases, _tags) {
-            // +++ Проверка на заполненность и корректность параметров
-            //----------
-            // +++ Заменить на any2arr
-            if (typeof(_forms) == 'string') {
-                _forms = [_forms];
-            }
-            if (typeof(_cases) == 'string') {
-                _cases = [_cases];
-            }
-            if (typeof(_tags) == 'string') {
-                _tags = [_tags];
-            }
-            //----------
-            var bid = _addBase(_forms[0], 'ПР', _tags); // Сохраняем данные об основе слова и получаем bid основы
-            //----------
-            //if (_can_be_adverb == true) {_add_adverb_and_prep(bid, true);} // end if
-            //----------
-            _add_word_cases(bid, '-', _cases); // Сохраняем данные о падежах предлога
-            //----------
-            // Перебираем формы предлога
-            for (var x = 0; x < _forms.length; x++) {
-                // +++ Проверка на заполненность и корректность параметров
-                //----------
-                var fid = _add_form(bid, _forms[x]); // Сохраняем данные о словоформе слова и получаем fid словоформы
-            } // end for x
-            //----------
-        }, // end function "addPreposition"
-    //------------------------------
-    // Добавление глагола в базу
-        addVerb = function (_base, _forms, data1, data2, data3) {
-            //----------
-            if (typeof(_forms) == 'string') {
-                _forms = [_forms]
-            } // end if
-            //----------
-            // +++ Проверка на заполненность и корректность параметров
-            //----------
-            var bid = _addBase(_base, 'Г'); // Сохраняем данные об основе слова
-            //----------
-            for (var x = 0; x < _forms.length; x++) {
-                var form = _forms[x];
-                //----------
-                //var ac = _check_autocomplete(form);
-                //----------
-                var fid = _add_form(bid, form); // Сохраняем данные о словоформе слова
-            } // end for x
-            //----------
-            _add_objects_to_verb(bid, 1, data1);
-            _add_objects_to_verb(bid, 2, data2);
-            _add_objects_to_verb(bid, 3, data3);
-            //----------
-        }, // end function "DICTIONARY.addVerb"
-    //------------------------------
-    // РАБОТА СО СЛОВАМИ
-    //------------------------------
-        getBase = _getBase,
-    //------------------------------
-        getForm = _get_form,
-    //------------------------------
-        getFormIDs = _get_form_ids,
-    //------------------------------
-    //get_word_gender:  _get_word_gender,
-    //------------------------------
-    //get_word_numbers: _get_word_numbers,
-    //------------------------------
-        getWordCases = _get_word_cases,
-    //------------------------------
-    // Функция по переданной словоформе определяет слово из словаря. Если это местоимение, то здесь же происходит привязка существительного
-    // Если не найдено — возвращает "null"
-        getWord = function (_word, _full_info, _prep, _last_nouns) {
-            _full_info = _full_info || false;
-            _prep = _prep || null;
-            //----------
-            var form = _word.trim().toLowerCase();
             if (form == '') {
                 return null;
-            } // end if
-            //----------
+            }
+
             // Получаем параметры словоформы
-            var result = _get_form_ids(form);
-            //----------
+            var result = getFormIds(form),
+                casesList, _case, noun, recs, addedYet, formRec, wordBase, nounToList;
+
             // Не найдено — возвращаем "null"
             if (result.fid === null) {
                 return null;
-            } // end if
-            //----------
-            result.word_as_is = _word;
+            }
+
+            result.wordAsIs = word;
             result.form = form;
-            //----------
+
             // Получаем параметры основы слова
-            var rec = _getBase(result.bid);
-            //----------
+            var rec = getBase(result.bid);
+
             // Не найдено — возвращаем "null"
             if (rec.bid === false) {
                 return null;
             }
-            //----------
+
             result.morph = rec.morph;
             result.base = rec.base;
-            //----------
-            result.prep = _prep;
-            //----------
+            result.prep = prep;
+
             // Если запрошена лишь краткая информация о слове — возвращаем, что есть
-            if (_full_info === false) {
+            if (fullInfo === false) {
                 return result;
-            } // end if
-            //----------
-            _last_nouns = _last_nouns || null;
-            //----------
+            }
+
+            lastNouns = lastNouns || null;
+
             // Если получили предлог
-            if (result.morph == 'ПР') {
-                result.cases = _get_word_cases(result.bid, '-');
-                result.tags = _get_word_tags(result.bid);
-
-                // Если получили наречие
+            if (result.morph === 'ПР') {
+                result.cases = _getWordCases(result.bid, '-');
+                result.tags = _getWordTags(result.bid);
+            // Если получили наречие
             } else if (result.morph == 'Н') {
-                result.tags = _get_word_tags(result.bid);
-                //----------
-                result.can_be_prep = _get_adverb_and_prep(result.bid);
-                if (result.can_be_prep === true) {
-                    result.cases = _get_word_cases(result.bid, '-');
-                } // end if
+                result.tags = _getWordTags(result.bid);
+                result.canBePrep = _getAdverbAndPrep(result.bid);
 
-                // Если получили существительное или местоимение
-            } else if (result.morph == 'С' || result.morph == 'М') {
+                if (result.canBePrep === true) {
+                    result.cases = _getWordCases(result.bid, '-');
+                }
+            // Если получили существительное или местоимение
+            } else if (result.morph === 'С' || result.morph === 'М') {
                 // Дополняем сведения о слове информацией о роде, падежах и числах
-                result.gender = _get_word_gender(result.bid);
-                //----------
-                result.cases = _get_word_cases(result.fid);
-                //----------
-                result.numbers = _get_word_numbers(result.fid);
-                //----------
-                if (_prep !== null) {
-                    var cases_list = result.cases.singular;
-                    if (cases_list.length > 0) {
-                        for (var x = cases_list.length - 1; x >= 0; x--) {
-                            var _case = cases_list[x];
-                            //----------
-                            if (_prep.cases.indexOf(_case) == -1) {
-                                cases_list.splice[x, 1];
-                            } // end if
-                        } // end for
-                    } // end if
-                    //----------
-                    var cases_list = result.cases.plural;
-                    if (cases_list.length > 0) {
-                        for (var x = cases_list.length - 1; x >= 0; x--) {
-                            var _case = cases_list[x];
-                            //----------
-                            if (_prep.cases.indexOf(_case) == -1) {
-                                cases_list.splice[x, 1];
-                            } // end if
-                        } // end for
-                    } // end if
-                    //----------
+                result.gender = _getWordGender(result.bid);
+                result.cases = _getWordCases(result.fid);
+                result.numbers = _getWordNumbers(result.fid);
+
+                if (prep !== null) {
+                    casesList = result.cases.singular;
+
+                    if (casesList.length > 0) {
+                        for (var i = casesList.length - 1; i >= 0; i--) {
+                            _case = casesList[i];
+
+                            if (prep.cases.indexOf(_case) == -1) {
+                                casesList.splice(i, 1);
+                            }
+                        }
+                    }
+
+                    casesList = result.cases.plural;
+
+                    if (casesList.length > 0) {
+                        for (i = casesList.length - 1; i >= 0; i--) {
+                            _case = casesList[i];
+
+                            if (prep.cases.indexOf(_case) == -1) {
+                                casesList.splice(i, 1);
+                            }
+                        }
+                    }
+
                     result.cases.united = result.cases.singular.concat(result.cases.plural);
-                } // end if
-                //----------
-                if (result.morph == 'М') {
-                    result.nouns_list = [];
-                    //----------
-                    // +++ обработку множественного числа местоимений "они", "любые"
-                    //----------
-                    var noun = null;
-                    if (_last_nouns !== null) {
-                        for (var x = 1; x <= 3; x++) {
-                            noun = _last_nouns[result.gender + ':' + x] || null;
+                }
+
+                if (result.morph === 'М') {
+                    result.nounsList = [];
+
+                    // TODO: обработку множественного числа местоимений "они", "любые"
+
+                    noun = null;
+
+                    if (lastNouns !== null) {
+                        for ( i = 1; i <= 3; i++) {
+                            noun = lastNouns[result.gender + ':' + i] || null;
+
                             // Если существительное не найдено и род местоимения мужской, то возможно подразумевается существительное в среднем роде
-                            if (noun === null && result.gender == 'М') {
-                                noun = _last_nouns['С:' + x] || null;
-                            } // end if
-                            //----------
+                            if (noun === null && result.gender === 'М') {
+                                noun = lastNouns['С:' + i] || null;
+                            }
+
                             if (noun !== null) {
                                 break;
-                            } // end-if
-                            //----------
-                        } // end-for
-                    } // end if
+                            }
+                        }
+                    }
                     //----------
                     if (noun == null) {
                         noun = PARSER.get_noun_of_object_by_pronoun(result.bid);
-                    } // end if "noun == null"
-                    //----------
+                    }
+
                     if (noun !== null) {
                         // Прореживаем с учётом числа местоимения
                         /*if (result.numbers.length == 1) {
                          _noun2list.cases[(result.numbers[0] == 'Е' ? 'plural' : 'singular')] == [];
                          result.cases.united=result.cases.singular.concat(result.cases.plural);
                          }*/ // end if
-                        //----------
-                        var recs = dbSearchForm({
+
+                        recs = dbSearchForm({
                             'bid': noun.bid,
                             'case': result.cases.united,
                             'number': result.numbers
                         }).get();
+
                         if (recs !== false) {
-                            var added_yet = [];
-                            result.nouns_list = [];
-                            for (var x = 0; x < recs.length; x++) {
-                                rec = recs[x];
-                                //----------
-                                if (added_yet.indexOf(rec.fid) >= 0) {
+                            addedYet = [];
+
+                            result.nounsList = [];
+                            for (i = 0; i < recs.length; i++) {
+                                rec = recs[i];
+
+                                if (addedYet.indexOf(rec.fid) >= 0) {
                                     continue;
-                                } // end if
-                                var form_rec = _get_form(rec.fid);
-                                //----------
-                                if (form_rec !== null) {
-                                    var word_base = _getBase(noun.bid);
-                                    //----------
-                                    var _noun2list = {
-                                        'bid': noun.bid,
-                                        'fid': rec.fid,
-                                        'morph': word_base.morph,
-                                        'base': word_base.base,
-                                        'form': form_rec.form,
-                                        'gender': _get_word_gender(noun.bid),
-                                        'cases': _get_word_cases(rec.fid),
-                                        'numbers': _get_word_numbers(rec.fid),
-                                        'nouns_list': null,
+                                }
+
+                                formRec = getForm(rec.fid);
+
+                                if (formRec !== null) {
+                                    wordBase = getBase(noun.bid);
+                                    nounToList = {
+                                        bid:        noun.bid,
+                                        fid:        rec.fid,
+                                        morph:      wordBase.morph,
+                                        base:       wordBase.base,
+                                        form:       formRec.form,
+                                        gender:     _getWordGender(noun.bid),
+                                        cases:      _getWordCases(rec.fid),
+                                        numbers:    _getWordNumbers(rec.fid),
+                                        nounsList:  null
                                     };
-                                    result.nouns_list.push(_noun2list);
-                                    //----------
-                                    added_yet.push(rec.fid);
-                                } // end if
-                            } // end for x
-                        } // end if
-                    } // end if
-                } // end if
-            } // end if
-            //----------
+                                    result.nounsList.push(nounToList);
+                                    addedYet.push(rec.fid);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             return result;
-            //----------
-        }, // end function "getWord"
-    //------------------------------
-    // Функция возвращает тип объекта (1-2-3) для глагола по fid предлога и падежу
-    // Возвращает число 1-2-3 или null.
-        getNounPriority = function (_verb, _noun, _prep_bid, already) {
+        },
+
+        /**
+         * Функция возвращает тип объекта (1-2-3) для глагола по fid предлога и падежу
+         * Возвращает число 1-2-3 или null.
+         * @param verb
+         * @param noun
+         * @param prepBid
+         * @param already
+         * @returns {*}
+         */
+        getNounPriority = function (verb, noun, prepBid, already) {
             var result = null;
             //----------
             // Отбираем данные по объектам всех типов для переданного глагола
-            var objects_list = dbObjectsOfVerbs({'bid': _verb.bid}).get();
+            var objects_list = dbObjectsOfVerbs({'bid': verb.bid}).get();
             //----------
             for (var x = 0; x < objects_list.length; x++) {
                 var object = objects_list[x];
@@ -792,25 +937,25 @@ define(['modules/az-utils'], function (utils) {
                 //----------
                 var cases = object.cases || [];
                 //----------
-                if (object.prep !== null && object.prep !== _prep_bid) {
+                if (object.prep !== null && object.prep !== prepBid) {
                     continue;
                 } // end if
                 //----------
-                if (_noun.morph == 'С') {
+                if (noun.morph == 'С') {
                     for (var z = 0; z < cases.length; z++) {
                         var case_obj = cases[z];
-                        if (_noun.cases.united.indexOf(case_obj) >= 0) {
+                        if (noun.cases.united.indexOf(case_obj) >= 0) {
                             result = {
                                 'priority': object.priority,
-                                'noun': _noun,
+                                'noun': noun,
                             };
                             break;
                         } // end if
                     } // end for
 
-                } else if (_noun.morph == 'М' && _noun.nouns_list !== null) {
-                    for (var y = 0; y < _noun.nouns_list.length; y++) {
-                        var noun2 = _noun.nouns_list[y];
+                } else if (noun.morph == 'М' && noun.nounsList !== null) {
+                    for (var y = 0; y < noun.nounsList.length; y++) {
+                        var noun2 = noun.nounsList[y];
                         //----------
                         for (var z = 0; z < cases.length; z++) {
                             var case_obj = cases[z];
@@ -827,14 +972,14 @@ define(['modules/az-utils'], function (utils) {
                             break;
                         } // end if
                     } // end for y
-                } else if (_noun.morph == 'Н') {
+                } else if (noun.morph == 'Н') {
                     var adverbs = object.adverbs || [];
                     //----------
                     if (adverbs.length > 0) {
-                        if (adverbs.indexOf(_noun.bid) >= 0) {
+                        if (adverbs.indexOf(noun.bid) >= 0) {
                             result = {
                                 'priority': object.priority,
-                                'noun': _noun,
+                                'noun': noun,
                             };
                             break;
                         } // end if
@@ -845,19 +990,19 @@ define(['modules/az-utils'], function (utils) {
             return result;
             //----------
         }, // end function "getNounPriority"
-    //------------------------------
+        //------------------------------
         getObjectsOfVerbs = function (_search) {
             return dbObjectsOfVerbs(_search).get();
         },
-    //------------------------------
-    /*get_forms_list: function (_search) {
-     return db_search_form(_search).get();
-     },*/
-    //------------------------------
+        //------------------------------
+        /*get_forms_list: function (_search) {
+         return db_search_form(_search).get();
+         },*/
+        //------------------------------
         getFormsListByCaseAndNumber = function (_search) {
             return dbSearchForm(_search).get();
         }, // end function "getFormsListByCaseAndNumber"
-    //------------------------------
+        //------------------------------
         getFormsListByBID = function (_search) {
             return dbForms(_search).get();
         }; // end function "getFormsListByBID"
