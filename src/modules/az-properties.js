@@ -47,7 +47,6 @@ define(['modules/az-utils'], function (utils) {
             }, 'value', undefined);
         },
 
-
         checkArgs = function (options, op, defaultValue) {
             var result = {
                 object: null,
