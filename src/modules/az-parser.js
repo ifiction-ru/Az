@@ -6,7 +6,8 @@
  2. Перечень: [{words:[слова1], locs:[локации1]}, {words:[слова2], locs:[локации2]}]
  */
 
-define(['modules/az-utils'], function (utils) {
+define(['modules/az-utils', 'modules/az-engine', 'modules/az-dictionary', 'modules/az-autocomplete', 'libs/taffy'],
+function (utils, engine, dict, autocomplete, Taffy) {
     'use strict';
 
     //var autocomplete  = {};
@@ -21,7 +22,7 @@ define(['modules/az-utils'], function (utils) {
          location    Строковый идентификатор расположения объекта
          */
 
-        dbWordsAndObjects = TAFFY(),
+        dbWordsAndObjects = Taffy(),
 
         /**
          * Добавляет наречие в перечень наречий
@@ -95,7 +96,7 @@ define(['modules/az-utils'], function (utils) {
          */
         _checkParamPriority = function (cmd, word, prep, nounsForPronouns, prOccupied) {
             var prepId = (prep === null ? null : prep.bid),
-                priority = DICTIONARY.getNounPriority(cmd.verb, word, prepId, prOccupied),
+                priority = dict.getNounPriority(cmd.verb, word, prepId, prOccupied),
                 objRec;
 
             if (priority === null) {
@@ -105,7 +106,7 @@ define(['modules/az-utils'], function (utils) {
             priority = priority['priority'];
 
             if (priority >= 1 && priority <= 3) {
-                objRec = _getLinkToObject({
+                objRec = getLinkToObject({
                     priority: priority,
                     loc: locId,
                     vid: cmd.verb.bid,
@@ -169,7 +170,7 @@ define(['modules/az-utils'], function (utils) {
                         // Если параметр команды данного приоритета не занят...
                         if (prOccupied.indexOf(priority) == -1) {
                             // ...пытаемся опеределить, подходит ли данное слово к какому либо объекту
-                            objRec = _getLinkToObject({
+                            objRec = getLinkToObject({
                                 priority: priority,
                                 loc: locId,
                                 vid: cmd.verb == null ? null : cmd.verb.bid,
@@ -190,7 +191,7 @@ define(['modules/az-utils'], function (utils) {
                     }
 
                     if (cmd.verb !== null) {
-                        priority = DICTIONARY.getNounPriority(cmd.verb, adverb, null, prOccupied);
+                        priority = dict.getNounPriority(cmd.verb, adverb, null, prOccupied);
                         if (priority === null) {
                             continue;
                         }
@@ -198,7 +199,7 @@ define(['modules/az-utils'], function (utils) {
                         priority = priority['priority'];
 
                         if (priority >= 1 && priority <= 3) {
-                            objRec = _getLinkToObject({
+                            objRec = getLinkToObject({
                                 priority: priority,
                                 loc: locId,
                                 vid: cmd.verb.bid,
@@ -229,7 +230,7 @@ define(['modules/az-utils'], function (utils) {
 
                 // Получаем перечень объектов, сопоставленных с переданным словом в текущей локации (или во всех).
                 objsList = dbWordsAndObjects({
-                    obj: AZ.available_objects(true),
+                    obj: engine.getAvailableObjects(true),
                     priority: 0,
                     loc: [ locId, null ],
                     wid: wordId
@@ -245,7 +246,7 @@ define(['modules/az-utils'], function (utils) {
 
                 // Теперь ищем действия с каким-либо приоритетом, где указана ссылка на объект, найденный по слову: to1, to2 или to3
                 search = {
-                    obj: AZ.available_objects(true),
+                    obj: engine.getAvailableObjects(true),
                     loc: [ locId, null ],
                     vid: verbId
                 };
@@ -265,7 +266,7 @@ define(['modules/az-utils'], function (utils) {
 
                         if (actRec != null) {
                             if (actRec.priority == _priority) {
-                                cmd.objects[_priority] = AZ.getObject(actRec.obj);
+                                cmd.objects[_priority] = engine.getObject(actRec.obj);
                                 cmd.actions[_priority] = actRec.action;
                                 result = actRec;
 
@@ -291,7 +292,7 @@ define(['modules/az-utils'], function (utils) {
             }
 
             return result === null ? null : {
-                object: AZ.getObject(result.obj),
+                object: engine.getObject(result.obj),
                 priority: result.priority,
                 action: result.action
             };
@@ -329,18 +330,18 @@ define(['modules/az-utils'], function (utils) {
                 console.error('У объекта "' + search.obj + '" дублирующий набор параметров действия:');
                 console.log(
                     '    1: L:' + rec.loc +
-                    ', v:' + (rec.vid == null ? '-' : DICTIONARY.getBase(rec.vid).base + ' (' + rec.vid + ')') +
-                    ', p:' + (rec.pid == null ? '-' : DICTIONARY.getBase(rec.pid).base + ' (' + rec.pid + ')') +
-                    ', w:' + (rec.wid == null ? '-' : DICTIONARY.getBase(rec.wid).base + ' (' + rec.wid + ')') +
+                    ', v:' + (rec.vid == null ? '-' : dict.getBase(rec.vid).base + ' (' + rec.vid + ')') +
+                    ', p:' + (rec.pid == null ? '-' : dict.getBase(rec.pid).base + ' (' + rec.pid + ')') +
+                    ', w:' + (rec.wid == null ? '-' : dict.getBase(rec.wid).base + ' (' + rec.wid + ')') +
                     ', t1:' + (rec.to1 || '-') +
                     ', t2:' + (rec.to2 || '-') +
                     ', t3:' + (rec.to3 || '-') +
                     ', a:' + rec.action);
                 console.log(
                     '    2: L:' + search.loc +
-                    ', v:' + (search.vid == null ? '-' : DICTIONARY.getBase(search.vid).base + ' (' + search.vid + ')') +
-                    ', p:' + (search.pid == null ? '-' : DICTIONARY.getBase(search.pid).base + ' (' + search.pid + ')') +
-                    ', w:' + (search.wid == null ? '-' : DICTIONARY.getBase(search.wid).base + ' (' + search.wid + ')') +
+                    ', v:' + (search.vid == null ? '-' : dict.getBase(search.vid).base + ' (' + search.vid + ')') +
+                    ', p:' + (search.pid == null ? '-' : dict.getBase(search.pid).base + ' (' + search.pid + ')') +
+                    ', w:' + (search.wid == null ? '-' : dict.getBase(search.wid).base + ' (' + search.wid + ')') +
                     ', t1:' + (search.to1 || '-') +
                     ', t2:' + (search.to2 || '-') +
                     ', t3:' + (search.to3 || '-') +
@@ -353,10 +354,10 @@ define(['modules/az-utils'], function (utils) {
                 /*console.log(
                  'id:'+search.obj+', t:'+search.priority+', n:'+search.nums+
                  ', L:'+search.loc+
-                 ', v:'+(search.vid == null ? '-' : DICTIONARY.getBase(search.vid).base+' ('+search.vid+')')+
-                 ', p:'+(search.pid == null ? '-' : DICTIONARY.getBase(search.pid).base+' ('+search.pid+')')+
-                 ', w:'+(search.wid == null ? '-' : DICTIONARY.getBase(search.wid).base+' ('+search.wid+')')+
-                 ', f:'+(search.fid == null ? '-' : DICTIONARY.getForm(search.fid).form+' ('+search.fid+')')+
+                 ', v:'+(search.vid == null ? '-' : dict.getBase(search.vid).base+' ('+search.vid+')')+
+                 ', p:'+(search.pid == null ? '-' : dict.getBase(search.pid).base+' ('+search.pid+')')+
+                 ', w:'+(search.wid == null ? '-' : dict.getBase(search.wid).base+' ('+search.wid+')')+
+                 ', f:'+(search.fid == null ? '-' : dict.getForm(search.fid).form+' ('+search.fid+')')+
                  ', t1:'+(search.to1 || '-')+
                  ', t2:'+(search.to2 || '-')+
                  ', t3:'+(search.to3 || '-')+
@@ -387,7 +388,7 @@ define(['modules/az-utils'], function (utils) {
                 to3 = options['to3'] || null,
 
                 search = {
-                    obj: AZ.getAvailableObjects(true),
+                    obj: engine.getAvailableObjects(true),
                     priority: priority,
                     loc: L,
                     vid: V,
@@ -415,7 +416,7 @@ define(['modules/az-utils'], function (utils) {
             }
 
             return objectId === null ? null : {
-                object: AZ.getObject(objectId),
+                object: engine.getObject(objectId),
                 priority: priority,
                 action: actionId
             };
@@ -429,7 +430,7 @@ define(['modules/az-utils'], function (utils) {
          * @private
          */
         getObjectsByWord = function (search, morph) {
-            search.obj = AZ.available_objects(true);
+            search.obj = engine.getAvailableObjects(true);
 
             var list = dbWordsAndObjects(search).get(),
                 result = [];
@@ -451,8 +452,8 @@ define(['modules/az-utils'], function (utils) {
             var result = null,
                 search = {
                     priority: 0,
-                    obj: AZ.available_objects(true),
-                    loc: [AZ.getLocation(true), null],
+                    obj: engine.getAvailableObjects(true),
+                    loc: [ engine.getLocation(true), null],
                     wid: wid
                 },
                 list = dbWordsAndObjects(search).get();
@@ -468,7 +469,7 @@ define(['modules/az-utils'], function (utils) {
             for (var i = 0; i < list.length; i++) {
                 wid = list[i].wid;
 
-                var rec = DICTIONARY.getBase(wid);
+                var rec = dict.getBase(wid);
 
                 if (rec.morph == 'С') {
                     result = rec;
@@ -503,7 +504,7 @@ define(['modules/az-utils'], function (utils) {
                 nounsForPronouns = {},
                 prOccupied = [],
                 adverbs = { list: [], bids: []},
-                availableObjs = AZ.getAvailableObjects(true),
+                availableObjs = engine.getAvailableObjects(true),
 
                 priority = null, // Приоритет параметра команды
                 objRec = null,
@@ -512,13 +513,13 @@ define(['modules/az-utils'], function (utils) {
                 bufferAfter = [], // Буфер существительных для (пост)постобработки ("кто я такой" -> "кто такой я")
                 containsSpace = phrase.substr(-1) == ' ';
 
-            locId = AZ.getLocation(true);
+            locId = engine.getLocation(true);
 
             phrase = phrase.trim().toLowerCase().replace(/\s+/g, ' ');
 
             if (phrase == '') {
                 //if (_preparsing == true) {
-                //  var words_list = PARSER.pre_parse(word_str);
+                //  var words_list = preParse(word_str);
                 //}
                 return null;
             }
@@ -543,7 +544,7 @@ define(['modules/az-utils'], function (utils) {
                         break;
                     }
                     // Получаем информацию о полученном слове
-                    word = DICTIONARY.getWord(wordStr, true, preposition, lastParams);
+                    word = dict.getWord(wordStr, true, preposition, lastParams);
 
                     // +++ Если слово незнакомое
                     if (word === null) {
@@ -613,8 +614,8 @@ define(['modules/az-utils'], function (utils) {
                     }
                 // Обрабатываем местоимение
                 } else if (word.morph == 'М') {
-                    for (var i = 0; i < word.nouns_list.length; i++) {
-                        var noun2 = word.nouns_list[i],
+                    for (var i = 0; i < word.nounsList.length; i++) {
+                        var noun2 = word.nounsList[i],
                             prep2 = _checkPrepByNoun(noun2, prep2);
 
                         priority = _checkParamPriority(cmd, noun2, prep2, nounsForPronouns, prOccupied);
@@ -680,7 +681,7 @@ define(['modules/az-utils'], function (utils) {
                             // Если параметр команды данного приоритета не занят...
                             if (prOccupied.indexOf(priority) == -1) {
                                 // ...пытаемся опеределить, подходит ли данное слово к какому либо объекту по приоритету
-                                objRec = _getLinkToObject({
+                                objRec = getLinkToObject({
                                     priority: priority,
                                     loc: locId,
                                     pid: preposition == null ? null : preposition.bid,
@@ -702,8 +703,8 @@ define(['modules/az-utils'], function (utils) {
                         }
                     // Обрабатываем местоимение
                     } else if (word.morph === 'М') {
-                        for (i = 0; i < word.nouns_list.length; i++) {
-                            noun2 = word.nouns_list[i];
+                        for (i = 0; i < word.nounsList.length; i++) {
+                            noun2 = word.nounsList[i];
                             prep2 = _checkPrepByNoun(noun2, prep2);
                             objRec = null;
 
@@ -842,12 +843,12 @@ define(['modules/az-utils'], function (utils) {
                 lastParams[key] = nounsForPronouns[key];
             }
 
-            if (typeof localizeCMD === 'function') {
+            if (window.localizeCMD && typeof localizeCMD === 'function') {
                 localizeCMD(cmd);
             }
 
             if (preparsing == true) {
-                preParse(wordStr, iNN(cmd.verb, 'bid'), iNN(preposition, 'bid'), cmd, prepart2);
+                preParse(wordStr, utils.iNN(cmd.verb, 'bid'), utils.iNN(preposition, 'bid'), cmd, prepart2);
             }
 
             return cmd;
@@ -870,7 +871,7 @@ define(['modules/az-utils'], function (utils) {
             var bidsList = [],
                 bidsData = [];
 
-            locId = AZ.getLocation(true);
+            locId = engine.getLocation(true);
 
             //var cashPrepsCases = {};
             // Добавляем слово в список на выдачу (+ доп. информация в values)
@@ -878,7 +879,7 @@ define(['modules/az-utils'], function (utils) {
                 if (list.indexOf(bid) == -1) {
                     list.push(bid);
 
-                    var word = DICTIONARY.getBase(bid),
+                    var word = dict.getBase(bid),
                         rec = { wid: bid, base: word.base, morph: word.morph };
 
                     if (values != undefined) {
@@ -899,7 +900,7 @@ define(['modules/az-utils'], function (utils) {
                     if (wCases[id] === undefined) {
                         wCases[id] = cases.slice();
                     } else {
-                        add_arr2arr(wCases[id], cases);
+                        utils.addArrToArr(wCases[id], cases);
                     }
                 }
             }
@@ -988,7 +989,7 @@ define(['modules/az-utils'], function (utils) {
                 prepsOfVerbs[verbId + ':2'] = [];
                 prepsOfVerbs[verbId + ':3'] = [];
 
-                var list = DICTIONARY.getObjectsOfVerbs(search);  // Отбираем предлоги и падежи из данных глагола.
+                var list = dict.getObjectsOfVerbs(search);  // Отбираем предлоги и падежи из данных глагола.
 
                 for (var i = 0; i < list.length; i++) {
                     rec = list[i];
@@ -1013,7 +1014,7 @@ define(['modules/az-utils'], function (utils) {
 
                             // Если падежи ещё не определены (то есть нет уточняющего списка падежей для предлога), то берём весь перечень падежей предлога
                             if (cases2 == null) {
-                                cases2 = DICTIONARY.getWordCases(rec.prep, '-');
+                                cases2 = dict.getWordCases(rec.prep, '-');
                             }
                         }
                     }
@@ -1038,7 +1039,7 @@ define(['modules/az-utils'], function (utils) {
 
             // Фильтр отбора записей-действий
             search = {
-                obj: AZ.available_objects(true), // [AZ.current_character.ID]
+                obj: engine.getAvailableObjects(true), // [AZ.current_character.ID]
                 priority: [1, 2, 3],
                 loc: [locId, null]
             };
@@ -1053,7 +1054,7 @@ define(['modules/az-utils'], function (utils) {
             for (i = 0; i < list.length; i++) {
                 rec = list[i];
 
-                if (cmd.objects[rec.priority] != null && rec.obj != AZ.getID(cmd.objects[rec.priority])) {
+                if (cmd.objects[rec.priority] != null && rec.obj != engine.getId(cmd.objects[rec.priority])) {
                     if (cmd.params[rec.priority] != null) {
                         continue;
                     }
@@ -1079,7 +1080,7 @@ define(['modules/az-utils'], function (utils) {
                         //  2. Глагол есть и в данных, и в команде.
                         if (rec.vid == verbId) {
                             _addBid(bidsList, bidsData, rec.pid);
-                            cases2 = DICTIONARY.getWordCases(rec.pid, '-');
+                            cases2 = dict.getWordCases(rec.pid, '-');
                             _casesToWord(wordsCases, rec.wid, cases2);
                             prepsToPass.push(rec.pid);
                         }
@@ -1118,7 +1119,7 @@ define(['modules/az-utils'], function (utils) {
                             }
 
                             // Если предлога нет, то падеж только именительный, иначе - берём из предлога.
-                            cases2 = (rec.pid == null ? ['И'] : DICTIONARY.getWordCases(rec.pid, '-'));
+                            cases2 = (rec.pid == null ? ['И'] : dict.getWordCases(rec.pid, '-'));
                         } else if (verbId != null) {
                             // Если есть глагол, то может быть ситуация, когда предлога в данных нет, а в команде он есть - в этом случае берём предлоги глагола
                             if (rec.pid != null && prepId != rec.pid) {
@@ -1152,7 +1153,7 @@ define(['modules/az-utils'], function (utils) {
                 }
             }
 
-            AUTOCOMPLETE.init(bidsList);
+            autocomplete.init(bidsList);
 
             var fid = null,
                 form = null,
@@ -1167,22 +1168,22 @@ define(['modules/az-utils'], function (utils) {
                 morph = bidsData[i].morph;
 
                 if (morph === 'Г') {
-                    formsList = AUTOCOMPLETE.getByBID(bid);
-                    formsListFull = DICTIONARY.getFormsListByBID({ bid: bid });
+                    formsList = autocomplete.getByBid(bid);
+                    formsListFull = dict.getFormsListByBID({ bid: bid });
 
                     if (wordStr == '') {
                         for (j = 0; j < formsList.length; j++) {
                             fid = formsList[j].fid;
-                            form = DICTIONARY.getForm(fid).form;
+                            form = dict.getForm(fid).form;
 
-                            AUTOCOMPLETE.add(wordStr, fid, form, morph);
+                            autocomplete.add(wordStr, fid, form, morph);
                         }
                     } else { // if (word_str != '')
                         haveAnyVerbs = false;
 
                         for (j = 0; j < formsList.length; j++) {
                             fid = formsList[j].fid;
-                            form = DICTIONARY.getForm(fid).form;
+                            form = dict.getForm(fid).form;
 
                             if (form.substr(0, wordStr.length) != wordStr) {
                                 continue;
@@ -1190,19 +1191,19 @@ define(['modules/az-utils'], function (utils) {
 
                             haveAnyVerbs = true;
 
-                            AUTOCOMPLETE.add(wordStr, fid, form, morph);
+                            autocomplete.add(wordStr, fid, form, morph);
                         }
 
                         if (haveAnyVerbs == false) {
                             for (j = 0; j < formsListFull.length; j++) {
                                 fid = formsListFull[j].fid;
-                                form = DICTIONARY.getForm(fid).form;
+                                form = dict.getForm(fid).form;
 
                                 if (form.substr(0, wordStr.length) != wordStr) {
                                     continue;
                                 }
 
-                                AUTOCOMPLETE.add(wordStr, fid, form, morph);
+                                autocomplete.add(wordStr, fid, form, morph);
                             }
                         }
                     }
@@ -1217,7 +1218,7 @@ define(['modules/az-utils'], function (utils) {
                         if ((bidsData[i].fid || null) != null) {
                             formsList = [{'fid': bidsData[i].fid}];
                         } else {
-                            formsList = DICTIONARY.getFormsListByCaseAndNumber({
+                            formsList = dict.getFormsListByCaseAndNumber({
                                 bid: bid,
                                 case: cases,
                                 number: (bidsData[i].nums || 'Е')
@@ -1226,7 +1227,7 @@ define(['modules/az-utils'], function (utils) {
 
                         for (j = 0; j < formsList.length; j++) {
                             fid = formsList[j].fid;
-                            form = DICTIONARY.getForm(fid).form;
+                            form = dict.getForm(fid).form;
 
                             if (wordStr != '') {
                                 if (form.substr(0, wordStr.length) != wordStr) {
@@ -1234,10 +1235,10 @@ define(['modules/az-utils'], function (utils) {
                                 }
                             }
 
-                            AUTOCOMPLETE.add(wordStr, fid, form, morph);
+                            autocomplete.add(wordStr, fid, form, morph);
                         }
                     } else {
-                        formsList = DICTIONARY.getFormsListByBID({ bid: bid });
+                        formsList = dict.getFormsListByBid({ bid: bid });
 
                         for (j = 0; j < formsList.length; j++) {
                             fid = formsList[j].fid;
@@ -1249,13 +1250,13 @@ define(['modules/az-utils'], function (utils) {
                                 }
                             }
 
-                            AUTOCOMPLETE.add(wordStr, fid, form, morph);
+                            autocomplete.add(wordStr, fid, form, morph);
                         }
                     }
                 }
             }
 
-            AUTOCOMPLETE.sort();
+            autocomplete.sort();
 
             var actionId,
                 action;
@@ -1268,7 +1269,7 @@ define(['modules/az-utils'], function (utils) {
                         action = cmd.objects[priority].actions_list[actionId - 1];
 
                         if (action != null) {
-                            AUTOCOMPLETE.setActionFlag();
+                            autocomplete.setActionFlag();
                         }
 
                         break;

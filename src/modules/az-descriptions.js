@@ -1,4 +1,5 @@
-define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
+define(['modules/az-utils', 'modules/az-constants', 'modules/az-engine', 'modules/az-decor', 'modules/az-dictionary', 'modules/az-parser'],
+function (utils, cons, engine, decor, dict, parser) {
     'use strict';
 
     /**
@@ -7,7 +8,7 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
      * @constructor
      */
     var Description = function (objOwner) {
-        Object.defineProperty(this, 'owner', {configurable: false, writable: false, value: objOwner});
+        Object.defineProperty(this, 'owner', { configurable: false, writable: false, value: objOwner });
 
         this.title    = '';
         this.text     = '';
@@ -31,10 +32,10 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
         this.title = title;
         this.text = description;
 
-        listInside = any2arr(listInside, false);
+        listInside = engine.anyToArr(listInside, false);
 
         for (var i = 0; i < listInside.length; i++) {
-            var id = AZ.getID(listInside[i]);
+            var id = engine.getId(listInside[i]);
 
             if (id != null) {
                 this.includes.push(id)
@@ -73,7 +74,7 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
 
         html = html || false;
 
-        return html == false ? title : DECOR.Description.getTitle(title, this.OWNER);
+        return html == false ? title : decor.description.getTitle(title, this.owner);
     };
 
     /**
@@ -85,7 +86,7 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
     Description.prototype.getText = function (param, html) {
         var self = this,
             text = typeof this.text === 'function' ? this.text(param) : this.text,
-            ownerID = AZ.getID(this.owner),
+            ownerID = engine.getId(this.owner),
             descr = {
                 text:     '',
                 mentions: { full: [], characters: [], items: [] },
@@ -103,7 +104,7 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
         text = text.replace(/\[\[(.+?)\]\]/gim, function (str, id) {
             var mention;
 
-            obj = AZ.getObject(id);
+            obj = engine.getObject(id);
 
             if (obj == null) {
                 console.error('При формировании описания "' + ownerID + '" не найден упомянутый объект "' + id + '"!');
@@ -113,7 +114,7 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
                 mention = obj.mentions.get(cons.FOR_DESC, self.owner);
                 listAlready.push(id);
 
-                return (mention === null) ? '' : (DECOR.getMention(mention, 0));
+                return (mention === null) ? '' : (decor.getMention(mention, 0));
             }
         });
 
@@ -125,10 +126,10 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
 
         for (var i = 0; i < objInside.length; i++) {
             // Получаем слово
-            var word = DICTIONARY.getFormIDs(objInside[i]);
+            var word = dict.getFormIds(objInside[i]);
 
             if (word != null) {
-                var list = PARSER.get_objects_by_word({
+                var list = parser.getObjectsByWord({
                     priority: 0,
                     loc: [ownerID, null],
                     wid: word.bid
@@ -142,7 +143,7 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
         // Вычищаем из содержимого те объекты, что указаны автором и упомянуты в тексте описания
         i = 0;
         while (i < listInside.length) {
-            if (listAlready.indexOf(AZ.getID(listInside[i].what)) == -1) {
+            if (listAlready.indexOf(engine.getId(listInside[i].what)) == -1) {
                 i++;
             } else {
                 listInside.splice(i, 1);
@@ -182,9 +183,9 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
             }
         }
 
-        AZ.getProtagonist().markContainerAsExam(this.owner);
+        engine.getProtagonist().markContainerAsExam(this.owner);
 
-        return DECOR.Description.getText(descr, this.owner);
+        return decor.description.getText(descr, this.owner);
     };
 
     return Description;

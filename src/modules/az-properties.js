@@ -1,4 +1,5 @@
-define(['modules/az-utils'], function (utils) {
+define(['modules/az-utils', 'modules/az-layers', 'modules/az-engine', 'modules/az-events', 'libs/taffy'],
+function (utils, layers, engine, events, Taffy) {
     'use strict';
 
     /* Формат базы данных "db_values":
@@ -9,7 +10,7 @@ define(['modules/az-utils'], function (utils) {
      value   Значение свойства
     */
 
-    var dbValues = TAFFY(), // База данных для хранения
+    var dbValues = Taffy(), // База данных для хранения
 
         /**
          *
@@ -57,8 +58,8 @@ define(['modules/az-utils'], function (utils) {
             if (options.length === 3) {
                 result.object = options[0];
 
-                if (result.object != null && AZ.isObject(result.object) == true) {
-                    result.object = AZ.getID(result.object);
+                if (result.object != null && engine.isObject(result.object) == true) {
+                    result.object = engine.getId(result.object);
                 }
 
                 result.name  = options[1];
@@ -70,8 +71,8 @@ define(['modules/az-utils'], function (utils) {
                 } else {
                     result.object = options[0];
 
-                    if (result.object != null && AZ.isObject(result.object) == true) {
-                        result.object = AZ.getID(result.object);
+                    if (result.object != null && engine.isObject(result.object) == true) {
+                        result.object = engine.getId(result.object);
                     }
 
                     result.name = options[1];
@@ -98,15 +99,15 @@ define(['modules/az-utils'], function (utils) {
          * @param value
          */
         create = function(name, value) {
-            _set(false, AZ.getID(this), name, value);
+            _set(false, engine.getId(this), name, value);
 
             Object.defineProperty(this, name, {
                 set: function(value) {
                     //При записи свойства объекта
-                    _set(false, AZ.getID(this), name, value);
+                    _set(false, engine.getId(this), name, value);
                 },
                 get: function() {
-                    var value = get(false, AZ.getID(this), name),
+                    var value = get(false, engine.getId(this), name),
                         result = events.checkReactions(events.PROPERTY, { // Вызываем событие "При получении свойства объекта"
                             what: this, property: name
                         }, {
@@ -171,7 +172,7 @@ define(['modules/az-utils'], function (utils) {
                 return;
             }
 
-            _set(true, params.object, params.name, PROPERTIES.get(true, params.object, params.name) - params.value);
+            _set(true, params.object, params.name, get(true, params.object, params.name) - params.value);
         };
 
     layers.addHandler('move', {

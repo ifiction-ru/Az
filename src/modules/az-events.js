@@ -1,4 +1,4 @@
-define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
+define(['modules/az-utils', 'modules/az-constants', 'modules/az-engine', 'libs/taffy'], function (utils, cons, engine, Taffy) {
     'use strict';
 
     /*
@@ -10,15 +10,15 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
      */
 
     var dbs = {
-            '_events.free':     TAFFY(),
+            '_events.free':     Taffy(),
 
-            '_events.put':      TAFFY(),
-            '_events.remove':   TAFFY(),
-            '_events.move':     TAFFY(),
+            '_events.put':      Taffy(),
+            '_events.remove':   Taffy(),
+            '_events.move':     Taffy(),
 
-            '_events.property': TAFFY(),
+            '_events.property': Taffy(),
 
-            '_events.action':   TAFFY()
+            '_events.action':   Taffy()
         },
 
         fieldsLocalization = {
@@ -135,7 +135,7 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
         updateAfterLoad = function () {
             for (var dbname in dbs) {
                 dbs[dbname]().map(function(rec) {
-                    var object = AZ.getObject(rec.id);
+                    var object = engine.getObject(rec.id);
 
                     if (object != null) {
                         dbs[dbname](rec).update({
@@ -150,7 +150,7 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
             var db = dbs[event];
 
             if (db === undefined) {
-                db = dbs[EVENTS.FREE];
+                db = dbs[self.FREE];
             }
 
             db({ 'id': id }).update({
@@ -199,7 +199,7 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
 
             eventId++;
             eventData['id'] = id;
-            object2table(eventData, table);
+            utils.objectToTable(eventData, table);
 
             for (var i = 0; i < table.length; i++) {
                 record = table[i];
@@ -208,7 +208,7 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
                     saveAs = fieldsSettings[fName].save;
 
                     if (utils.typeOf(saveAs) === 'object' ) {
-                        record[fName] = AZ.getID(record[fName]);
+                        record[fName] = engine.getId(record[fName]);
                     }
                 }
 
@@ -227,7 +227,7 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
                 db = dbs[eventName],
                 search  = {
                     enable:    true,
-                    location: [ AZ.getLocation(true), null ]
+                    location: [ engine.getLocation(true), null ]
                 },
                 _data = {},
                 saveAs,
@@ -242,14 +242,14 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
             }
 
             if (eventType == self.FREE) {
-                _data = arr2arr(data);
+                _data = utils.arrToArr(data);
             } else {
                 for (var fName in data) {
                     saveAs = fieldsSettings[fName].save;
 
                     if (saveAs == 'object') {
-                        search[fName]    = [ AZ.getID(data[fName]), null ];
-                        _data[fName]     = AZ.getObject(data[fName]);
+                        search[fName]    = [ engine.getId(data[fName]), null ];
+                        _data[fName]     = engine.getObject(data[fName]);
                     } else if (saveAs == 'with-null') {
                         search[fName]    = [data[fName], null];
                         _data[fName]     = data[fName];
@@ -296,7 +296,7 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
             if (reactions != false) {
                 for (i = 0; i < reactions.length; i++) {
                     var rec = reactions[i],
-                        reaction = AZ.getObject(rec.id);
+                        reaction = engine.getObject(rec.id);
 
                     if (typeof reaction.module === 'function') {
                         var res = reaction.module(_data);
@@ -316,7 +316,7 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
         },
 
         run = function (event, data) {
-            return self.checkReactions(event, data);
+            return checkReactions(event, data);
         },
 
         Reaction = function (event, data, module) {
@@ -333,13 +333,13 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
                 return;
             }
 
-            var rec = EVENTS.addReaction(event, this, data);
+            var rec = addReaction(event, this, data);
 
             eventType  = rec.type;
-            objectId   = AZ.addObject(rec.ID, this); //Строковый ID объекта
+            objectId   = engine.addObject(rec.id, this); //Строковый ID объекта
 
             Object.defineProperty(this, 'isObject',  { configurable: false, writable: false, value: true });
-            Object.defineProperty(this, 'ID',        { configurable: false, writable: false, value: objectId });
+            Object.defineProperty(this, 'id',        { configurable: false, writable: false, value: objectId });
             Object.defineProperty(this, 'event',     { configurable: false, writable: false, value: eventType });
             Object.defineProperty(this, 'module',    { configurable: false, writable: false, value: module });
 
@@ -348,12 +348,12 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
         };
 
     Reaction.prototype.enable = function () {
-        updateEnable(this.event, this.ID, true);
+        updateEnable(this.event, this.id, true);
         setProperty(this, 'enable', true);
     };
 
     Reaction.prototype.disable = function () {
-        updateEnable(this.event, this.ID, false);
+        updateEnable(this.event, this.id, false);
         setProperty(this, 'enable', false);
     };
 
@@ -366,8 +366,8 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
         updateAfterLoad: updateAfterLoad,
         updateEnable:    updateEnable,
         addReaction:     addReaction,
-        checkReactions: checkReactions,
-        run:            run,
+        checkReactions:  checkReactions,
+        run:             run,
 
         Reaction:        Reaction
     };

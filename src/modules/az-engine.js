@@ -1,4 +1,4 @@
-define(['modules/az-utils'], function (utils) {
+define(['modules/az-utils', 'modules/az-layers', 'modules/az-autocomplete'], function (utils, layers, autocomplete) {
     'use strict';
 
     /*
@@ -116,7 +116,7 @@ define(['modules/az-utils'], function (utils) {
 
                     if (typeof value === 'object') {
                         if (isGameObject(value)) {
-                            result += '#' + getID(value) + '\n';
+                            result += '#' + getId(value) + '\n';
                         } else {
                             result += arrToStr(value, limit, level, fields, x + '    ');
                         }
@@ -229,7 +229,7 @@ define(['modules/az-utils'], function (utils) {
             }
 
             if (object != null) {
-                return object.ID;
+                return object.id;
             } else {
                 if (error ==  true) {
                     console.error('Объект с "' + object + '" не найден!');
@@ -291,7 +291,7 @@ define(['modules/az-utils'], function (utils) {
                 console.error('Передан пустой персонаж!');
             } else {
                 protagonist.object = getObject(character);
-                protagonist.ID     = getId(protagonist.object);
+                protagonist.id     = getId(protagonist.object);
                 
                 var loc = protagonist.object.container.where();
                 
@@ -349,7 +349,7 @@ define(['modules/az-utils'], function (utils) {
         },
 
         startNewTurn = function() {
-            AUTOCOMPLETE.init();
+            autocomplete.init();
 
             updateAvailableObjects();
 

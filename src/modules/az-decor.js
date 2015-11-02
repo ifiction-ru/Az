@@ -1,6 +1,6 @@
 // Модуль-прослойка для оформления игры. Связывает движок с конкретным оформлением.
 
-define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
+define(['modules/az-utils', 'modules/az-constants', 'modules/az-engine'], function (utils, cons, engine) {
     'use strict';
 
     /**
@@ -34,7 +34,7 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
             if (list.length == 0) {
                 result = prefix[type + 'N'];
             } else {
-                result = enumeration.getList( list, prefix[type + length2symbol(list.length)] );
+                result = enumeration.getList( list, prefix[type + utils.lengthToSymbol(list.length)] );
             }
 
             return result;
@@ -117,7 +117,7 @@ define(['modules/az-utils', 'modules/az-constants'], function (utils, cons) {
 
         inventory = {
             get: function () {
-                var hero = AZ.getProtagonist();
+                var hero = engine.getProtagonist();
 
                 return getContent(cons.FOR_ALL, hero.getContent(), hero.getPrefixForContent());
             }

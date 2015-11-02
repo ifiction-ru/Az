@@ -8,6 +8,8 @@
 
     'use strict';
 
+    var _ = 'modules/az-';
+
     requirejs.config({
         shim: {
             taffy: {
@@ -16,14 +18,12 @@
         }
     });
 
-    define('az', ['modules/az-constants', 'modules/az-utils', 'modules/az-ui'],
-    function (cons, utils, ui) {
+    define('az', [_+'constants', _+'utils', _+'ui', _+'engine', _+'layers'],
+    function (cons, utils, ui, engine, layers) {
 
         var az,
             settings = {
-                ui: {
-
-                }
+                ui: {}
             },
 
             exportToGlobal = function () {
@@ -31,8 +31,8 @@
             },
 
             start = function () {
-                var character = AZ.getProtagonist() || null,
-                    loc       = AZ.getLocation();
+                var character = engine.getProtagonist() || null,
+                    loc       = engine.getLocation();
 
                 if (character == null) {
                     console.error('Не задан текущий персонаж игры!');
@@ -44,32 +44,32 @@
                     return;
                 }
 
-                AZ.startNewTurn();
-                INTERFACE.preparsing({value:''});
+                engine.startNewTurn();
+                ui.clearInput();
                 layers.add();
-            };
+            },
 
-        /* Достаем настройки из az.settings */
-        if (global.az && typeof global.az.settings === 'object') {
-            utils.extend(settings, global.az.settings);
-        }
+            init = function (options) {
+                utils.extend(settings, options);
+
+                ui.init(settings.ui, function () {
+                    ui.on('az.ui.submit', function (event) {
+                        console.log(event.detail);
+                    });
+
+                    ui.on('az.ui.input', function (event) {
+                        console.log(event.detail);
+                    });
+                });
+            };
 
         /* готовим объект для экспорта в глобальное пространство */
         az = {
-            settings : settings,
-            'export' : exportToGlobal,
-            start    : start
+            'export': exportToGlobal,
+            init:     init,
+            start:    start,
+            ui:       ui
         };
-
-        ui.init(settings.ui, function () {
-            ui.on('az.ui.submit', function (event) {
-                console.log(event.detail);
-            });
-
-            ui.on('az.ui.input', function (event) {
-                console.log(event.detail);
-            });
-        });
 
         global.az = az;
 

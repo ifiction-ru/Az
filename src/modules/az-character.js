@@ -1,4 +1,4 @@
-define(['modules/az-objects'], function (objects) {
+define(['modules/az-objects', 'modules/az-engine'], function (objects, engine) {
     'use strict';
 
     /**
@@ -24,11 +24,11 @@ define(['modules/az-objects'], function (objects) {
     Character.prototype.constructor = Character;
 
     Character.prototype.assignAsCurrent = function () {
-        AZ.setProtagonist(this);
+        engine.setProtagonist(this);
     };
 
     Character.prototype.markContainerAsExamined = function(container) {
-        var id = AZ.getID(container);
+        var id = engine.getId(container);
 
         if (id == null) {
             return false;

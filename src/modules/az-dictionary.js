@@ -1,4 +1,4 @@
-define(['modules/az-utils'], function (utils) {
+define(['modules/az-utils', 'modules/az-autocomplete', 'modules/az-parser', 'libs/taffy'], function (utils, autocomplete, parser, Taffy) {
     'use strict';
 
     var idForBase  = 0, // Числовой уникальный идентификатор каждого слова-основы в словаре
@@ -13,28 +13,28 @@ define(['modules/az-utils'], function (utils) {
          morph   Часть речи
          base    Основа слова
          */
-        dbBases = TAFFY(),
+        dbBases = Taffy(),
 
         /*
          Формат базы данных "dbBasesForTag":
          tag     Имя тега
          bids    Перечень уникальных числовых идентификаторов слов-основ
          */
-        dbBasesForTag = {}, //TAFFY(),
+        dbBasesForTag = {}, //Taffy(),
 
         /*
          Формат базы данных "dbTagsForBase":
          bid     Уникальный числовой идентификатор слова-основы
          tags    Имена тегов
          */
-        dbTagsForBase = {}, //TAFFY(),
+        dbTagsForBase = {}, //Taffy(),
 
         /* Формат базы данных "dbForms":
          bid     Уникальный числовой идентификатор слова-основы
          fid     Уникальный числовой идентификатор словоформы
          form    Словоформа
          */
-        dbForms = TAFFY(),
+        dbForms = Taffy(),
 
         /*
          БД (массив) "dbWordGenders" предназначена для хранения рода существительных и местоимений
@@ -42,7 +42,7 @@ define(['modules/az-utils'], function (utils) {
          bid     Уникальный числовой идентификатор основы слова
          gender  Род
          */
-        dbWordGenders = {}, //TAFFY(),
+        dbWordGenders = {}, //Taffy(),
 
         /*
          БД (массив) "dbWordCases" предназначена для хранения падежей существительных, местоимений и предлогов (как отношение сущ., мест., числ.)
@@ -75,7 +75,7 @@ define(['modules/az-utils'], function (utils) {
          number  Число
          fid     Уникальный числовой идентификатор словоформы
          */
-        dbSearchForm = TAFFY(),
+        dbSearchForm = Taffy(),
 
         /*
          Формат базы данных "dbObjectsOfVerbs":
@@ -84,7 +84,7 @@ define(['modules/az-utils'], function (utils) {
          prep        fid предлога
          case        Падеж [И|Р|Д|В|Т|П]
          */
-        dbObjectsOfVerbs = TAFFY(),
+        dbObjectsOfVerbs = Taffy(),
 
         // ВНУТРЕННИЕ ФУНКЦИИ
 
@@ -188,7 +188,7 @@ define(['modules/az-utils'], function (utils) {
             }
 
             if (acInc !== null) {
-                AUTOCOMPLETE.addWordWithFlag(bid, rec.fid, acInc);
+                autocomplete.addWordWithFlag(bid, rec.fid, acInc);
             }
 
             return rec.fid;
@@ -858,7 +858,7 @@ define(['modules/az-utils'], function (utils) {
                     }
 
                     if (noun == null) {
-                        noun = PARSER.get_noun_of_object_by_pronoun(result.bid);
+                        noun = parser.getNounOfObjectByPronoun(result.bid);
                     }
 
                     if (noun !== null) {

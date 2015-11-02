@@ -15,7 +15,7 @@
       Также объект содержит функцию "getActionFlag", которая возвращает true, если введённая команда может быть выполнена.
 */
 
-define(['modules/az-utils'], function (utils) {
+define(['modules/az-utils', 'libs/taffy'], function (utils, Taffy) {
     'use strict';
 
     var acData,
@@ -31,7 +31,7 @@ define(['modules/az-utils'], function (utils) {
          inc     Включать или нет слово в автодополнение
          */
 
-        dbAutocomplete = TAFFY(),
+        dbAutocomplete = Taffy(),
 
         /**
          * Инициализация данных модуля. Вызывается в модуле parser в функции препарсинга.

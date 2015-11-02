@@ -1,4 +1,4 @@
-define(['modules/az-utils','modules/az-constants'], function (utils, cons) {
+define(['modules/az-utils', 'modules/az-constants', 'modules/az-engine'], function (utils, cons, engine) {
     'use strict';
 
     /**
@@ -104,7 +104,7 @@ define(['modules/az-utils','modules/az-constants'], function (utils, cons) {
             if (typeof mention === 'string') {
                 return mention;
             } else if (typeof mention === 'function') {
-                return mention(purpose, AZ.getObject(where));
+                return mention(purpose, engine.getObject(where));
             }
         }
     };

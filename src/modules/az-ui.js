@@ -667,6 +667,7 @@ define(['modules/az-utils'], function (utils) {
         setPlaceholder: setPlaceholder,
         write: write,
         clear: clear,
+        clearInput: clearInput,
         setSuggestions: setSuggestions,
         render: render,
         on: on,
