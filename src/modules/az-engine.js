@@ -49,18 +49,18 @@ define(['modules/az-utils'], function (utils) {
 
             // Известные игроку контейнеры в инвентаре и локации
             for (var i = 0; i < objects.length; i++) {
-                object = AZ.getObject(objects[i].what);
+                object = getObject(objects[i].what);
                 availableObjects.push(object);
-                availableObjectsIds.push(AZ.getID(object));
+                availableObjectsIds.push(getId(object));
             }
 
             var examinedObjects = protagonist.object.what_he_exam.now;
 
             for (i = 0; i < examinedObjects.length; i++) {
-                container    = AZ.getObject(examinedObjects[i]);
-                containerId  = AZ.getObject(examinedObjects[i]);
+                container    = getObject(examinedObjects[i]);
+                containerId  = getObject(examinedObjects[i]);
 
-                if (AZ.getID(containerId) == position.ID) {
+                if (getId(containerId) == position.ID) {
                     continue;
                 }
 
@@ -68,7 +68,7 @@ define(['modules/az-utils'], function (utils) {
 
                 for (var k = 0; k < content.length; k++) {
                     object = content[k].what;
-                    id = AZ.getID(object);
+                    id = getId(object);
 
                     if (availableObjectsIds.indexOf(id) < 0) {
                         availableObjects.push(object);
@@ -77,6 +77,84 @@ define(['modules/az-utils'], function (utils) {
                 }
             }
 
+        },
+
+        /**
+         *
+         * @param arr
+         * @param limit
+         * @param level
+         * @param fields
+         * @param x
+         * @returns {string}
+         */
+        arrToStr = function (arr, limit, level, fields, x) {
+            if (level === undefined) {
+                level = 0;
+            }
+            if (x === undefined) {
+                x = '';
+            }
+
+            level++;
+
+            if (limit !== undefined && level > limit) {
+                return '';
+            }
+
+            var result = '';
+
+            for (var key in arr) {
+                if (arr.hasOwnProperty(key)) {
+                    if (fields !== undefined && fields.indexOf(key) == -1) {
+                        continue;
+                    }
+
+                    var value = arr[key];
+
+                    result += '' + x + key + ': ';
+
+                    if (typeof value === 'object') {
+                        if (isGameObject(value)) {
+                            result += '#' + getID(value) + '\n';
+                        } else {
+                            result += arrToStr(value, limit, level, fields, x + '    ');
+                        }
+                    } else if (typeof(value) == 'function') {
+                        result += 'function(...)\n';
+                    } else {
+                        result += value + '\n';
+                    }
+                }
+            }
+
+            return result;
+        },
+
+        /**
+         *
+         * @param param
+         * @param addNull
+         * @returns {*}
+         */
+        anyToArr = function (param, addNull) {
+            if (param === undefined) {
+                param = (addNull == false ? [] : [null]);
+            } else if (param === null) {
+                param = (addNull == false ? [] : [null]);
+            } else if (typeof param === 'string') {
+                param = (param.trim() === '' && addNull == false) ? [] : [param];
+            } else if (typeof param === 'number') {
+                param = [param];
+            } else if (typeof param === 'object') {
+                if (param.length === undefined) {
+                    param = [param];
+                } else if (isGameObject(param) === true) {
+                    param = [param];
+                }
+            }
+
+            return param;
         },
 
         // РАБОТА С БАЗОВЫМИ ОБЪЕКТАМИ
@@ -255,7 +333,7 @@ define(['modules/az-utils'], function (utils) {
                 position.id     = null;
             } else {
                 position.object = loc;
-                position.id     = AZ.getID(loc);
+                position.id     = getId(loc);
             }
         },
 
@@ -304,7 +382,8 @@ define(['modules/az-utils'], function (utils) {
         setLocation: setLocation,
         getLocation: getLocation,
         startNewTurn: startNewTurn,
-        getAvailableObjects: getAvailableObjects
+        getAvailableObjects: getAvailableObjects,
+        arrToStr: arrToStr,
+        anyToArr: anyToArr
     };
-
 });

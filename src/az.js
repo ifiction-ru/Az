@@ -29,6 +29,7 @@
             exportToGlobal = function () {
                 utils.extend(window, cons);
             },
+
             start = function () {
                 var character = AZ.getProtagonist() || null,
                     loc       = AZ.getLocation();
