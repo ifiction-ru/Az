@@ -28,7 +28,7 @@ define(['modules/az-utils', 'modules/az-engine', 'modules/az-descriptions', 'mod
         };
 
         // ОБЩИЕ МЕТОДЫ
-        //--------------------------------------------------
+
         // Функция сравнивает переданный параметр с идентификатором объекта.
         // Возвращает true или false.
         Simple.prototype.is = function (id) {
