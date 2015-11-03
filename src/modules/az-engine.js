@@ -115,7 +115,7 @@ define(['modules/az-utils', 'modules/az-layers', 'modules/az-autocomplete'], fun
                     result += '' + x + key + ': ';
 
                     if (typeof value === 'object') {
-                        if (isGameObject(value)) {
+                        if (isObject(value)) {
                             result += '#' + getId(value) + '\n';
                         } else {
                             result += arrToStr(value, limit, level, fields, x + '    ');
@@ -149,7 +149,7 @@ define(['modules/az-utils', 'modules/az-layers', 'modules/az-autocomplete'], fun
             } else if (typeof param === 'object') {
                 if (param.length === undefined) {
                     param = [param];
-                } else if (isGameObject(param) === true) {
+                } else if (isObject(param) === true) {
                     param = [param];
                 }
             }
@@ -195,7 +195,7 @@ define(['modules/az-utils', 'modules/az-layers', 'modules/az-autocomplete'], fun
             if (id !== null) {
                 if (typeof id === 'string') {
                     object = objectsList[ id.trim().toUpperCase() ];
-                } else if (isGameObject(id) == true) {
+                } else if (isObject(id) == true) {
                     object = id;
                 }
             }
@@ -223,7 +223,7 @@ define(['modules/az-utils', 'modules/az-layers', 'modules/az-autocomplete'], fun
             if (object != null) {
                 if (typeof object === 'string') {
                     object = objectsList[ object.trim().toUpperCase() ];
-                } else if (isGameObject(object) == false) {
+                } else if (isObject(object) == false) {
                     object = null;
                 }
             }
@@ -243,7 +243,7 @@ define(['modules/az-utils', 'modules/az-layers', 'modules/az-autocomplete'], fun
          * @param object
          * @returns {boolean}
          */
-        isGameObject = function(object) {
+        isObject = function(object) {
             if (typeof object === 'string') {
                 object = getObject(object);
             } else if (object.isObject !== true) {
@@ -353,7 +353,7 @@ define(['modules/az-utils', 'modules/az-layers', 'modules/az-autocomplete'], fun
 
             updateAvailableObjects();
 
-            if (DEBUG.isEnable() == true) {
+            if (DEBUG && DEBUG.isEnable() == true) {
                 DEBUG.updatePanelForObjects();
             }
 
@@ -373,7 +373,7 @@ define(['modules/az-utils', 'modules/az-layers', 'modules/az-autocomplete'], fun
         addObject: addObject,
         getObject: getObject,
         getId: getId,
-        isGameObject: isGameObject,
+        isObject: isObject,
         isEqual: isEqual,
         isAvailable: isAvailable,
         setProtagonist: setProtagonist,

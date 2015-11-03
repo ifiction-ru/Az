@@ -493,7 +493,7 @@ function (utils, engine, dict, autocomplete, Taffy) {
             var cmd = {
                     phrase: phrase, // Текст команды
 
-                    any_errors: false,
+                    anyErrors: false,
                     error: {type: null, word: ''}, // Описание ошибки
 
                     verb: null,
@@ -548,7 +548,7 @@ function (utils, engine, dict, autocomplete, Taffy) {
 
                     // +++ Если слово незнакомое
                     if (word === null) {
-                        cmd.any_errors = true;
+                        cmd.anyErrors = true;
                         cmd.error.type = 1; // 1 - незнакомое слово
                         cmd.error.word = wordStr;
 
@@ -941,7 +941,9 @@ function (utils, engine, dict, autocomplete, Taffy) {
                 cmd = {params: [ undefined, null, null, null ], objects: [ undefined, null, null, null ]};
             }
 
-            DEBUG.updatePreparsingData(cmd);
+            if (DEBUG && DEBUG.isEnable() == true) {
+                DEBUG.updatePreparsingData(cmd);
+            }
 
             for (var priority = 1; priority <= 3; priority++) {
                 if (cmd.params[priority] != null) {
@@ -1169,7 +1171,7 @@ function (utils, engine, dict, autocomplete, Taffy) {
 
                 if (morph === 'Г') {
                     formsList = autocomplete.getByBid(bid);
-                    formsListFull = dict.getFormsListByBID({ bid: bid });
+                    formsListFull = dict.getFormsListByBid({ bid: bid });
 
                     if (wordStr == '') {
                         for (j = 0; j < formsList.length; j++) {
