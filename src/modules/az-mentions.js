@@ -7,7 +7,7 @@ define(['modules/az-utils', 'modules/az-constants', 'modules/az-engine'], functi
      * @constructor
      */
     var Mentions = function (ownerObj) {
-        Object.defineProperty(this, 'owner', { configurable: false, writable: false, value: ownerObj });
+        Object.defineProperty(this, 'OWNER', { configurable: false, writable: false, value: ownerObj });
         this.mentionsList = [];
     };
 

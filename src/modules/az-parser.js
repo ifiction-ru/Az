@@ -493,7 +493,7 @@ function (utils, engine, dict, autocomplete, Taffy) {
             var cmd = {
                     phrase: phrase, // Текст команды
 
-                    any_errors: false,
+                    anyErrors: false,
                     error: {type: null, word: ''}, // Описание ошибки
 
                     verb: null,
@@ -548,7 +548,7 @@ function (utils, engine, dict, autocomplete, Taffy) {
 
                     // +++ Если слово незнакомое
                     if (word === null) {
-                        cmd.any_errors = true;
+                        cmd.anyErrors = true;
                         cmd.error.type = 1; // 1 - незнакомое слово
                         cmd.error.word = wordStr;
 
@@ -788,6 +788,7 @@ function (utils, engine, dict, autocomplete, Taffy) {
                     }
 
                     objRec = _searchObjectByPriority0(cmd, cmd.verb.bid, param.bid, priority);
+
                     if (objRec != null) {
                         break;
                     }
@@ -833,7 +834,7 @@ function (utils, engine, dict, autocomplete, Taffy) {
 
                 if (obj != null && act != null) {
                     cmd.object = obj;
-                    cmd.action = obj.actions_list[act - 1];
+                    cmd.action = obj.actionsList[act - 1];
 
                     break;
                 }
@@ -941,7 +942,9 @@ function (utils, engine, dict, autocomplete, Taffy) {
                 cmd = {params: [ undefined, null, null, null ], objects: [ undefined, null, null, null ]};
             }
 
-            DEBUG.updatePreparsingData(cmd);
+            if (DEBUG && DEBUG.isEnable() == true) {
+                DEBUG.updatePreparsingData(cmd);
+            }
 
             for (var priority = 1; priority <= 3; priority++) {
                 if (cmd.params[priority] != null) {
@@ -1169,7 +1172,7 @@ function (utils, engine, dict, autocomplete, Taffy) {
 
                 if (morph === 'Г') {
                     formsList = autocomplete.getByBid(bid);
-                    formsListFull = dict.getFormsListByBID({ bid: bid });
+                    formsListFull = dict.getFormsListByBid({ bid: bid });
 
                     if (wordStr == '') {
                         for (j = 0; j < formsList.length; j++) {
@@ -1216,7 +1219,7 @@ function (utils, engine, dict, autocomplete, Taffy) {
                         }
 
                         if ((bidsData[i].fid || null) != null) {
-                            formsList = [{'fid': bidsData[i].fid}];
+                            formsList = [{ 'fid': bidsData[i].fid }];
                         } else {
                             formsList = dict.getFormsListByCaseAndNumber({
                                 bid: bid,
@@ -1266,7 +1269,7 @@ function (utils, engine, dict, autocomplete, Taffy) {
                     actionId = cmd.actions[priority];
 
                     if (actionId != null) {
-                        action = cmd.objects[priority].actions_list[actionId - 1];
+                        action = cmd.objects[priority].actionsList[actionId - 1];
 
                         if (action != null) {
                             autocomplete.setActionFlag();

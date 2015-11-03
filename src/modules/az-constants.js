@@ -2,7 +2,7 @@ define(function () {
     'use strict';
 
     return {
-        ANY          : null,
+        ANYTHING     : null,
         FOR_DESC     : 'для описания',
         FOR_CONT     : 'для содержимого',
         FOR_ALL      : 'A',

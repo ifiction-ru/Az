@@ -28,7 +28,7 @@ define(['modules/az-utils', 'modules/az-engine', 'modules/az-descriptions', 'mod
         };
 
         // ОБЩИЕ МЕТОДЫ
-        //--------------------------------------------------
+
         // Функция сравнивает переданный параметр с идентификатором объекта.
         // Возвращает true или false.
         Simple.prototype.is = function (id) {
@@ -258,7 +258,7 @@ define(['modules/az-utils', 'modules/az-engine', 'modules/az-descriptions', 'mod
                                     });
                                     priorityAll = priority;
                                 } else if (typeof(rec) == 'object') {// end if
-                                    if (engine.isGameObject(rec) === true) {
+                                    if (engine.isObject(rec) === true) {
                                         var recId = engine.getId(rec);
 
                                         //var data_tmp = {'obj':object_id, 'priority':priority, 'loc':loc_id, 'vid':verb_id, 'action':action_id};
@@ -300,7 +300,7 @@ define(['modules/az-utils', 'modules/az-engine', 'modules/az-descriptions', 'mod
 
                                                     recElems.push({'pid': prep.bid, 'wid': word.bid, 'fid': word.fid});
                                                 } else if (typeof(word) == 'object' && word !== null) {
-                                                    if (engine.isGameObject(word) == true) {
+                                                    if (engine.isObject(word) == true) {
                                                         var e = {
                                                             pid: prep.bid
                                                         };

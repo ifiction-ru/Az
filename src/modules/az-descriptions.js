@@ -8,7 +8,7 @@ function (utils, cons, engine, decor, dict, parser) {
      * @constructor
      */
     var Description = function (objOwner) {
-        Object.defineProperty(this, 'owner', { configurable: false, writable: false, value: objOwner });
+        Object.defineProperty(this, 'OWNER', { configurable: false, writable: false, value: objOwner });
 
         this.title    = '';
         this.text     = '';
@@ -74,7 +74,7 @@ function (utils, cons, engine, decor, dict, parser) {
 
         html = html || false;
 
-        return html == false ? title : decor.description.getTitle(title, this.owner);
+        return html == false ? title : decor.description.getTitle(title, this.OWNER);
     };
 
     /**
@@ -86,7 +86,7 @@ function (utils, cons, engine, decor, dict, parser) {
     Description.prototype.getText = function (param, html) {
         var self = this,
             text = typeof this.text === 'function' ? this.text(param) : this.text,
-            ownerID = engine.getId(this.owner),
+            ownerID = engine.getId(this.OWNER),
             descr = {
                 text:     '',
                 mentions: { full: [], characters: [], items: [] },
@@ -96,7 +96,7 @@ function (utils, cons, engine, decor, dict, parser) {
             // Получаем перечень объектов, которые автор указал как упомянутые в описании
             listAlready = this.includes.slice(),
             // Получаем содержимое объекта
-            listInside  = this.owner.getContent(),
+            listInside  = this.OWNER.getContent(),
             obj = null,
             objInside;
 
@@ -111,7 +111,7 @@ function (utils, cons, engine, decor, dict, parser) {
 
                 return '???';
             } else {
-                mention = obj.mentions.get(cons.FOR_DESC, self.owner);
+                mention = obj.mentions.get(cons.FOR_DESC, self.OWNER);
                 listAlready.push(id);
 
                 return (mention === null) ? '' : (decor.getMention(mention, 0));
@@ -183,9 +183,9 @@ function (utils, cons, engine, decor, dict, parser) {
             }
         }
 
-        engine.getProtagonist().markContainerAsExam(this.owner);
+        engine.getProtagonist().markContainerAsExam(this.OWNER);
 
-        return decor.description.getText(descr, this.owner);
+        return decor.description.getText(descr, this.OWNER);
     };
 
     return Description;
