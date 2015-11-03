@@ -15,8 +15,6 @@ window.PARSER = (function() {
     //--------------------------------------------------
     var last_params     = {};
     //--------------------------------------------------
-    var available_objects = [];
-    //--------------------------------------------------
     var LOC_ID          = null;
     //--------------------------------------------------
     /* Формат базы данных "db_words_and_objects":
@@ -38,7 +36,7 @@ window.PARSER = (function() {
         var to2 = _options['to2'] || null;
         var to3 = _options['to3'] || null;
         //----------
-        var search = {'obj':AZ.available_objects(true), 'priority':priority, 'loc':L, 'vid':V, 'pid':P, 'wid':W, 'to1':to1, 'to2':to2, 'to3':to3};
+        var search = {'obj':AZ.availObjects(true, false), 'priority':priority, 'loc':L, 'vid':V, 'pid':P, 'wid':W, 'to1':to1, 'to2':to2, 'to3':to3};
         //----------
         var object_id   = null;
         var priority    = null;
@@ -63,7 +61,7 @@ window.PARSER = (function() {
     } // end function "_get_link_to_object"
     /* --------------------------------------------------------------------------- */
     function _get_objects_by_word (_search, _morph) {
-        _search.obj = AZ.available_objects(true);
+        _search.obj = AZ.availObjects(true, false);
         //----------
         var list = db_words_and_objects(_search).get();
         //----------
@@ -81,7 +79,7 @@ window.PARSER = (function() {
         //----------
         var search = {
             priority: 0,
-            obj:      AZ.available_objects(true),
+            obj:      AZ.availObjects(true, false),
             loc:      [AZ.getLocation(true), null],
             wid:      _wid,
         }; // end search
@@ -238,22 +236,28 @@ window.PARSER = (function() {
     } // end function "_check_adverbs"
     /* --------------------------------------------------------------------------- */
     // Ищем объект по сопоставленным с ним словам с нулевым приоритетом
-    function _search_object_by_priority_0 (CMD, _verb_id, _word_id, _priority) {
+    function _search_object_by_priority (CMD, _verb_id, _word_id, _priority) {
         //----------
         //_priority = _priority || 1;
         var maxmin = (_priority === undefined ? {min:1, max:3} : {min:_priority, max:_priority});
         var result = null;
         //----------
+        var full_IDs    = AZ.availObjects(true, false); // Получаем перечень объектов, доступных лишь из-за действия с ними в данной локации
+        var limited_ids = AZ.availObjects(true, true); // Получаем перечень объектов, доступных лишь из-за действия с ними в данной локации
+        //----------
         // Получаем перечень объектов, сопоставленных с переданным словом в текущей локации (или во всех).
-        var objs_list = db_words_and_objects({'obj':AZ.available_objects(true), 'priority':0, 'loc':[LOC_ID, null], 'wid':_word_id}).get();
+        var objs_list = db_words_and_objects({'obj':full_IDs, 'priority':0, 'loc':[LOC_ID, null], 'wid':_word_id}).get();
         for (var x=0; x<objs_list.length; x++) {
             var objrec = objs_list[x];
             //----------
             // Теперь ищем действия с каким-либо приоритетом, где указана ссылка на объект, найденный по слову: to1, to2 или to3
-            var search = {'obj':AZ.available_objects(true), 'loc':[LOC_ID, null], 'vid': _verb_id};
+            var search = {'obj':full_IDs, 'priority':[1,2,3], 'loc':[LOC_ID, null], 'vid': _verb_id};
             //----------
             for (var priority=maxmin.min; priority<=maxmin.max; priority++) {
                 if (CMD.objects[priority] != null) {continue;} // end if
+                //----------
+                // Если объект из "неполного перечня", то локация должна совпадать.
+                search['loc'] = (limited_ids.indexOf(objrec.obj) == -1 ? [LOC_ID, null]: LOC_ID);
                 //----------
                 search['to'+priority] = objrec.obj;
                 //----------
@@ -284,7 +288,7 @@ window.PARSER = (function() {
         } // end for x
         //----------
         return result === null ? null : {'object':AZ.getObject(result.obj), 'priority':result.priority, 'action':result.action};
-    } // end function "_search_object_by_priority_0"
+    } // end function "_search_object_by_priority"
     /* --------------------------------------------------------------------------- */
     return {
         add_link_to_object: function (_options) {
@@ -355,10 +359,19 @@ window.PARSER = (function() {
             return true;
         }, // end function "add_link_to_object"
         //--------------------------------------------------
+        // Возвращает массив с идентификаторами объектов, которые имеют действия в указанной локации
+        get_objects_by_loc_and_actions: function (_loc) {
+            //----------
+            var result = db_words_and_objects({'priority':[1,2,3], 'loc':_loc}).distinct('obj');
+            //----------
+            return (result == false ? [] : result);
+            //----------
+        }, // end function "get_objects_by_loc_and_actions"
+        //--------------------------------------------------
         get_link_to_object: _get_link_to_object,
         //--------------------------------------------------
         get_objects_by_word:            _get_objects_by_word,
-        get_noun_of_object_by_pronoun: _get_noun_of_object_by_pronoun,
+        get_noun_of_object_by_pronoun:  _get_noun_of_object_by_pronoun,
         //--------------------------------------------------
         parse: function (_phrase, _preparsing, _prepart2) {
             _prepart2 = _prepart2 || false;
@@ -385,8 +398,6 @@ window.PARSER = (function() {
             var nouns4pronouns  = {};
             var pr_occupied     = [];
             var adverbs         = {list:[], bids:[]};
-            //----------
-            var avail_objs = AZ.available_objects(true);
             //----------
             LOC_ID  = AZ.getLocation(true);
             //----------
@@ -585,7 +596,7 @@ window.PARSER = (function() {
                         } // end for priority
                         if (objrec == null) {
                             // ...пытаемся опеределить, подходит ли данное слово к какому либо объекту вообще
-                            objrec = _search_object_by_priority_0(CMD, (CMD.verb == null ? null : CMD.verb.bid), word.bid);
+                            objrec = _search_object_by_priority(CMD, (CMD.verb == null ? null : CMD.verb.bid), word.bid);
                         }
                         if (objrec !== null) {
                             //----------
@@ -616,7 +627,7 @@ window.PARSER = (function() {
                             } // end for priority
                             if (objrec == null) {
                                 // ...пытаемся опеределить, подходит ли данное слово к какому либо объекту вообще
-                                objrec = _search_object_by_priority_0(CMD, (CMD.verb == null ? null : CMD.verb.bid), noun2.bid);
+                                objrec = _search_object_by_priority(CMD, (CMD.verb == null ? null : CMD.verb.bid), noun2.bid);
                             }
                             if (objrec !== null) {
                                 //----------
@@ -670,7 +681,7 @@ window.PARSER = (function() {
                     var param = CMD.params[priority] || null;
                     if (param == null) {continue;} // end if
                     //----------
-                    objrec = _search_object_by_priority_0(CMD, CMD.verb.bid, param.bid, priority);
+                    objrec = _search_object_by_priority(CMD, CMD.verb.bid, param.bid, priority);
                     if (objrec != null) {break;} // end if
                     //----------
                 } // end for priority
@@ -719,12 +730,12 @@ window.PARSER = (function() {
         }, // end function "parse"
         //--------------------------------------------------
         pre_parse: function (word_str, verb_id, prep_id, CMD, _prepart2) {
-            word_str = word_str || '';
+            word_str    = word_str || '';
             //----------
             verb_id     = verb_id || null;
             prep_id     = prep_id || null;
             //----------
-            _prepart2 = _prepart2 || false;
+            _prepart2   = _prepart2 || false;
             //----------
             var bids_list = [];
             var bids_data = [];
@@ -877,7 +888,7 @@ window.PARSER = (function() {
             //----------
             // Фильтр отбора записей-действий
             var search = {
-                'obj':      AZ.available_objects(true), // [AZ.current_character.ID]
+                'obj':      AZ.availObjects(true, false), // [AZ.current_character.ID]
                 'priority': [1,2,3],
                 //----------
                 'loc':      [LOC_ID, null],
@@ -886,8 +897,15 @@ window.PARSER = (function() {
             //----------
             // Отбираем все комбинации слов, используемых в действиях с доступными объектами
             var list = db_words_and_objects(search).get();
+            //----------
+            var limited_ids = AZ.availObjects(true, true); // Получаем перечень объектов, доступных лишь из-за действия с ними в данной локации
+            //----------
             for (var x=0; x<list.length; x++) {
                 var rec = list[x];
+                //----------
+                if (limited_ids.indexOf(rec.obj) != -1) {
+                    if (rec.loc == null) {continue;} // end if
+                } // end if
                 //----------
                 if (CMD.objects[rec.priority] != null && rec.obj != AZ.getID(CMD.objects[rec.priority])) {
                     if (CMD.params[rec.priority] != null) {continue;} // end if

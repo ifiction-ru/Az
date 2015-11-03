@@ -10,8 +10,7 @@ window.AZ = (function() {
     var protagonist = {object:null, ID:null}; // Текущий персонаж
     var position    = {object:null, ID:null}; // Текущее местоположение (персонажа)
     //----------
-    var available_objects       = [];
-    var available_objects_IDs   = [];
+    var available_objects = {full:[], full_IDs:[], limited:[], limited_IDs:[]};
     //----------
     var objects_list = {}; // Ассоциативный массив для хранения ссылок на объекты игры по их строковому ID.
     //--------------------------------------------------
@@ -20,6 +19,9 @@ window.AZ = (function() {
     setProperty('turns.loc', 0);
     //--------------------------------------------------
     function updateAvailableObjects () {
+        // Очищаем перечень доступных объектов
+        available_objects = {full:[], full_IDs:[], limited:[], limited_IDs:[]};
+        //----------
         // Добавляем в перечень доступных объектов содержимое локации
         // ??? Может, стоит это делатьтолько после того, как игрок посмотрел инвентарь?
         var objects1 = position.object.container.getContent();
@@ -37,14 +39,11 @@ window.AZ = (function() {
         //----------
         // +++ Известные игроку контейнеры в инвентаре и локации
         //----------
-        available_objects       = [];
-        available_objects_IDs   = [];
-        //----------
         for (var x=0; x<objects.length; x++) {
             var object = AZ.getObject(objects[x].what);
             //----------
-            available_objects.push(object);
-            available_objects_IDs.push(AZ.getID(object));
+            available_objects.full.push(object);
+            available_objects.full_IDs.push(AZ.getID(object));
         } // end for x
         //----------
         var arr = protagonist.object.what_he_exam.now;
@@ -60,11 +59,26 @@ window.AZ = (function() {
                 var object = content[y].what;
                 var id     = AZ.getID(object);
                 //----------
-                if (available_objects_IDs.indexOf(id) == -1) {
-                    available_objects.push(object);
-                    available_objects_IDs.push(id);
+                if (available_objects.full_IDs.indexOf(id) == -1) {
+                    available_objects.full.push(object);
+                    available_objects.full_IDs.push(id);
                 } // end if
             } // end for
+        } // end for x
+        //----------
+        var arr = PARSER.get_objects_by_loc_and_actions(position.ID);
+        for (var x=0; x<arr.length; x++) {
+            var object = AZ.getObject(arr[x]);
+            //----------
+            if (available_objects.full_IDs.indexOf(arr[x]) == -1) {
+                available_objects.full.push(object);
+                available_objects.full_IDs.push(arr[x]);
+                //----------
+                if (available_objects.limited_IDs.indexOf(arr[x]) == -1) {
+                    available_objects.limited.push(object);
+                    available_objects.limited_IDs.push(arr[x]);
+                } // end if
+            } // end if
         } // end for x
         //----------
     }; // end function "AZ.get_available_objects"
@@ -151,7 +165,7 @@ window.AZ = (function() {
                 //----------
                 if (id == null) {return false;} // end if
                 //----------
-                return available_objects_IDs.indexOf(id) == -1 ? false : true;
+                return available_objects.full_IDs.indexOf(id) == -1 ? false : true;
             }, // end function "AZ.addObject"
         //--------------------------------------------------
         // РАБОТА С ОБЪЕКТАМИ ИГРЫ
@@ -214,14 +228,21 @@ window.AZ = (function() {
                 LAYERS.add();
             }, // end function "AZ.startNewTurn"
         //--------------------------------------------------
-        available_objects: function (_only_id) {
-            return ((_only_id || false) == false) ? available_objects.slice() : available_objects_IDs.slice();
-        }, // end function "AZ.available_objects"
+        availObjects: function (_only_id, _limited) {
+            if (_limited == true) {
+                return (_only_id == true ? available_objects.limited_IDs.slice() : available_objects.limited.slice());
+            } else {
+                return (_only_id == true ? available_objects.full_IDs.slice() : available_objects.full.slice());
+            } // end if
+        }, // end function "AZ.availObjects"
         /* --------------------------------------------------------------------------- */
     };
 })(); // end object "AZ"
 /* --------------------------------------------------------------------------- */
 window.START = function (_param) {
+    window.markdown  = new showdown.Converter();
+    window.typograph = new Typograf({lang: 'ru'});
+    //----------
     var character = AZ.getProtagonist() || null;
     //----------
     if (character == null) {
@@ -238,7 +259,8 @@ window.START = function (_param) {
     //----------
     var loc = AZ.getLocation();
     //----------
-    SCREEN.Out(loc.getTitle(null, true) + loc.getDescription());
+    print(loc.getTitle(null, true));
+    print(loc.getDescription());
     //----------
     INTERFACE.preparsing({value:''});
     //----------
