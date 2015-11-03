@@ -49,8 +49,12 @@
                 layers.add();
             },
 
-            init = function (options) {
+            changeSettings = function (options) {
                 utils.extend(settings, options);
+            },
+
+            init = function (options) {
+                changeSettings(options);
 
                 ui.init(settings.ui, function () {
                     ui.on('az.ui.submit', function (event) {
@@ -65,14 +69,14 @@
 
         /* готовим объект для экспорта в глобальное пространство */
         az = {
-            'export': exportToGlobal,
-            init:     init,
-            start:    start,
-            ui:       ui
+            'export':       exportToGlobal,
+            changeSettings: changeSettings,
+            init:           init,
+            start:          start,
+            ui:             ui
         };
 
         global.az = az;
-
     });
 
 })(this);
