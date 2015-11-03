@@ -19,7 +19,7 @@ window.DECOR = (function() {
         if (_text.trim() == '') {
             return '';
         } else {
-            return (_type == 0 ? _text : '<p>'+_text+'</p>');
+            return (_type == 0 ? _text : '\n\n'+_text+'\n\n');
         } // end if
         //----------
     }, // end function "DECOR.getMention"
@@ -39,7 +39,7 @@ window.DECOR = (function() {
     //--------------------------------------------------
     Description: {
         getTitle: function  (_title, _object) {
-            return '<h1>'+_title+'</h1>';
+            return '<h2>'+_title+'</h2>';
         }, // end function "DECOR.getTitle"
         //----------
         getText: function (_descr, _object) {
@@ -47,7 +47,8 @@ window.DECOR = (function() {
             //----------
             var result  = '';
             //----------
-            result += '<p>' + _descr.text + '</p>'; // Добавляем основной текст описания
+            result += _descr.text; // Добавляем основной текст описания
+            //result += _descr.text; // Добавляем основной текст описания
             //----------
             // Добавляем к тексту упоминания персонажей
             for (var x=0; x<_descr.mentions.characters.length; x++) {
@@ -83,7 +84,7 @@ window.DECOR = (function() {
         }, // end function "getPrefix"
         //----------
         getBlock: function (_text) {
-            return '<p>'+_text+'</p>';
+            return '\n\n'+_text+'\n\n';
         }, // end function "getBlock"
         //----------
         getList: function (_list, _prefix) {
@@ -128,7 +129,7 @@ window.DECOR = (function() {
     //--------------------------------------------------
     Command: {
         print: function (_text) {
-            return '<p><b>&gt; '+_text+'</b></p>'
+            return '<b>&gt; '+_text+'</b>'
         }, // end function "Inventory"
     },
     //--------------------------------------------------
