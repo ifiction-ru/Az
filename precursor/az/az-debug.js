@@ -67,7 +67,7 @@ window.DEBUG = (function() {
         updatePanelForObjects: function () {
             if (debug_enable == false || objects.panel == '') {return;} // end if
             //----------
-            var txt_objects = AZ.available_objects(true);
+            var txt_objects = AZ.availObjects(true, false);
             //----------
             SCREEN.Clear('debug-objects-list');
             //----------
