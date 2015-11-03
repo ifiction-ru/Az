@@ -434,7 +434,7 @@ window.PARSER = (function() {
                     //----------
                     // +++ Если слово незнакомое
                     if (word === null) {
-                        CMD.anyErrors = true;
+                        CMD.any_errors = true;
                         //----------
                         CMD.error.type  = 1; // 1 - незнакомое слово
                         CMD.error.word  = word_str;
@@ -530,7 +530,7 @@ window.PARSER = (function() {
                 //----------
             } // end while (true)
             //----------
-            if (CMD.anyErrors == true) {
+            if (CMD.any_errors == true) {
                 if (_preparsing == false || (wx < maxwx || (wx == maxwx && have_a_space == true))) {
                     console.error('Слово: "'+word_str+'" мне незнакомо.'); // Консоль
                     //SCREEN.Вывести('Мне неизвестно слово"'+_word+'".<br/>');
