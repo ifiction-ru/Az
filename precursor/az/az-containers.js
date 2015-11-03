@@ -125,7 +125,7 @@ tContainer.prototype.put = function(_where, _quantity) { // Containers
     result = EVENTS.checkReactions(EVENTS.PUT, event);
     //----------
     // Если событие вернуло "Отбой", то пропускаем добавление
-    if (result = false) {return false;} // end if
+    if (result == false) {return false;} // end if
     //----------
     var how_many = CONTAINERS.get(this.OWNER, _where); // Получаем количество, сколько было
     //----------
