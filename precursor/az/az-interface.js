@@ -7,8 +7,8 @@
             var EL=document.getElementById(_panel);
             //----------
             if (EL!=null) {
-                //EL.innerHTML += TYPOGRAPH.text2html(text);
-                EL.innerHTML += text;
+                EL.innerHTML += text2html(text);
+                //EL.innerHTML += text;
             };
         }, // end function "Out"
         //----------
@@ -132,16 +132,6 @@
         SCREEN.Out(DECOR.Command.print(_text));
         //----------
     };
-    //--------------------------------------------------
-    window.printDescription = function (_object, _param) {
-        var object = AZ.getObject(_object);
-        //----------
-        // +++ Что делать, если объект для описания не найден
-        if (object != null) {
-            SCREEN.Out(object.getDescription(_param));
-        } // end if
-        //----------
-    }; // end function "printDescription"
     //--------------------------------------------------
     window.printInventory = function () {
         //----------
