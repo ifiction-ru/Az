@@ -146,4 +146,14 @@ window.object2table = function (data, result, fields, level, max, elem1) {
     //----------
 } // end function "next_level"
 //----------
+window.text2html = function (_text) {
+    //----------
+    _text = _text.replace(/^\s+/gm, '\n');
+    _text = markdown.makeHtml(_text);
+    _text = typograph.execute(_text);
+    //----------
+    return _text;
+    //----------
+}; // end function "text2html"
+/* --------------------------------------------------------------------------- */
 
