@@ -23,6 +23,9 @@
     window.ДляПерсонажей    = ForChars;
     window.ДляОбъектов      = ForItems;
     //----------
+    tSimpleObject.prototype.ВывестиОписание            = tSimpleObject.prototype.printDescription;
+    tSimpleObject.prototype.ВывестиОписаниеСЗаголовком = tSimpleObject.prototype.printTitleAndDescription;
+    //----------
     tSimpleObject.prototype.ПрефиксСодержимого = tSimpleObject.prototype.setPrefixForContent;
 /* --------------------------------------------------------------------------- */
 // РАБОТА С ПЕРСОНАЖАМИ
@@ -78,7 +81,6 @@
 // РАБОТА С ЭКРАНОМ
     //--------------------------------------------------
     window.Вывести          = print;
-    window.ВывестиОписание  = printDescription;
     window.ВывестиИнвентарь = printInventory;
 /* --------------------------------------------------------------------------- */
 // СОБЫТИЯ
