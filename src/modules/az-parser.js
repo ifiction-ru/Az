@@ -788,6 +788,7 @@ function (utils, engine, dict, autocomplete, Taffy) {
                     }
 
                     objRec = _searchObjectByPriority0(cmd, cmd.verb.bid, param.bid, priority);
+
                     if (objRec != null) {
                         break;
                     }
@@ -833,7 +834,7 @@ function (utils, engine, dict, autocomplete, Taffy) {
 
                 if (obj != null && act != null) {
                     cmd.object = obj;
-                    cmd.action = obj.actions_list[act - 1];
+                    cmd.action = obj.actionsList[act - 1];
 
                     break;
                 }
@@ -1218,7 +1219,7 @@ function (utils, engine, dict, autocomplete, Taffy) {
                         }
 
                         if ((bidsData[i].fid || null) != null) {
-                            formsList = [{'fid': bidsData[i].fid}];
+                            formsList = [{ 'fid': bidsData[i].fid }];
                         } else {
                             formsList = dict.getFormsListByCaseAndNumber({
                                 bid: bid,
@@ -1268,7 +1269,7 @@ function (utils, engine, dict, autocomplete, Taffy) {
                     actionId = cmd.actions[priority];
 
                     if (actionId != null) {
-                        action = cmd.objects[priority].actions_list[actionId - 1];
+                        action = cmd.objects[priority].actionsList[actionId - 1];
 
                         if (action != null) {
                             autocomplete.setActionFlag();
