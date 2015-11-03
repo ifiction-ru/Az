@@ -88,6 +88,19 @@ window.tSimpleObject = function (_id) {
         //----------
     }; // end function "<Объект>.Description"
     //--------------------------------------------------
+    tSimpleObject.prototype.printDescription = function (_param) {
+        //----------
+        print(this.getDescription(_param));
+        //----------
+    }; // end function "<Объект>.Description"
+    //--------------------------------------------------
+    tSimpleObject.prototype.printTitleAndDescription = function (_param) {
+        //----------
+        print(this.getTitle(_param, true));
+        print(this.getDescription(_param));
+        //----------
+    }; // end function "<Объект>.Description"
+    //--------------------------------------------------
     tSimpleObject.prototype.isAvailable = function () {
         //----------
         return AZ.isAvailable(objectID);
@@ -307,7 +320,7 @@ window.tSimpleObject = function (_id) {
                                                 var word = DICTIONARY.getWord(word);
                                                 //----------
                                                 if (word === null) {
-                                                    console.error('У объекта "'+this.ID+'" в качестве слова-отсылки указано неизвестное слово: "'+word+'"!');
+                                                    console.error('У объекта "'+this.ID+'" в качестве слова-отсылки указано неизвестное слово: "'+words_list[w]+'"!');
                                                     return;
                                                 } // end if
                                                 //----------
