@@ -162,7 +162,7 @@ p {
   width: 50px;
   padding: 0.2em;
   border: 0;
-  background: #fff;
+  background: transparent;
   font-size: 1.3rem;
   color: #555;
 }
