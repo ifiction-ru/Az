@@ -15,33 +15,32 @@
             <td valign="top">&nbsp;</td>
             <td valign="top"><div id="debug-preparsing-objects">&hellip;</div></td>
         </tr></table>
+        <br><br>
+        <p id="debug-words-list-short"></p>
     </div>
 
     <script>
-        window.onload = function () {
-            window.addEventListener('message', function(event) {
-                var data = event.data,
-                    $ = document.getElementById.bind(document),
-                    el;
+        window.addEventListener('message', function(event) {
+            var data = event.data,
+                $ = document.getElementById.bind(document),
+                el;
 
-                if (data && data.id) {
-                    if (data.content === false) {
-                        el = $(data.id);
+            if (data && data.id) {
+                if (data.content === false) {
+                    el = $(data.id);
 
-                        if (el) {
-                            el.innerHTML = '';
-                        }
-                    } else {
-                        el = $(data.id);
+                    if (el) {
+                        el.innerHTML = '';
+                    }
+                } else {
+                    el = $(data.id);
 
-                        if (el) {
-                            el.innerHTML = data.content;
-                        }
+                    if (el) {
+                        el.innerHTML = data.content;
                     }
                 }
-            });
-        };
-
+            }
+        });
     </script>
 
 </body>

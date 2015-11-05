@@ -265,8 +265,6 @@ window.START = function (_param) {
     print(loc.getDescription());
     */
 
-    //----------
-    // INTERFACE.preparsing({value:''});
     INTERFACE.init({
         title: 'Остров и пират',
         placeholder: 'Введите команду'
@@ -277,6 +275,12 @@ window.START = function (_param) {
     });
     //----------
     LAYERS.add();
+
+    //----------
+    // INTERFACE.preparsing({value:''});
+    PARSER.pre_parse();
+    DEBUG.updateWordsFullList();
+    DEBUG.updateWordsShortList();
 }; // end function "START"
 /* --------------------------------------------------------------------------- */
 

@@ -561,6 +561,7 @@ window.INTERFACE = (function (utils) {
 
             template = template ? ' ' + template : '<p>{{ this }}</p>';
             dom.appendTo( dom.create( render(template, text2html(text)) ), elements.story );
+            window.scrollTo(0, window.outerHeight);
         },
 
         /**
@@ -726,6 +727,8 @@ window.INTERFACE = (function (utils) {
                 checkMaySubmit();
                 //----------
                 DEBUG.updateWordsFullList();
+                DEBUG.updateWordsShortList();
+                DEBUG.updatePanelForObjects();
 
                 AUTOCOMPLETE.start(1);
 
@@ -760,6 +763,7 @@ window.INTERFACE = (function (utils) {
                 renderView();
                 handleEvents();
                 clearSuggestions();
+                elements.input.focus();
                 callback && callback();
             });
         };

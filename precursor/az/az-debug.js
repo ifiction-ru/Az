@@ -7,10 +7,6 @@ window.DEBUG = (function() {
     //----------
     var colors = {'Г':'blue', 'ПР':'gray', 'С':'red', 'Н':'green', 'М':'black'};
     //----------
-    var preparsing = {
-        panel:      '',
-    };
-    //----------
     var objects = {
         panel:      'debug-objects-list',
     };
@@ -26,7 +22,7 @@ window.DEBUG = (function() {
 
     function createWindow() {
         if (debug_enable) {
-            debugWindow = window.open('debug.html', 'az-debug-window', 'width=600,height=400,menubar=no,toolbar=no');
+            debugWindow = window.open('debug.html', 'az-debug-window', 'width=600,height=400,menubar=no,toolbar=no,scrollbars=yes');
         }
     }
 
