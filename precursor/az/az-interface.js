@@ -560,7 +560,7 @@ window.INTERFACE = (function (utils) {
             }
 
             template = template ? ' ' + template : '<p>{{ this }}</p>';
-            dom.appendTo( dom.create(render(template, text)), elements.story );
+            dom.appendTo( dom.create( render(template, text2html(text)) ), elements.story );
         },
 
         /**
