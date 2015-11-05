@@ -618,6 +618,7 @@ define(['modules/az-utils'], function (utils) {
                 } else if (key === 27) {
                     clearInput();
                 } else if (key === 9) {
+                    event.preventDefault();
                     item = dom.query(selectors.suggestionItem)[0];
 
                     if (item) {
