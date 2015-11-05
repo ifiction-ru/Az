@@ -618,10 +618,10 @@ window.INTERFACE = (function (utils) {
 
         /**
          * Обработчик ввода команды
+         * @param text
          */
-        submitInput = function () {
-            var input = elements.input,
-                text = input.value.trim();
+        submitInput = function (text) {
+            text = text || elements.input.value.trim();
 
             clearInput();
             clearSuggestions();
@@ -743,6 +743,14 @@ window.INTERFACE = (function (utils) {
 
             dom.on(elements.execute, 'click', function () {
                 submitInput();
+            });
+
+            dom.on(elements.gameLook, 'click', function () {
+                submitInput('Осмотреться');
+            });
+
+            dom.on(elements.gameInventory, 'click', function () {
+                submitInput('Инвентарь');
             });
 
             dom.on(elements.suggestions, 'click', function (event) {

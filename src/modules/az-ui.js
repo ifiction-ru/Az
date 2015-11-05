@@ -511,6 +511,7 @@ define(['modules/az-utils'], function (utils) {
 
             template = template ? ' ' + template : '<p>{{ this }}</p>';
             dom.appendTo( dom.create(render(template, text)), elements.story );
+            window.scrollTo(0, window.outerHeight);
         },
 
         /**
@@ -552,6 +553,7 @@ define(['modules/az-utils'], function (utils) {
                 words = value.split(' ');
                 words[words.length - 1] = text;
                 elements.input.value = words.join(' ');
+                elements.input.focus();
                 clearSuggestions();
             }
         },
@@ -566,10 +568,10 @@ define(['modules/az-utils'], function (utils) {
 
         /**
          * Обработчик ввода команды
+         * @param text
          */
-        submitInput = function () {
-            var input = elements.input,
-                text = input.value.trim();
+        submitInput = function (text) {
+            text = text || elements.input.value.trim();
 
             clearInput();
             clearSuggestions();
@@ -635,6 +637,14 @@ define(['modules/az-utils'], function (utils) {
                 submitInput();
             });
 
+            dom.on(elements.gameLook, 'click', function () {
+                submitInput('Осмотреться');
+            });
+
+            dom.on(elements.gameInventory, 'click', function () {
+                submitInput('Инвентарь');
+            });
+
             dom.on(elements.suggestions, 'click', function (event) {
                 if (dom.is(event.target, selectors.suggestionItem)) {
                     applySuggestion(event.target.innerHTML.trim());
@@ -653,6 +663,7 @@ define(['modules/az-utils'], function (utils) {
                 renderView();
                 handleEvents();
                 clearSuggestions();
+                elements.input.focus();
                 callback && callback();
             });
         };
