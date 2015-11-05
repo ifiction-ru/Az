@@ -259,11 +259,24 @@ window.START = function (_param) {
     //----------
     var loc = AZ.getLocation();
     //----------
+
+    /*
     print(loc.getTitle(null, true));
     print(loc.getDescription());
+    */
+
     //----------
-    INTERFACE.preparsing({value:''});
+    // INTERFACE.preparsing({value:''});
+    INTERFACE.init({
+        title: 'Остров и пират'
+    }, function () {
+        INTERFACE.write(loc.getTitle(null, true));
+        INTERFACE.write(loc.getDescription());
+
+    });
     //----------
     LAYERS.add();
 }; // end function "START"
 /* --------------------------------------------------------------------------- */
+
+window.addEventListener('load', window.START, false);

@@ -26,7 +26,7 @@ define(function () {
                     target[name] = Array.isArray(src) ? [] : {};
                     target[name] = extend(copy, src);
                 } else if (copy !== undefined) {
-                    target[name] = src;
+                    target[name] = copy;
                 }
             }
 

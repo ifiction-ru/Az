@@ -534,6 +534,7 @@ define(['modules/az-utils'], function (utils) {
                 }
 
                 elements.suggestions.innerHTML = result;
+                elements.suggestions.style.display = 'block';
             }
         },
 
@@ -549,7 +550,7 @@ define(['modules/az-utils'], function (utils) {
                 text.trim();
                 value = elements.input.value.trim().replace(/\s+/g, ' ');
                 words = value.split(' ');
-                words[words.length] = text;
+                words[words.length - 1] = text;
                 elements.input.value = words.join(' ');
                 clearSuggestions();
             }
@@ -560,6 +561,7 @@ define(['modules/az-utils'], function (utils) {
          */
         clearSuggestions = function () {
             elements.suggestions.innerHTML = '';
+            elements.suggestions.style.display = 'none';
         },
 
         /**
@@ -570,6 +572,7 @@ define(['modules/az-utils'], function (utils) {
                 text = input.value.trim();
 
             clearInput();
+            clearSuggestions();
             text && triggerEvent('submit', { value: text });
         },
 
@@ -648,7 +651,8 @@ define(['modules/az-utils'], function (utils) {
                 changeSettings(options);
                 renderView();
                 handleEvents();
-                callback();
+                clearSuggestions();
+                callback && callback();
             });
         };
 
