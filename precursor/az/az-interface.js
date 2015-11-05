@@ -629,6 +629,8 @@ window.INTERFACE = (function (utils) {
             if (text) {
                 var CMD = PARSER.parse(text);
 
+                printCommand(text);
+
                 if (CMD.action == null) {
                     print('Ничего не понятно.');
                 } else {

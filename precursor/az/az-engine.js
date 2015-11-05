@@ -268,7 +268,8 @@ window.START = function (_param) {
     //----------
     // INTERFACE.preparsing({value:''});
     INTERFACE.init({
-        title: 'Остров и пират'
+        title: 'Остров и пират',
+        placeholder: 'Введите команду'
     }, function () {
         INTERFACE.write(loc.getTitle(null, true));
         INTERFACE.write(loc.getDescription());
