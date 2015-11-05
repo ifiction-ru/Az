@@ -89,7 +89,7 @@ window.INTERFACE = (function (utils) {
             match,
             add = function(line, js) {
                 js? (code += line.match(reExp) ? line + '\n' : 'r.push(' + line + ');\n') :
-                    (code += line != '' ? 'r.push("' + line.replace(/"/g, '\\"') + '");\n' : '');
+                    (code += line != '' ? 'r.push("' + line.replace(/\"/g, '\\"') + '");\n' : '');
                 return add;
             };
         while(match = re.exec(tpl)) {
@@ -601,7 +601,8 @@ window.INTERFACE = (function (utils) {
                 value = elements.input.value.trim().replace(/\s+/g, ' ');
                 words = value.split(' ');
                 words[words.length - 1] = text;
-                elements.input.value = words.join(' ');
+                elements.input.value = words.join(' ') + ' ';
+                elements.input.focus();
                 clearSuggestions();
             }
         },
