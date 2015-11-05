@@ -230,15 +230,3 @@ p {
     width: 900px;
   }
 }
-
-.az-debug-wrapper {
-  position: fixed;
-  right: 10px;
-  top: 10px;
-  overflow: auto;
-  width: 400px;
-  height: 80%;
-  background: rgba(255,255,255,0.5);
-  padding: 10px;
-  z-index: 9999;
-}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Debug</title>
+</head>
+<body>
+
+    <!-- <DEBUG>  -->
+    <div class="az-debug-wrapper" id="az-debug-wrapper" style="width: 100%; table-layout: fixed">
+        <table border="0"><tr>
+            <td valign="top"><div id="debug-objects-list">&hellip;</div></td>
+            <td valign="top">&nbsp;</td>
+            <td valign="top"><div id="debug-words-list-full">&hellip;</div></td>
+            <td valign="top">&nbsp;</td>
+            <td valign="top"><div id="debug-preparsing-objects">&hellip;</div></td>
+        </tr></table>
+    </div>
+
+    <script>
+        window.onload = function () {
+            window.addEventListener('message', function(event) {
+                var data = event.data,
+                    $ = document.getElementById.bind(document),
+                    el;
+
+                if (data && data.id) {
+                    if (data.content === false) {
+                        el = $(data.id);
+
+                        if (el) {
+                            el.innerHTML = '';
+                        }
+                    } else {
+                        el = $(data.id);
+
+                        if (el) {
+                            el.innerHTML = data.content;
+                        }
+                    }
+                }
+            });
+        };
+
+    </script>
+
+</body>
+</html>

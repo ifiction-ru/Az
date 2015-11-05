@@ -2,6 +2,8 @@
 window.DEBUG = (function() {
     //--------------------------------------------------
     var debug_enable = false;
+
+    var debugWindow;
     //----------
     var colors = {'Г':'blue', 'ПР':'gray', 'С':'red', 'Н':'green', 'М':'black'};
     //----------
@@ -21,15 +23,51 @@ window.DEBUG = (function() {
         full_list:  {panel:     'debug-words-list-full'},
         short_list: {panel:     'debug-words-list-short'}
     };
+
+    function createWindow() {
+        if (debug_enable) {
+            debugWindow = window.open('debug.html', 'az-debug-window', 'width=600,height=400,menubar=no,toolbar=no');
+        }
+    }
+
+    function closeWindow() {
+        debugWindow.close();
+        debugWindow = null;
+    }
+
+    function write(content, id) {
+        if (debugWindow && !debugWindow.closed) {
+            debugWindow.postMessage({
+                content: content,
+                id: id
+            }, '*');
+        }
+    }
+
+    function clear(id) {
+        if (debugWindow && !debugWindow.closed) {
+            debugWindow.postMessage({
+                content: false,
+                id: id
+            }, '*')
+        }
+    }
+
     //--------------------------------------------------
     return {
         //--------------------------------------------------
         Enable: function () {
             debug_enable = true;
+            if (!debugWindow || debugWindow.closed) {
+                createWindow();
+            }
         },
         //--------------------------------------------------
         Disable: function () {
             debug_enable = false;
+            if (debugWindow) {
+                closeWindow();
+            }
         },
         //--------------------------------------------------
         isEnable: function () {
@@ -44,9 +82,9 @@ window.DEBUG = (function() {
             if (debug_enable == false) {return;} // end if
             //----------
             if (_name == '') {
-                
+
             } else {
-                
+
             }// end if
         },
         //--------------------------------------------------
@@ -58,9 +96,9 @@ window.DEBUG = (function() {
             if (debug_enable == false) {return;} // end if
             //----------
             if (_name == '') {
-                SCREEN.Clear('debug-objects-list');
+                clear('debug-objects-list');
             } else {
-                
+
             }// end if
         },
         //--------------------------------------------------
@@ -69,10 +107,10 @@ window.DEBUG = (function() {
             //----------
             var txt_objects = AZ.availObjects(true, false);
             //----------
-            SCREEN.Clear('debug-objects-list');
+            clear('debug-objects-list');
             //----------
             if (txt_objects.length > 0) {
-                SCREEN.Out(txt_objects.join('<br/>'), 'debug-objects-list');
+                write(txt_objects.join('<br/>'), 'debug-objects-list');
             } // end if
             //----------
         },
@@ -95,8 +133,8 @@ window.DEBUG = (function() {
                 output += '<a href="#" onclick="INTERFACE.addWordToCommand(\''+word+'\'); return false;" style="text-decoration:none; color: '+colors[morph]+'">'+word+'</a><br/>';
             } // end for
             //----------
-            SCREEN.Clear(words.full_list.panel);
-            SCREEN.Out(output, words.full_list.panel);
+            clear(words.full_list.panel);
+            write(output, words.full_list.panel);
             //----------
         },
         //--------------------------------------------------
@@ -118,8 +156,8 @@ window.DEBUG = (function() {
                 output += '<b>&lt;ввод&gt;</b>';
             } // end if*/
             //----------
-            SCREEN.Clear(words.short_list.panel);
-            SCREEN.Out(output,words.short_list.panel);
+            clear(words.short_list.panel);
+            write(output, words.short_list.panel);
             //----------
         },
         //--------------------------------------------------
@@ -153,10 +191,10 @@ window.DEBUG = (function() {
                 output += '<br/>';
             } // end for priority
             //----------
-            SCREEN.Clear(preparsing.panel);
-            SCREEN.Out(output,preparsing.panel);
+            clear(preparsing.panel);
+            write(output, preparsing.panel);
             //----------
-        },
+        }
         //--------------------------------------------------
     };
 })(); // end object "DEBUG"
