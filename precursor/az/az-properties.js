@@ -120,7 +120,7 @@ window.decProperty = function () {
 }; // end function "decProperty"
 /* --------------------------------------------------------------------------- */
 window.getProperty = function () {
-    var params = PROPERTIES.checkARGS(arguments, 'get', null);
+    var params = PROPERTIES.checkARGS(arguments, 'get', undefined);
     //----------
     if (params == null) {return;} // end if
     //----------
