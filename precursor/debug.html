@@ -41,6 +41,9 @@
                 }
             }
         });
+        window.addEventListener('load', function () {
+            window.opener.postMessage({ status: 'loaded' }, '*');
+        });
     </script>
 
 </body>
