@@ -1,4 +1,4 @@
-window.INTERFACE = (function (utils) {
+window.INTERFACE = (function () {
     'use strict';
 
     /* Polyfill Custom Event */
@@ -476,6 +476,9 @@ window.INTERFACE = (function (utils) {
             // Заполняются в renderView
         },
 
+        _ready = false,
+        _readyQueue = [],
+
         /**
          * Строим базовый интерфейс игры.
          */
@@ -760,6 +763,27 @@ window.INTERFACE = (function (utils) {
             });
         },
 
+        _runReadyQueue = function () {
+            for (var i = 0; i < _readyQueue.length; i++) {
+                _readyQueue[i]();
+            }
+
+            _readyQueue = [];
+            _ready = true;
+        },
+
+        /**
+         *
+         * @param callback
+         */
+        ready = function (callback) {
+            if (_ready) {
+                callback && callback();
+            } else {
+                _readyQueue.push(callback);
+            }
+        },
+
         /**
          * Инициализация интерфейса игры
          * @param options Настройки интерфейса. Значения по умолчанию см. в переменной settings.
@@ -772,11 +796,13 @@ window.INTERFACE = (function (utils) {
                 handleEvents();
                 clearSuggestions();
                 elements.input.focus();
+
+                _runReadyQueue();
                 callback && callback();
             });
         };
 
-    if (document.readyState == "complete") {
+    if (document.readyState === "complete") {
         dom.ready = true;
         dom.readyCallback();
     } else {
@@ -786,6 +812,8 @@ window.INTERFACE = (function (utils) {
 
     return {
         dom: dom,
+        ready: ready,
+        changeSettings: changeSettings,
         setTitle: setTitle,
         setLocation: setLocation,
         setPlaceholder: setPlaceholder,

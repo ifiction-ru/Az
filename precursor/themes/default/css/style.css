@@ -162,7 +162,7 @@ p {
   padding: 0.2em;
   border: 0;
   background: transparent;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   color: #555;
 }
 .az-inputs__text:-moz-placeholder {
@@ -223,10 +223,14 @@ p {
 }
 
 /* Media queries */
-@media screen and (min-width: 736px) {
+@media screen and (min-width: 700px) {
   .az-main,
   .az-header,
   .az-footer {
-    width: 900px;
+    width: 660px;
+  }
+
+  .az-inputs__text {
+    font-size: 1.3rem;
   }
 }
