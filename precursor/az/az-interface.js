@@ -719,7 +719,7 @@ window.INTERFACE = (function () {
             dom.on(elements.input, 'input', function (event) {
                // triggerEvent('input', { text : elements.input.value.trim() });
                 //----------
-                var command = elements.input.value.trim() || '';
+                var command = elements.input.value || ''; // Тут нельзя обрезать хвостовой пробел! Пробел — признак того, что слово закончено, и нужно подбирать следующее.
                 //----------
                 if (command == '') {
                     PARSER.pre_parse();
