@@ -13,6 +13,9 @@ window.AZ = (function() {
     var available_objects = {full:[], full_IDs:[], limited:[], limited_IDs:[]};
     //----------
     var objects_list = {}; // Ассоциативный массив для хранения ссылок на объекты игры по их строковому ID.
+    //----------
+    var toDoOnStart  = null; // С чего начать игру +++ Переделать на внутреннее свойство.
+    var outputLayers = [];   // Перечень слоёв "чего выводим", для переключения парсера
     //--------------------------------------------------
     // Инициализация параметров, которые должны сохраняться в игровой сессии:
     setProperty('turns.all', 0);
@@ -22,68 +25,82 @@ window.AZ = (function() {
         // Очищаем перечень доступных объектов
         available_objects = {full:[], full_IDs:[], limited:[], limited_IDs:[]};
         //----------
-        // Добавляем в перечень доступных объектов содержимое локации
-        // ??? Может, стоит это делатьтолько после того, как игрок посмотрел инвентарь?
-        var objects1 = position.object.container.getContent();
-        //----------
-        // Добавляем в перечень доступных объектов содержимое инвентаря
-        var objects2 = protagonist.object.container.getContent();
-        //----------
-        var objects=objects1.concat(objects2);
-        //----------
-        // Добавляем в перечень доступных объектов персонажа игрока
-        objects.unshift({'what': protagonist.object, 'where': position.object, 'quantity':1});
-        //----------
-        // Добавляем в перечень доступных объектов текущую локацию
-        objects.unshift({'what': position.object, 'where': position.object, 'quantity':1});
-        //----------
-        // +++ Известные игроку контейнеры в инвентаре и локации
-        //----------
-        for (var x=0; x<objects.length; x++) {
-            var object = AZ.getObject(objects[x].what);
+        if (outputLayers.length == 0) {
+            // Добавляем в перечень доступных объектов содержимое локации
+            // ??? Может, стоит это делатьтолько после того, как игрок посмотрел инвентарь?
+            var objects1 = position.object.container.getContent();
             //----------
+            // Добавляем в перечень доступных объектов содержимое инвентаря
+            var objects2 = protagonist.object.container.getContent();
+            //----------
+            var objects=objects1.concat(objects2);
+            //----------
+            // Добавляем в перечень доступных объектов персонажа игрока
+            objects.unshift({'what': protagonist.object, 'where': position.object, 'quantity':1});
+            //----------
+            // Добавляем в перечень доступных объектов текущую локацию
+            objects.unshift({'what': position.object, 'where': position.object, 'quantity':1});
+            //----------
+            // +++ Известные игроку контейнеры в инвентаре и локации
+            //----------
+            for (var x=0; x<objects.length; x++) {
+                var object = AZ.getObject(objects[x].what);
+                //----------
+                available_objects.full.push(object);
+                available_objects.full_IDs.push(AZ.getID(object));
+            } // end for x
+            //----------
+            var arr = protagonist.object.what_he_exam.now;
+            for (var x=0; x<arr.length; x++) {
+                var container    = AZ.getObject(arr[x]);
+                var container_id = AZ.getObject(arr[x]);
+                //----------
+                if (AZ.getID(container_id) == position.ID) {continue;} // end if
+                //----------
+                var content = container.getContent();
+                //----------
+                for (var y=0; y<content.length; y++) {
+                    var object = content[y].what;
+                    var id     = AZ.getID(object);
+                    //----------
+                    if (available_objects.full_IDs.indexOf(id) == -1) {
+                        available_objects.full.push(object);
+                        available_objects.full_IDs.push(id);
+                    } // end if
+                } // end for
+            } // end for x
+            //----------
+            var arr = PARSER.get_objects_by_loc_and_actions(position.ID);
+            for (var x=0; x<arr.length; x++) {
+                var object = AZ.getObject(arr[x]);
+                //----------
+                if (available_objects.full_IDs.indexOf(arr[x]) == -1) {
+                    available_objects.full.push(object);
+                    available_objects.full_IDs.push(arr[x]);
+                    //----------
+                    if (available_objects.limited_IDs.indexOf(arr[x]) == -1) {
+                        available_objects.limited.push(object);
+                        available_objects.limited_IDs.push(arr[x]);
+                    } // end if
+                } // end if
+            } // end for x
+        } else {
+            var object = outputLayers[outputLayers.length - 1];
             available_objects.full.push(object);
             available_objects.full_IDs.push(AZ.getID(object));
-        } // end for x
+        } // end if
         //----------
-        var arr = protagonist.object.what_he_exam.now;
-        for (var x=0; x<arr.length; x++) {
-            var container    = AZ.getObject(arr[x]);
-            var container_id = AZ.getObject(arr[x]);
-            //----------
-            if (AZ.getID(container_id) == position.ID) {continue;} // end if
-            //----------
-            var content = container.getContent();
-            //----------
-            for (var y=0; y<content.length; y++) {
-                var object = content[y].what;
-                var id     = AZ.getID(object);
-                //----------
-                if (available_objects.full_IDs.indexOf(id) == -1) {
-                    available_objects.full.push(object);
-                    available_objects.full_IDs.push(id);
-                } // end if
-            } // end for
-        } // end for x
-        //----------
-        var arr = PARSER.get_objects_by_loc_and_actions(position.ID);
-        for (var x=0; x<arr.length; x++) {
-            var object = AZ.getObject(arr[x]);
-            //----------
-            if (available_objects.full_IDs.indexOf(arr[x]) == -1) {
-                available_objects.full.push(object);
-                available_objects.full_IDs.push(arr[x]);
-                //----------
-                if (available_objects.limited_IDs.indexOf(arr[x]) == -1) {
-                    available_objects.limited.push(object);
-                    available_objects.limited_IDs.push(arr[x]);
-                } // end if
-            } // end if
-        } // end for x
+        if (DEBUG.isEnable() == true) {
+            DEBUG.updatePanelForObjects();
+        } // end if
         //----------
     }; // end function "AZ.get_available_objects"
     //--------------------------------------------------
     return {
+        //--------------------------------------------------
+        outputLayers: outputLayers,
+        toDoOnStart:  toDoOnStart,
+        updateAvailableObjects: updateAvailableObjects,
         //--------------------------------------------------
         // РАБОТА С БАЗОВЫМИ ОБЪЕКТАМИ
             //--------------------------------------------------
@@ -218,15 +235,16 @@ window.AZ = (function() {
                 //----------
                 updateAvailableObjects();
                 //----------
-                if (DEBUG.isEnable() == true) {
-                    DEBUG.updatePanelForObjects();
-                } // end if
-                //----------
                 // ...
                 //----------
                 // Данная команда должна идти в самом конце, чтобы все изменения (по событиям, например), происходили на предыдущем слое.
                 LAYERS.add();
             }, // end function "AZ.startNewTurn"
+        //--------------------------------------------------
+        startWith: function(_module) {
+            // +++ Вставить всякие проверки
+            this.toDoOnStart = _module;
+        }, // end function "AZ.startNewTurn"
         //--------------------------------------------------
         availObjects: function (_only_id, _limited) {
             if (_limited == true) {
@@ -238,6 +256,10 @@ window.AZ = (function() {
         /* --------------------------------------------------------------------------- */
     };
 })(); // end object "AZ"
+/* --------------------------------------------------------------------------- */
+window.startWith = function (_module) {
+    AZ.startWith(_module);
+}
 /* --------------------------------------------------------------------------- */
 window.START = function (_param) {
     window.markdown  = new showdown.Converter();
@@ -255,30 +277,28 @@ window.START = function (_param) {
         return;
     } // end if
     //----------
-    AZ.startNewTurn();
+    LAYERS.add();
     //----------
-    var loc = AZ.getLocation();
-    //----------
-
-    /*
-    print(loc.getTitle(null, true));
-    print(loc.getDescription());
-    */
-
     INTERFACE.init({
+        title: 'Остров и пират',
         placeholder: 'Введите команду'
     }, function () {
-        INTERFACE.write(loc.getTitle(null, true));
-        INTERFACE.write(loc.getDescription());
+        AZ.startNewTurn();
+        //----------
+        if (typeof(AZ.toDoOnStart) == 'function') {
+            AZ.toDoOnStart();
+        } else {
+            var loc = AZ.getLocation();
+            //----------
+            INTERFACE.write(loc.getTitle(null, true));
+            INTERFACE.write(loc.getDescription());
+        } // end if
+        //----------
+        // INTERFACE.preparsing({value:''});
+        PARSER.pre_parse();
+        DEBUG.updateWordsFullList();
+        DEBUG.updateWordsShortList();
     });
-    //----------
-    LAYERS.add();
-
-    //----------
-    // INTERFACE.preparsing({value:''});
-    PARSER.pre_parse();
-    DEBUG.updateWordsFullList();
-    DEBUG.updateWordsShortList();
 }; // end function "START"
 /* --------------------------------------------------------------------------- */
 
