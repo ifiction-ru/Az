@@ -11,6 +11,10 @@
     window.Объект   = Item;
     window.Персонаж = Character;
 /* --------------------------------------------------------------------------- */
+// РАБОТА С ИГРОЙ
+    //--------------------------------------------------
+    СЧегоНачать     = startWith;
+/* --------------------------------------------------------------------------- */
 // РАБОТА С ОБЪЕКТАМИ
     //--------------------------------------------------
     tSimpleObject.prototype.Это         = tSimpleObject.prototype.Is;
@@ -19,9 +23,9 @@
     //----------
 /* --------------------------------------------------------------------------- */
 // РАБОТА С ОПИСАНИЕМ
-    window.ДляВсего     = ForAll;
-    window.ДляПерсонажей    = ForChars;
-    window.ДляОбъектов      = ForItems;
+    window.ДляВсего      = ForAll;
+    window.ДляПерсонажей = ForChars;
+    window.ДляОбъектов   = ForItems;
     //----------
     tSimpleObject.prototype.ВывестиОписание            = tSimpleObject.prototype.printDescription;
     tSimpleObject.prototype.ВывестиОписаниеСЗаголовком = tSimpleObject.prototype.printTitleAndDescription;
@@ -31,6 +35,13 @@
 // РАБОТА С ПЕРСОНАЖАМИ
     //--------------------------------------------------
     tSimpleObject.prototype.СделатьТекущим  = Character.prototype.SetCurrent;
+/* --------------------------------------------------------------------------- */
+// РАБОТА С ТЕКСТАМИ
+    //--------------------------------------------------
+    window.Текст = SimpleText;
+    SimpleText.prototype.Вывести  = SimpleText.prototype.print;
+    SimpleText.prototype.Далее    = SimpleText.prototype.next;
+    //SimpleText.prototype.Действие = tSimpleObject.prototype.Action;
 /* --------------------------------------------------------------------------- */
 // РАБОТА СО СВОЙСТВАМИ ОБЪЕКТОВ
     //--------------------------------------------------
