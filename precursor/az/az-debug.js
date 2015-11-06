@@ -1,7 +1,10 @@
 /* --------------------------------------------------------------------------- */
 window.DEBUG = (function() {
     //--------------------------------------------------
-    var debug_enable = false;
+    var debug_enable = false,
+        debug_ready = false;
+
+    var debugQuery = [];
 
     var debugWindow;
     //----------
@@ -20,6 +23,18 @@ window.DEBUG = (function() {
         short_list: {panel:     'debug-words-list-short'}
     };
 
+    window.addEventListener('message', function(event) {
+        if (event.data.status === 'loaded') {
+            debug_ready = true;
+
+            for (var i = 0; i < debugQuery.length; i++) {
+                if (typeof debugQuery[i] === 'function') {
+                    debugQuery[i]();
+                }
+            }
+        }
+    });
+
     function createWindow() {
         if (debug_enable) {
             debugWindow = window.open('debug.html', 'az-debug-window', 'width=600,height=400,menubar=no,toolbar=no,scrollbars=yes');
@@ -32,20 +47,36 @@ window.DEBUG = (function() {
     }
 
     function write(content, id) {
-        if (debugWindow && !debugWindow.closed) {
+        var func = function () {
             debugWindow.postMessage({
                 content: content,
                 id: id
             }, '*');
+        };
+
+        if (debugWindow && !debugWindow.closed) {
+            if (debug_ready) {
+                func();
+            } else {
+                debugQuery.push(func);
+            }
         }
     }
 
     function clear(id) {
-        if (debugWindow && !debugWindow.closed) {
+        var func = function () {
             debugWindow.postMessage({
                 content: false,
                 id: id
             }, '*')
+        };
+
+        if (debugWindow && !debugWindow.closed) {
+            if (debug_ready) {
+                func();
+            } else {
+                debugQuery.push(func);
+            }
         }
     }
 
