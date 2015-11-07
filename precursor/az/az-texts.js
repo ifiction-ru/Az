@@ -1,18 +1,43 @@
 /* --------------------------------------------------------------------------- */
 // РАБОТА С ТЕКСТАМИ
 //--------------------------------------------------
-window.SimpleText = function (_id, _text, _module) {
+window.SimpleText = function (_id) {
     tSimpleObject.apply(this, arguments);
     //----------
     this.type           = 'text'; // Тип объекта
-    this.module         = _module;
     //----------
-    this.pages = {texts:[], current:-1};
-    // Нарезаем текст на страницы
-    this.pages.texts = _text.split(/[\s|\n]*\<\-\s*далее\s*\-\>[\s|\n]*/gi);
-    for (var x=0; x<this.pages.texts.length; x++) {
-        this.pages.texts[x] = this.pages.texts[x].trim().replace(/^\s+/gm, '\n');
-    } // end for
+    this.module = null;
+    //----------
+    this.text   = '';
+    this.pages  = {texts:[], current:-1};
+    //----------
+    Object.defineProperty(this, 'Текст', {
+        set: function(_text) {
+            //----------
+            this.text = _text;
+            //----------
+            // Нарезаем текст на страницы
+            this.pages.texts = _text.split(/[\s|\n]*\<\-\s*далее\s*\-\>[\s|\n]*/gi);
+            for (var x=0; x<this.pages.texts.length; x++) {
+                this.pages.texts[x] = this.pages.texts[x].trim().replace(/^\s+/gm, '\n');
+            } // end for
+            //----------
+        },
+        get: function() {
+            return this.text;
+        }
+    });
+    //----------
+    Object.defineProperty(this, 'ВыполнитьПосле', {
+        set: function(_module) {
+            //----------
+            this.module = _module;
+            //----------
+        },
+        get: function() {
+            return null;
+        }
+    });
     //----------
     //Object.defineProperty(this, 'isObject', {configurable:false, writable:false, value:true});
     //Object.defineProperty(this, 'ID',       {configurable:false, writable:false, value:objectID});
