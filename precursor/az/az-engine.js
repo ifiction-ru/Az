@@ -280,7 +280,7 @@ window.START = function (_param) {
     LAYERS.add();
     //----------
     INTERFACE.init({
-        title: 'Остров и пират',
+        title: Получить('Название игры'),
         placeholder: 'Введите команду'
     }, function () {
         AZ.startNewTurn();
