@@ -84,6 +84,7 @@ p {
 .az-story {
   overflow: hidden;
   padding: 0.5em 0;
+  text-align: justify;
 }
 
 .az-story__command {

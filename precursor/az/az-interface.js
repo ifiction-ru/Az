@@ -650,6 +650,9 @@ window.INTERFACE = (function () {
                 } // end if
                 //----------
                 AZ.startNewTurn();
+                PARSER.pre_parse();
+
+                autocomplete();
             }
         },
 
