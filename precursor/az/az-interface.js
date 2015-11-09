@@ -628,12 +628,12 @@ window.INTERFACE = (function () {
         submitInput = function (text) {
             text = text || elements.input.value.trim();
 
-            clearInput();
-            clearSuggestions();
-            // text && triggerEvent('submit', { value: text });
-
             if (text) {
                 var CMD = PARSER.parse(text);
+
+                clearInput();
+                clearSuggestions();
+                // text && triggerEvent('submit', { value: text });
 
                 printCommand(text);
 
