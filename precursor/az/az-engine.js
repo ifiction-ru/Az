@@ -280,8 +280,8 @@ window.START = function (_param) {
     LAYERS.add();
     //----------
     INTERFACE.init({
-        title: Получить('Название игры'),
-        heading: Получить('Название игры'),
+        title: getProperty('Название игры'),
+        heading: getProperty('Название игры'),
         placeholder: 'Введите команду'
     }, function () {
         AZ.startNewTurn();
