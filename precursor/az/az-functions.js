@@ -96,9 +96,9 @@ window.length2symbol = function (_list) {
     //----------
     if (value == 0) {
         return 'N';
-    } else if (value == 1) {
+    } else if (value < 3) {
         return 'S';
-    } else if (value > 1) {
+    } else if (value > 2) {
         return 'P';
     } else {
         return null;
