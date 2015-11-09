@@ -629,13 +629,13 @@ window.INTERFACE = (function () {
             text = text || elements.input.value.trim();
 
             if (text) {
+                printCommand(text);
+
                 var CMD = PARSER.parse(text);
 
                 clearInput();
                 clearSuggestions();
                 // text && triggerEvent('submit', { value: text });
-
-                printCommand(text);
 
                 if (CMD.action == null) {
                     print('Ничего не понятно.');
