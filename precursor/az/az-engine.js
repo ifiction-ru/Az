@@ -285,8 +285,8 @@ window.START = function (_param) {
     } // end if
     //----------
     INTERFACE.init({
-        title:       getProperty('Название игры'),
-        heading:     getProperty('Название игры'),
+        title:       getProperty('ИГРА.Название'),
+        heading:     getProperty('ИГРА.Название'),
         placeholder: 'Введите команду'
     }, function () {
         if (typeof(AZ.toDoOnStart) == 'function') {
