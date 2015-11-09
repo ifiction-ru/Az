@@ -414,7 +414,7 @@ window.PARSER = (function() {
                 //if (_preparsing == true) {
                 //  var words_list = PARSER.pre_parse(word_str);
                 //} // end if
-                return null;
+                return {phrase:CMD.phrase, object:null, action:null};
             } // end if
             //----------
             var words_list = _phrase.split(' ');
@@ -542,9 +542,10 @@ window.PARSER = (function() {
             //----------
             if (CMD.any_errors == true) {
                 if (_preparsing == false || (wx < maxwx || (wx == maxwx && have_a_space == true))) {
-                    console.error('Слово: "'+word_str+'" мне незнакомо.'); // Консоль
-                    //SCREEN.Вывести('Мне неизвестно слово"'+_word+'".<br/>');
-                    return null;
+                    if (_preparsing == false) {
+                        print('Слово "<strong>'+word_str+'</strong>" мне незнакомо.');
+                    } // end if
+                    return {phrase:CMD.phrase, object:null, action:null};
                 } // end if
                 //----------
                 
