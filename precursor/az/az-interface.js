@@ -466,7 +466,8 @@ window.INTERFACE = (function () {
             input: '.az-inputs__text',
             execute: '.az-inputs__execute',
             gameLook: '.az-inputs__game-look',
-            gameInventory: '.az-inputs__game-inv'
+            gameInventory: '.az-inputs__game-inv',
+            storyCommand: '.az-story__command'
         },
         classes = {
             main: 'az-main'
@@ -560,9 +561,12 @@ window.INTERFACE = (function () {
                 return;
             }
 
+            var commands = dom.query(selectors.storyCommand),
+                lastCommand = commands && commands[commands.length - 1];
+
             template = template ? ' ' + template : '<p>{{ this }}</p>';
             dom.appendTo( dom.create( render(template, text2html(text)) ), elements.story );
-            window.scrollTo(0, document.body.scrollHeight);
+            lastCommand && window.scrollTo(0, lastCommand.offsetTop - elements.heading.offsetHeight);
         },
 
         /**
