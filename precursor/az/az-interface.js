@@ -676,7 +676,8 @@ window.INTERFACE = (function () {
                 return;
             }
 
-            field.style.color = (AUTOCOMPLETE.getActionFlag() == true) ? "#00F" : null;
+            var status = AUTOCOMPLETE.getStatus();
+            field.style.color = ((status == 1) ? "#00F" : ((status == -1) ? "#F00" : null));
         },
 
         /**

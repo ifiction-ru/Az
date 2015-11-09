@@ -149,7 +149,8 @@ window.DEBUG = (function() {
             //----------
             var output = '';
             //----------
-            if (AUTOCOMPLETE.getActionFlag() == true) {
+            //if (AUTOCOMPLETE.getActionFlag() == true) {
+            if (AUTOCOMPLETE.getStatus() == 1) {
                 output += '<b>&lt;ввод&gt;</b><hr/>';
             } // end if
             //----------
@@ -178,10 +179,6 @@ window.DEBUG = (function() {
                 //----------
                 output += '<div class="acword"><a href="#" onclick="INTERFACE.addWordToCommand(\''+word+'\'); return false;" style="text-decoration:none; color: '+colors[morph]+'">'+word+'</a></div>';
             } // end for
-            //----------
-            /*if (AUTOCOMPLETE.getActionFlag() == true) {
-                output += '<b>&lt;ввод&gt;</b>';
-            } // end if*/
             //----------
             clear(words.short_list.panel);
             write(output, words.short_list.panel);

@@ -545,6 +545,9 @@ window.PARSER = (function() {
                     if (_preparsing == false) {
                         print('Слово "<strong>'+word_str+'</strong>" мне незнакомо.');
                     } // end if
+                    //----------
+                    AUTOCOMPLETE.setStatus(-1);
+                    //----------
                     return {phrase:CMD.phrase, object:null, action:null};
                 } // end if
                 //----------
@@ -1091,7 +1094,8 @@ window.PARSER = (function() {
                     if (action_id != null) {
                         var _action = CMD.objects[priority].actions_list[action_id-1];
                         if (_action != null) {
-                            AUTOCOMPLETE.setActionFlag();
+                            AUTOCOMPLETE.setActionFlag(); // --- Убрать
+                            AUTOCOMPLETE.setStatus(1);
                         } // end if
                         //----------
                         break;
