@@ -833,7 +833,17 @@ window.INTERFACE = (function () {
         setSuggestions: setSuggestions,
         render: render,
         on: on,
-        init: init
+        init: init,
+        updateCommandPanel: function (_mode) {
+            // Обновление командной панели игрока
+            if (_mode == 'text') {
+                // Кнопки для текста
+                
+            } else {
+                // Кнопки для всего остального
+                
+            } // end if
+        } // end function "updateCommandPanel"
     };
 })();
 

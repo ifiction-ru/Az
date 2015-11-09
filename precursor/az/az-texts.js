@@ -38,13 +38,8 @@ window.SimpleText = function (_id) {
             return null;
         }
     });
-    //----------
-    //Object.defineProperty(this, 'isObject', {configurable:false, writable:false, value:true});
-    //Object.defineProperty(this, 'ID',       {configurable:false, writable:false, value:objectID});
-    //Object.defineProperty(this, 'pages',    {configurable:false, writable:false, value:pages});
-    //Object.defineProperty(this, 'module',   {configurable:false, writable:false, value:module});
-    //----------
 } // end function "SimpleText"
+//----------
 SimpleText.prototype = Object.create(tSimpleObject.prototype);
 SimpleText.prototype.constructor = SimpleText;
 //--------------------------------------------------
@@ -77,6 +72,7 @@ SimpleText.prototype.print = function () {
     AZ.outputLayers.push(this);
     //----------
     AZ.updateAvailableObjects();
+    //----------
     //this.pages.current = -1;
     //----------
     this.next();
