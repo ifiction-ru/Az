@@ -406,7 +406,8 @@ window.PARSER = (function() {
             var preposition  = null;
             var buffer_after = []; // Буфер существительных для (пост)постобработки ("кто я такой" -> "кто такой я")
             //----------
-            var have_a_space = (_phrase.substr(-1) == ' ') ? true : false;
+            // Если это препарсинг, то проверяем, есть ли в конце фразы пробел. Если нет — считаем, что он там есть, чтобы последнее слово обрабатывалось как законченное.
+            var have_a_space = (_preparsing == false || _phrase.substr(-1) == ' ') ? true : false;
             //----------
             _phrase = _phrase.trim().toLowerCase().replace(/\s+/g,' ');
             if (_phrase == '') {
