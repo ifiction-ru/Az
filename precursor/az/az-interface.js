@@ -658,6 +658,8 @@ window.INTERFACE = (function () {
 
                 autocomplete();
             }
+
+            elements.input.focus();
         },
 
         /**
