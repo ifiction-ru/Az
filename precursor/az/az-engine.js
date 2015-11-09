@@ -281,6 +281,7 @@ window.START = function (_param) {
     //----------
     INTERFACE.init({
         title: Получить('Название игры'),
+        heading: Получить('Название игры'),
         placeholder: 'Введите команду'
     }, function () {
         AZ.startNewTurn();

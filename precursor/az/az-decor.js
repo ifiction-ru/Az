@@ -129,7 +129,7 @@ window.DECOR = (function() {
     //--------------------------------------------------
     Command: {
         print: function (_text) {
-            return '<b>&gt; '+_text+'</b>'
+            return '<div class="az-story__command">&gt; '+_text+'</div>'
         }, // end function "Inventory"
     },
     //--------------------------------------------------

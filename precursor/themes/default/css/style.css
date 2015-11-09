@@ -16,8 +16,6 @@
   font-weight: bold;
   src: local("PT Sans Bold"), url("../fonts/PTSans/PTS75F_W.eot?#iefix") format("embedded-opentype"), url("../fonts/PTSans/PTS75F_W.woff") format("woff"), url("../fonts/PTSans/PTS75F_W.ttf") format("truetype"), url("../fonts/PTSans/PTS75F_W.svg#PTSans-Bold") format("svg");
 }
-
-
 html, body {
   margin: 0;
   padding: 0;
@@ -28,7 +26,7 @@ body {
   position: relative;
   min-height: 480px;
   background: #f8f8f8;
-  font: 1em/1.4 "PT Sans", "sans-serif" normal;
+  font: 14px/1.4 "PT Sans", "sans-serif" normal;
   color: #3a3a3a;
 }
 
@@ -86,6 +84,16 @@ p {
 .az-story {
   overflow: hidden;
   padding: 0.5em 0;
+}
+
+.az-story__command {
+  font-weight: bold;
+  color: #3087ff;
+}
+.az-story__command:last-of-type {
+  margin-top: 1.5em;
+  padding: 1em 0 0;
+  border-top: 1px dashed #ccc;
 }
 
 .az-parser {
@@ -162,7 +170,7 @@ p {
   padding: 0.2em;
   border: 0;
   background: transparent;
-  font-size: 1.1rem;
+  font-size: 16px;
   color: #555;
 }
 .az-inputs__text:-moz-placeholder {
@@ -189,7 +197,7 @@ p {
 .az-inputs__btn {
   position: relative;
   width: 32px;
-  margin: 0 0.1rem;
+  margin: 0 0.1em;
   padding: 0;
   border: 0;
   background: 50% 50% no-repeat;
@@ -224,6 +232,10 @@ p {
 
 /* Media queries */
 @media screen and (min-width: 700px) {
+  body {
+    font-size: 17px;
+  }
+
   .az-main,
   .az-header,
   .az-footer {
@@ -231,6 +243,6 @@ p {
   }
 
   .az-inputs__text {
-    font-size: 1.3rem;
+    font-size: 19px;
   }
 }

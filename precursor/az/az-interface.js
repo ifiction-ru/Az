@@ -431,8 +431,8 @@ window.INTERFACE = (function () {
     };
 
     var settings = {
-            title: 'Название игры', // допускается HTML-код
-            location: 'Название локации', // название локации
+            title: 'Название игры',
+            heading: 'Название игры', // допускается HTML-код
             theme: '',   // путь к css-файлу со стилями, относительно index.html,
             placeholder: '>',
             executeTitle: 'Выполнить',
@@ -459,8 +459,7 @@ window.INTERFACE = (function () {
 
         selectors = {
             main: '.az-main',
-            title: '.az-title',
-            location: '.az-location',
+            heading: '.az-title',
             story: '.az-story',
             suggestions: '.az-suggestions',
             suggestionItem: '.az-suggestions__item',
@@ -493,8 +492,7 @@ window.INTERFACE = (function () {
 
             utils.extend(elements, {
                 main: main,
-                title: dom.get(selectors.title, main),
-                location: dom.get(selectors.location, main),
+                heading: dom.get(selectors.heading, main),
                 story: dom.get(selectors.story, main),
                 suggestions: dom.get(selectors.suggestions, main),
                 input: dom.get(selectors.input, main),
@@ -528,7 +526,7 @@ window.INTERFACE = (function () {
 
         /**
          * Изменение заголовка игры
-         * @param {string} text Заголовок игры, допускается HTML-код
+         * @param {string} text Заголовок окна игры
          */
         setTitle = function (text) {
             if (!text) {
@@ -536,20 +534,20 @@ window.INTERFACE = (function () {
             }
 
             changeSettings({ title: text });
-            elements.title.innerHtml = text;
+            document.title = text;
         },
 
         /**
-         * Изменение заголовка локации
-         * @param {string} text Заголовок локации, допускается HTML-код
+         * Изменение заголовка игры
+         * @param {string} text Заголовок игры, допускается HTML-код
          */
-        setLocation = function (text) {
+        setHeading = function (text) {
             if (!text) {
                 return;
             }
 
-            changeSettings({ location: text });
-            elements.location.innerHtml = text;
+            changeSettings({ heading: text });
+            elements.heading.innerHtml = text;
         },
 
         /**
@@ -733,15 +731,7 @@ window.INTERFACE = (function () {
                 DEBUG.updateWordsShortList();
                 DEBUG.updatePanelForObjects();
 
-                AUTOCOMPLETE.start(1);
-
-                var data = [];
-
-                while (AUTOCOMPLETE.next(1) != false) {
-                    data.push(AUTOCOMPLETE.word(1));
-                }
-
-                setSuggestions(data)
+                autocomplete();
             });
 
             dom.on(elements.execute, 'click', function () {
@@ -761,6 +751,18 @@ window.INTERFACE = (function () {
                     applySuggestion(event.target.innerHTML.trim());
                 }
             });
+        },
+
+        autocomplete = function () {
+            var data = [];
+
+            AUTOCOMPLETE.start(1);
+
+            while (AUTOCOMPLETE.next(1) != false) {
+                data.push(AUTOCOMPLETE.word(1));
+            }
+
+            setSuggestions(data);
         },
 
         _runReadyQueue = function () {
@@ -797,8 +799,9 @@ window.INTERFACE = (function () {
                 clearSuggestions();
                 elements.input.focus();
 
-                _runReadyQueue();
                 callback && callback();
+                _runReadyQueue();
+                autocomplete();
             });
         };
 
@@ -815,7 +818,7 @@ window.INTERFACE = (function () {
         ready: ready,
         changeSettings: changeSettings,
         setTitle: setTitle,
-        setLocation: setLocation,
+        setHeading: setHeading,
         setPlaceholder: setPlaceholder,
         write: write,
         clear: clear,

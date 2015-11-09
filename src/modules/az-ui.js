@@ -380,7 +380,7 @@ define(['modules/az-utils'], function (utils) {
         };
 
     var settings = {
-            title: 'Название игры', // допускается HTML-код
+            heading: 'Название игры', // допускается HTML-код
             location: 'Название локации', // название локации
             theme: '',   // путь к css-файлу со стилями, относительно index.html,
             placeholder: '>',
@@ -409,7 +409,7 @@ define(['modules/az-utils'], function (utils) {
 
         selectors = {
             main: '.az-main',
-            title: '.az-title',
+            heading: '.az-title',
             location: '.az-location',
             story: '.az-story',
             suggestions: '.az-suggestions',
@@ -440,7 +440,7 @@ define(['modules/az-utils'], function (utils) {
 
             utils.extend(elements, {
                 main: main,
-                title: dom.get(selectors.title, main),
+                heading: dom.get(selectors.heading, main),
                 location: dom.get(selectors.location, main),
                 story: dom.get(selectors.story, main),
                 suggestions: dom.get(selectors.suggestions, main),
@@ -482,8 +482,8 @@ define(['modules/az-utils'], function (utils) {
                 return;
             }
 
-            changeSettings({ title: text });
-            elements.title.innerHtml = text;
+            changeSettings({ heading: text });
+            elements.heading.innerHtml = text;
         },
 
         /**
