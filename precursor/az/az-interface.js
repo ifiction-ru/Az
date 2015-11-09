@@ -562,7 +562,7 @@ window.INTERFACE = (function () {
 
             template = template ? ' ' + template : '<p>{{ this }}</p>';
             dom.appendTo( dom.create( render(template, text2html(text)) ), elements.story );
-            window.scrollTo(0, window.outerHeight);
+            window.scrollTo(0, document.body.scrollHeight);
         },
 
         /**
