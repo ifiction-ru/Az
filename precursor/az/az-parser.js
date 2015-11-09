@@ -11,8 +11,6 @@
 --------------------------------------------------------------------------- */
 window.PARSER = (function() {
     //--------------------------------------------------
-    //var autocomplete  = {};
-    //--------------------------------------------------
     var last_params     = {};
     //--------------------------------------------------
     var LOC_ID          = null;
@@ -664,7 +662,7 @@ window.PARSER = (function() {
                     } // end if
                 } // end for x
                 //----------
-                if (objrec !== null) {
+                if (objrec !== null && word_str == '') {
                     CMD.params[objrec.priority] = null;
                     //----------
                     CMD.objects[objrec.priority]    = objrec.object;
@@ -674,7 +672,7 @@ window.PARSER = (function() {
                 } // end if
             } // end if
             //----------
-            if (CMD.verb != null) {
+            if (CMD.verb != null && word_str == '') {
                 for (var priority=1; priority<=3; priority++) {
                     if (CMD.objects[priority] != null) {continue;} // end if
                     //----------
