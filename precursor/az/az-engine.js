@@ -15,7 +15,8 @@ window.AZ = (function() {
     var objects_list = {}; // Ассоциативный массив для хранения ссылок на объекты игры по их строковому ID.
     //----------
     var toDoOnStart  = null; // С чего начать игру +++ Переделать на внутреннее свойство.
-    var outputLayers = [];   // Перечень слоёв "чего выводим", для переключения парсера
+    //----------
+    var outputLayers = [];   // Перечень слоёв "с чем имеет дело игрок", для переключения парсера, области видимости объектов и т.п.
     //--------------------------------------------------
     // Инициализация параметров, которые должны сохраняться в игровой сессии:
     setProperty('turns.all', 0);
@@ -99,6 +100,7 @@ window.AZ = (function() {
     return {
         //--------------------------------------------------
         outputLayers: outputLayers,
+        //----------
         toDoOnStart:  toDoOnStart,
         updateAvailableObjects: updateAvailableObjects,
         //--------------------------------------------------
@@ -229,22 +231,28 @@ window.AZ = (function() {
                 //----------
                 return position.object == null ? null : (_as_id == false ? position.object : position.ID);
             }, // end function "AZ.getLocation"
-            //--------------------------------------------------
-            startNewTurn: function() {
-                AUTOCOMPLETE.init();
-                //----------
-                updateAvailableObjects();
-                //----------
-                // ...
-                //----------
-                // Данная команда должна идти в самом конце, чтобы все изменения (по событиям, например), происходили на предыдущем слое.
-                LAYERS.add();
-            }, // end function "AZ.startNewTurn"
+        //--------------------------------------------------
+        // Функция вызывается перед передачей управления игроку
+        startNewTurn: function() {
+            AUTOCOMPLETE.init();
+            //----------
+            updateAvailableObjects();
+            //----------
+            // +++ Переделать на анализ слоёв
+            if (outputLayers.length == 0) {
+                INTERFACE.updateCommandPanel('other');
+            } else {
+                INTERFACE.updateCommandPanel('text');
+            } // end if
+            //----------
+            // Данная команда должна идти в самом конце, чтобы все изменения (по событиям, например), происходили на предыдущем слое.
+            LAYERS.add();
+        }, // end function "AZ.startNewTurn"
         //--------------------------------------------------
         startWith: function(_module) {
             // +++ Вставить всякие проверки
             this.toDoOnStart = _module;
-        }, // end function "AZ.startNewTurn"
+        }, // end function "AZ.startWith"
         //--------------------------------------------------
         availObjects: function (_only_id, _limited) {
             if (_limited == true) {
@@ -266,7 +274,6 @@ window.START = function (_param) {
     window.typograph = new Typograf({lang: 'ru'});
     //----------
     var character = AZ.getProtagonist() || null;
-    //----------
     if (character == null) {
         console.error('Не задан текущий персонаж игры!');
         return;
@@ -277,15 +284,11 @@ window.START = function (_param) {
         return;
     } // end if
     //----------
-    LAYERS.add();
-    //----------
     INTERFACE.init({
-        title: getProperty('Название игры'),
-        heading: getProperty('Название игры'),
+        title:       getProperty('Название игры'),
+        heading:     getProperty('Название игры'),
         placeholder: 'Введите команду'
     }, function () {
-        AZ.startNewTurn();
-        //----------
         if (typeof(AZ.toDoOnStart) == 'function') {
             AZ.toDoOnStart();
         } else {
@@ -295,7 +298,8 @@ window.START = function (_param) {
             INTERFACE.write(loc.getDescription());
         } // end if
         //----------
-        // INTERFACE.preparsing({value:''});
+        AZ.startNewTurn();
+        //----------
         PARSER.pre_parse();
         DEBUG.updateWordsFullList();
         DEBUG.updateWordsShortList();
