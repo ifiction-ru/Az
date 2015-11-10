@@ -11,6 +11,13 @@ window.tSimpleObject = function (_id) {
     var mentions        = new tMentions(this); // Упоминания объекта
     var container       = new tContainer(this); // Контейнер объекта
     //this.properties       = new tProperties(this); // Свойства объекта
+    //----------
+    var hideContent     = false; // Скрывать содержимое при просмотре описания
+    //--------------------------------------------------
+    Object.defineProperty(this, 'hideContent', {
+        set: function(_value) {hideContent = (_value == true ? true : false);},
+        get: function()       {return hideContent;}
+    });
     //--------------------------------------------------
     Object.defineProperty(this, 'description',  {configurable:false, writable:false, value:description});
     Object.defineProperty(this, 'mentions',     {configurable:false, writable:false, value:mentions});
@@ -219,7 +226,7 @@ window.tSimpleObject = function (_id) {
                     var word = DICTIONARY.getWord(verbs[vx]);
                     //----------
                     if (word === null) {
-                        console.error('У объекта "'+this.ID+'" в качестве глагола указано неизвестное слово: "'+verbs[vx]+'"!');
+                        console.warn('У объекта "'+this.ID+'" в качестве глагола указано неизвестное слово: "'+verbs[vx]+'"!');
                         //DICTIONARY.dict_absend.push({'word': verb, 'morph': 'Г', 'object': this});
                         continue;
                     } // end if
@@ -346,8 +353,12 @@ window.tSimpleObject = function (_id) {
                     } // end for priority
                     //----------
                     function fill_elem (rec, data, key) {
-                        if ((data[key] !== undefined) && (rec[key] === undefined)) {
-                            rec[key] = data[key];
+                        if (rec[key] === undefined) {
+                            if (data == null) {
+                                rec[key] = null;
+                            } else if (data[key] !== undefined) {
+                                rec[key] = data[key];
+                            } // end if
                         } // end if
                     } // end function "fill_elem"
                     //----------

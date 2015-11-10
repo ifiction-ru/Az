@@ -74,95 +74,96 @@ tDescription.prototype.getText = function (_param, _html) {
     var ownerID = AZ.getID(this.OWNER);
     //----------
     var descr = {
-        text:       '',
+        text:       text,
         mentions:   {full:[], characters:[], items:[]},
         content:    {full:[], characters:[], items:[]},
         prefix:     this.descr_prefix,
     };          
     //----------
-    // Получаем перечень объектов, которые автор указал как упомянутые в описании
-    var list_already    = this.descr_includes.slice();
-    //----------
-    // Получаем содержимое объекта
-    var list_inside = this.OWNER.getContent();
-    //----------
-    var obj = null;
-    //----------
-    // Вставляем упоминания
-    text = text.replace(/\[\[(.+?)\]\]/gim, function (_str, _id) {
+    if (this.hideContent == false) {
+        // Получаем перечень объектов, которые автор указал как упомянутые в описании
+        var list_already    = this.descr_includes.slice();
         //----------
-        obj = AZ.getObject(_id);
+        // Получаем содержимое объекта
+        var list_inside = this.OWNER.getContent();
         //----------
-        if (obj == null) {
-            console.error('При формировании описания "'+ownerID+'" не найден упомянутый объект "'+_id+'"!');
-            return '???';
-        } else {
-            var mention = obj.mentions.get(for_description, this.OWNER);
+        var obj = null;
+        //----------
+        // Вставляем упоминания
+        text = text.replace(/\[\[(.+?)\]\]/gim, function (_str, _id) {
             //----------
-            list_already.push(_id);
+            obj = AZ.getObject(_id);
             //----------
-            return (mention === null) ? '' : (DECOR.getMention(mention, 0));
-        } // end if
-    }); // Конец перебора упоминаний в описании объекта
-    //----------
-    descr.text = text;
-    //----------
-    // Вычленяем упомянутые в тексте описания объекты
-    // Последовательно перебираем все слова описания и сравниваем их с базой привязанных к объектам слов
-    var obj_inside = text.match( /[a-zA-Zа-яёА-ЯЁ0-9\-\']+/mig );
-    for (var x=0; x<obj_inside.length; x++) {
-        // Получаем слово
-        var word = DICTIONARY.getFormIDs(obj_inside[x]);
-        //----------
-        if (word != null) {
-            var list = PARSER.get_objects_by_word({'priority':0, 'loc':[ownerID,null], 'wid':word.bid}); // Ищем по этому слову объект
-            //----------
-            for (var y=0; y<list.length; y++) {list_already.push(list[y]);} // end for y
-        } // end if
-    } // end for x - Закончили перебирать слова текста
-    //----------
-    // Вычищаем из содержимого те объекты, что указаны автором и упомянуты в тексте описания
-    var x=0;
-    while (x < list_inside.length) {
-        if (list_already.indexOf(AZ.getID(list_inside[x].what)) == -1) {
-            x++;
-        } else {
-            list_inside.splice(x, 1);
-        } // end if
-    } // end while
-    //----------
-    // Дополняем описание содержимым объекта
-    var x=0;
-    while (x < list_inside.length) {
-        obj = list_inside[x].what;
-        //----------
-        var mention = obj.getMention(for_container, this.OWNER);
-        if (mention == null) {
-            x++;
-        } else {
-            descr.mentions.full.push(mention);
-            if (obj.type == 'character') {
-                descr.mentions.characters.push(mention);
+            if (obj == null) {
+                console.error('При формировании описания "'+ownerID+'" не найден упомянутый объект "'+_id+'"!');
+                return '???';
             } else {
-                descr.mentions.items.push(mention);
+                var mention = obj.mentions.get(for_description, this.OWNER);
+                //----------
+                list_already.push(_id);
+                //----------
+                return (mention === null) ? '' : (DECOR.getMention(mention, 0));
+            } // end if
+        }); // Конец перебора упоминаний в описании объекта
+        //----------
+        descr.text = text;
+        //----------
+        // Вычленяем упомянутые в тексте описания объекты
+        // Последовательно перебираем все слова описания и сравниваем их с базой привязанных к объектам слов
+        var obj_inside = text.match( /[a-zA-Zа-яёА-ЯЁ0-9\-\']+/mig );
+        for (var x=0; x<obj_inside.length; x++) {
+            // Получаем слово
+            var word = DICTIONARY.getFormIDs(obj_inside[x]);
+            //----------
+            if (word != null) {
+                var list = PARSER.get_objects_by_word({'priority':0, 'loc':[ownerID,null], 'wid':word.bid}); // Ищем по этому слову объект
+                //----------
+                for (var y=0; y<list.length; y++) {list_already.push(list[y]);} // end for y
+            } // end if
+        } // end for x - Закончили перебирать слова текста
+        //----------
+        // Вычищаем из содержимого те объекты, что указаны автором и упомянуты в тексте описания
+        var x=0;
+        while (x < list_inside.length) {
+            if (list_already.indexOf(AZ.getID(list_inside[x].what)) == -1) {
+                x++;
+            } else {
+                list_inside.splice(x, 1);
+            } // end if
+        } // end while
+        //----------
+        // Дополняем описание содержимым объекта
+        var x=0;
+        while (x < list_inside.length) {
+            obj = list_inside[x].what;
+            //----------
+            var mention = obj.getMention(for_container, this.OWNER);
+            if (mention == null) {
+                x++;
+            } else {
+                descr.mentions.full.push(mention);
+                if (obj.type == 'character') {
+                    descr.mentions.characters.push(mention);
+                } else {
+                    descr.mentions.items.push(mention);
+                } // end if
+                //----------
+                list_inside.splice(x, 1);
+            } // end if
+        } // end while
+        //----------
+        for (var x=0; x<list_inside.length; x++) {
+            var rec = list_inside[x];
+            //----------
+            descr.content.full.push(rec);
+            if (obj.type == 'character') {
+                descr.content.characters.push(rec);
+            } else {
+                descr.content.items.push(rec);
             } // end if
             //----------
-            list_inside.splice(x, 1);
-        } // end if
-    } // end while
-    //----------
-    for (var x=0; x<list_inside.length; x++) {
-        var rec = list_inside[x];
-        //----------
-        descr.content.full.push(rec);
-        if (obj.type == 'character') {
-            descr.content.characters.push(rec);
-        } else {
-            descr.content.items.push(rec);
-        } // end if
-        //----------
-    } // end for
-    //----------
+        } // end for
+    } // end if
     AZ.getProtagonist().markContainerAsExam(this.OWNER);
     //----------
     return DECOR.Description.getText(descr, this.OWNER);
