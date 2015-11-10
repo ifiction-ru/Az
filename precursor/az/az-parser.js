@@ -336,8 +336,8 @@ window.PARSER = (function() {
                 search['action']    = _options.action || null;
                 search['nums']      = _options.nums || null;
                 //----------
-                //if (search.priority == 0) {
-                   /*console.log(
+                /*if (search.obj == 'ПОРОХ') {
+                   console.log(
                         'id:'+search.obj+', t:'+search.priority+', n:'+search.nums+
                         ', L:'+search.loc+
                         ', v:'+(search.vid == null ? '-' : DICTIONARY.getBase(search.vid).base+' ('+search.vid+')')+
@@ -347,8 +347,8 @@ window.PARSER = (function() {
                         ', t1:'+(search.to1 || '-')+
                         ', t2:'+(search.to2 || '-')+
                         ', t3:'+(search.to3 || '-')+
-                        ', a:'+search.action);*/
-                //} // end if
+                        ', a:'+search.action);
+                } // end if */
                 //----------
                 db_words_and_objects.insert(search);
                 //----------
@@ -816,6 +816,7 @@ window.PARSER = (function() {
             //----------
             DEBUG.updatePreparsingData(CMD);
             //----------
+            // Запоминаем уже распознанные в команде слова и предлоги <<
             for (var priority=1; priority<=3; priority++) {
                 if (CMD.params[priority] != null) {
                     words_to_pass.push(CMD.params[priority].bid);
@@ -829,6 +830,7 @@ window.PARSER = (function() {
                 //  obj_to_pass.push(AZ.getID(CMD.objects[priority])); //+++ на время
                 //} // end if
             } // end for x
+            // >> Закончили запоминать уже распознанные в команде слова
             //----------
             // Если в команде есть предлог или слова, то глагол пропускаем. Для автодополнения глагол должен идти первым.
             var pass_verb = (prep_id == null && preps_to_pass.length == 0 && words_to_pass.length == 0) ? false : true;
@@ -847,6 +849,7 @@ window.PARSER = (function() {
                 preps_of_verbs[verb_id+':2'] = [];
                 preps_of_verbs[verb_id+':3'] = [];
                 //----------
+                // Начинаем перебор предлогов и падежей из данных глагола <<
                 var list = DICTIONARY.getObjectsOfVerbs(search); // Отбираем предлоги и падежи из данных глагола.
                 for (var x=0; x<list.length; x++) {
                     var rec = list[x];
@@ -858,7 +861,7 @@ window.PARSER = (function() {
                     // Если в данных указаны падежи, то берём их за основу
                     if (rec.cases != null) {cases2 = rec.cases.slice();}
                     //----------
-                    // Если предлог есть в данных, то пытаемся добавить его в перечень.
+                    // Если предлог есть в данных, то пытаемся добавить его в перечень
                     if (rec.prep != null) {
                         if (preps_to_pass.indexOf(rec.prep) == -1) {
                             if (rec.prep != prep_id) {
@@ -884,6 +887,8 @@ window.PARSER = (function() {
                     } // end if
                     //----------
                 } // end for x
+                // >> Заканчиваем перебор предлогов и падежей из данных глагола
+                //----------
             } // end if
             //----------
             // Шаблон фильтра отбора слов, сопоставленных с объектом
@@ -926,33 +931,34 @@ window.PARSER = (function() {
                 //----------
                 // Предлог и слово связаны с основным объектом команды. Если данный объект уже распознан в команде, то ни предлог, ни слово не нужны.
                 //if (obj_to_pass.indexOf(rec.obj) == -1 && (CMD.objects[rec.priority] == null || rec.obj == AZ.getID(CMD.objects[rec.priority]))) {
-                if (obj_to_pass.indexOf(rec.obj) == -1) {
-                    // Предлог добавляем, если этого предлога в команде ещё нет.
-                    if (rec.pid != null && prep_id == null && preps_to_pass.indexOf(rec.pid) == -1) {
-                        //  1. Глагола нет ни в данных, ни в команде.
-                        //  2. Глагол есть и в данных, и в команде.
-                        if (rec.vid == verb_id) {
-                            _add_bid(bids_list, bids_data, rec.pid);
-                            //----------
-                            cases2 = DICTIONARY.getWordCases(rec.pid, '-');
-                            _cases2word(words_cases, rec.wid, cases2);
-                            //----------
-                            preps_to_pass.push(rec.pid);
-                        } // end if
-                    } // end if
-                    //----------
-                    // Слово добавляем если этого слова в команде ещё нет:
-                    if (rec.wid != null && words_to_pass.indexOf(rec.wid) == -1 && prep_id == rec.pid) {
-                        //  1. Глагола нет ни в данных, ни в команде. Предлога нет ни в данных, ни в команде.
-                        //  2. Глагола нет ни в данных, ни в команде. Предлог есть и в данных, и в команде.
-                        //  3. Глагол есть и в данных, и в команде. Предлога нет ни в данных, ни в команде.
-                        //  4. Глагол есть и в данных, и в команде. Предлог есть и в данных, и в команде.
-                        if (rec.vid == verb_id && rec.pid == prep_id) {
-                            _add_bid(bids_list, bids_data, rec.wid, {'fid':rec.fid});
-                            words_to_pass.push(rec.wid);
-                        } // end if
+                //if (obj_to_pass.indexOf(rec.obj) == -1) {
+                //----------
+                // Предлог добавляем, если этого предлога в команде ещё нет.
+                if (rec.pid != null && prep_id == null && preps_to_pass.indexOf(rec.pid) == -1) {
+                    //  1. Глагола нет ни в данных, ни в команде.
+                    //  2. Глагол есть и в данных, и в команде.
+                    if (rec.vid == verb_id) {
+                        _add_bid(bids_list, bids_data, rec.pid);
+                        //----------
+                        cases2 = DICTIONARY.getWordCases(rec.pid, '-');
+                        _cases2word(words_cases, rec.wid, cases2);
+                        //----------
+                        preps_to_pass.push(rec.pid);
                     } // end if
                 } // end if
+                //----------
+                // Слово добавляем если этого слова в команде ещё нет:
+                if (rec.wid != null && words_to_pass.indexOf(rec.wid) == -1 && prep_id == rec.pid) {
+                    //  1. Глагола нет ни в данных, ни в команде. Предлога нет ни в данных, ни в команде.
+                    //  2. Глагола нет ни в данных, ни в команде. Предлог есть и в данных, и в команде.
+                    //  3. Глагол есть и в данных, и в команде. Предлога нет ни в данных, ни в команде.
+                    //  4. Глагол есть и в данных, и в команде. Предлог есть и в данных, и в команде.
+                    if (rec.vid == verb_id && rec.pid == prep_id) {
+                        _add_bid(bids_list, bids_data, rec.wid, {'fid':rec.fid});
+                        words_to_pass.push(rec.wid);
+                    } // end if
+                } // end if
+                //} // end if "obj_to_pass"
                 //----------
                 // Если...
                 // Сопоставление слов с объектами
