@@ -76,8 +76,8 @@ window.any2arr = function (_param, _add_null) {
         if (_param.length === undefined) {
             _param = [_param];
             
-        } else if (AZ.isObject(_param) === true) {
-            _param = [_param];
+        //} else if (AZ.isObject(_param) === true) {
+        //    _param = [_param];
             
         }// end if
     } // end if
