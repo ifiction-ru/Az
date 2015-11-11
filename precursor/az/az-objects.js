@@ -172,7 +172,7 @@ window.tSimpleObject = function (_id) {
             var word = DICTIONARY.getWord(word);
             //----------
             if (word === null) {
-                console.error('Не найдено слово "'+_words[x]+'" для привязки к объекту: '+this.ID);
+                console.warn('Не найдено слово "'+_words[x]+'" для привязки к объекту: '+this.ID);
                 //DICTIONARY.dict_absend.push({'word': _words[x], 'morph': 'С', 'object': this});
                 continue;
             } // end if
@@ -194,7 +194,7 @@ window.tSimpleObject = function (_id) {
         //if (_options.ACT != true) {return;} // end if
         //----------
         if ((_execute || null) === null) {
-            console.error('У объекта "'+this.ID+'" при добавлении действия нет модуля!');
+            console.warn('У объекта "'+this.ID+'" при добавлении действия нет модуля!');
             // +++ Ошибка. Нет модуля действия!
             return;
         } // end if
@@ -278,7 +278,7 @@ window.tSimpleObject = function (_id) {
                                 var word = DICTIONARY.getWord(rec);
                                 //----------
                                 if (word === null) {
-                                    console.error('У объекта "'+this.ID+'" в качестве связки указано неизвестное слово: "'+rec+'"!');
+                                    console.warn('У объекта "'+this.ID+'" в качестве связки указано неизвестное слово: "'+rec+'"!');
                                     continue;
                                 } // end if
                                 //----------
@@ -316,7 +316,7 @@ window.tSimpleObject = function (_id) {
                                         var prep = DICTIONARY.getWord(preps_list[p]);
                                         //----------
                                         if (prep === null) {
-                                            console.error('У объекта "'+this.ID+'" в качестве предлога указано неизвестное слово: "'+preps_list[p]+'"!');
+                                            console.warn('У объекта "'+this.ID+'" в качестве предлога указано неизвестное слово: "'+preps_list[p]+'"!');
                                             continue;
                                         } // end if
                                         //----------
@@ -327,7 +327,7 @@ window.tSimpleObject = function (_id) {
                                                 var word = DICTIONARY.getWord(word);
                                                 //----------
                                                 if (word === null) {
-                                                    console.error('У объекта "'+this.ID+'" в качестве слова-отсылки указано неизвестное слово: "'+words_list[w]+'"!');
+                                                    console.warn('У объекта "'+this.ID+'" в качестве слова-отсылки указано неизвестное слово: "'+words_list[w]+'"!');
                                                     return;
                                                 } // end if
                                                 //----------
