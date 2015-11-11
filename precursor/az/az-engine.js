@@ -232,6 +232,10 @@ window.AZ = (function() {
                 return position.object == null ? null : (_as_id == false ? position.object : position.ID);
             }, // end function "AZ.getLocation"
         //--------------------------------------------------
+        layerType: function() {
+            return (outputLayers.length == 0) ? 'other' : 'text';
+        }, // end function "AZ.layerType"
+        //--------------------------------------------------
         // Функция вызывается перед передачей управления игроку
         startNewTurn: function() {
             AUTOCOMPLETE.init();

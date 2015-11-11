@@ -174,6 +174,20 @@ window.AUTOCOMPLETE = (function() {
             return true;
         }, // end function "AUTOCOMPLETE.next"
         //--------------------------------------------------
+        // Возвращает длину списка
+        lenght: function(_type) {
+            return ac_data[(_type || 0)].list['full'].length;
+        }, // end function "AUTOCOMPLETE.lenght"
+        //--------------------------------------------------
+        // Возвращает первое слово из списка (или пустую строку, если список пустой)
+        firstWord: function(_type) {
+            _type = _type || 0;
+            //----------
+            var list = ac_data[_type].list['full'];
+            //----------
+            return list.length == 0 ? '' : ac_data[_type].list['full'][0];
+        }, // end function "AUTOCOMPLETE.first"
+        //--------------------------------------------------
         // Получение слова из текущей позиции выборки. Параметр: 0 — из полного перечня, 1 — из краткого перечня (с учётом минимального числа символов).
         word: function(_type) {
             _type = _type || 0;
