@@ -26,7 +26,7 @@ body {
   position: relative;
   min-height: 480px;
   background: #f8f8f8;
-  font: 14px/1.4 "PT Sans", "sans-serif" normal;
+  font: 14px/1.5 "PT Sans", "sans-serif" normal;
   color: #3a3a3a;
 }
 
@@ -48,7 +48,8 @@ p {
 }
 
 .az-main {
-  padding: 100px 20px 120px;
+  position: relative;
+  padding: 100px 20px 130px;
 }
 
 .az-header,
@@ -65,7 +66,7 @@ p {
 
 .az-footer {
   bottom: 0;
-  padding-top: 10px;
+  padding-top: 25px;
 }
 
 .az-title {
@@ -83,7 +84,6 @@ p {
 
 .az-story {
   overflow: hidden;
-  padding: 0.5em 0;
   text-align: justify;
 }
 
@@ -94,7 +94,7 @@ p {
 .az-story__command:last-of-type {
   margin-top: 2.5em;
   padding: 1em 0 0;
-  border-top: 2px dashed #bbb;
+  border-top: 2px dashed #a0a0a0;
 }
 
 .az-parser {
@@ -103,19 +103,12 @@ p {
 }
 
 .az-suggestions {
-  position: absolute;
   overflow: hidden;
   left: 0;
   right: 0;
   bottom: 100%;
-  height: 5em;
-  line-height: 7em;
-  background: rgba(255, 255, 255, 0.9);
-  background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuNSIgeTE9IjAuMCIgeDI9IjAuNSIgeTI9IjEuMCI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwLjAiLz48c3RvcCBvZmZzZXQ9IjUwJSIgc3RvcC1jb2xvcj0iI2Y4ZjhmOCIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiIC8+PC9zdmc+IA==');
-  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, rgba(255, 255, 255, 0)), color-stop(50%, #f8f8f8));
-  background: -moz-linear-gradient(top, rgba(255, 255, 255, 0) 0%, #f8f8f8 50%);
-  background: -webkit-linear-gradient(top, rgba(255, 255, 255, 0) 0%, #f8f8f8 50%);
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, #f8f8f8 50%);
+  height: 34px;
+  line-height: 17px;
 }
 .az-suggestions:before {
   content: '';
@@ -154,7 +147,7 @@ p {
   -moz-box-shadow: inset 0 1px 8px rgba(0, 0, 0, 0.15);
   -webkit-box-shadow: inset 0 1px 8px rgba(0, 0, 0, 0.15);
   box-shadow: inset 0 1px 8px rgba(0, 0, 0, 0.15);
-  height: 3em;
+  height: 50px;
   box-sizing: border-box;
   padding: 0 0.4em;
   border: 1px solid #e6e6e6;
@@ -175,16 +168,16 @@ p {
   color: #555;
 }
 .az-inputs__text:-moz-placeholder {
-  color: #b8b8b8;
+  color: #777;
 }
 .az-inputs__text::-moz-placeholder {
-  color: #b8b8b8;
+  color: #777;
 }
 .az-inputs__text:-ms-input-placeholder {
-  color: #b8b8b8;
+  color: #777;
 }
 .az-inputs__text::-webkit-input-placeholder {
-  color: #b8b8b8;
+  color: #777;
 }
 .az-inputs__text:focus {
   outline: 0;
@@ -204,13 +197,13 @@ p {
   background: 50% 50% no-repeat;
   background-size: 24px;
   cursor: pointer;
-  opacity: 0.3;
+  opacity: 0.45;
 }
 .az-inputs__btn:focus {
   outline: none;
 }
 .az-inputs__btn:hover {
-  opacity: 0.4;
+  opacity: 0.6;
 }
 
 .az-inputs__execute {

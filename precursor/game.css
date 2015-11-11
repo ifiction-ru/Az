@@ -1,0 +1,39 @@
+body,
+.az-footer {
+    background: rgb(237, 185, 102) 50% 100% no-repeat fixed url(images/bg-page.png);
+    background-size: 100% auto;
+}
+
+body {
+
+}
+
+.az-main {
+    background: rgba(255,255,255,0.5);
+    text-shadow: 0 0 1px rgba(0,0,0,0.2);
+}
+
+.az-inputs {
+    border-color: rgba(237, 185, 102, 1);
+    background: rgba(230, 200, 110, 0.9);
+}
+
+.az-inputs__text:-moz-placeholder {
+    color: #857812;
+}
+.az-inputs__text::-moz-placeholder {
+    color: #857812;
+}
+.az-inputs__text:-ms-input-placeholder {
+    color: #857812;
+}
+.az-inputs__text::-webkit-input-placeholder {
+    color: #857812;
+}
+
+@media screen and (min-width: 700px) {
+    body,
+    .az-footer {
+        background-size: 1280px auto;
+    }
+}
