@@ -21,7 +21,8 @@
 
 
 body,
-.az-footer {
+.az-footer,
+.az-header {
     background: rgb(237, 185, 102) 0 100% no-repeat fixed url(images/bg-page.png);
     background-size: auto 100%;
 }
@@ -31,9 +32,14 @@ body,
     font-family: "Roboto Slab", "sans-serif";
 }
 
+.az-header {
+    height: 100%;
+    clip: rect(0, 660px, 100px, 0);
+}
+
 .az-main {
     background: rgba(255,255,255,0.5);
-    text-shadow: 0 0 1px rgba(0,0,0,0.2);
+    text-shadow: 0 0 1px rgba(0,0,0,0.1);
 }
 
 .az-inputs {
@@ -56,6 +62,7 @@ body,
 
 @media screen and (min-width: 700px) {
     body,
+    .az-header,
     .az-footer {
         background-position: 50% 100%;
         background-size: 1280px auto;
