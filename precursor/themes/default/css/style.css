@@ -165,6 +165,7 @@ p {
   border: 0;
   background: transparent;
   font-size: 16px;
+  font-family: "PT Sans", "sans-serif";
   color: #555;
 }
 .az-inputs__text:-moz-placeholder {
