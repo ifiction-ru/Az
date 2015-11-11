@@ -634,6 +634,15 @@ window.INTERFACE = (function () {
         submitInput = function (text) {
             text = text || elements.input.value.trim();
 
+            // Если выводим текст и команда при нажатии Enter пустая, а в перечне автодополнения есть один-единственный вариант ("далее") - вставляем его
+            if (AZ.layerType() == 'text') {
+                if (text.trim() == '') {
+                    if (AUTOCOMPLETE.lenght(0) == 1) {
+                        text = AUTOCOMPLETE.firstWord(0);
+                    } // end if
+                } // end if
+            } // end if
+
             if (text) {
                 printCommand(text);
 
