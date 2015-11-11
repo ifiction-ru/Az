@@ -409,11 +409,11 @@ window.PARSER = (function() {
             // Если это препарсинг, то проверяем, есть ли в конце фразы пробел. Если нет — считаем, что он там есть, чтобы последнее слово обрабатывалось как законченное.
             var have_a_space = (_preparsing == false || _phrase.substr(-1) == ' ') ? true : false;
             //----------
+            // Убираем из команды лишние символы
+            _phrase = _phrase.replace(/[^а-яёА-ЯЁa-zA-Z0-9\-\s]/gim, '');
+            //----------
             _phrase = _phrase.trim().toLowerCase().replace(/\s+/g,' ');
             if (_phrase == '') {
-                //if (_preparsing == true) {
-                //  var words_list = PARSER.pre_parse(word_str);
-                //} // end if
                 return {phrase:CMD.phrase, object:null, action:null};
             } // end if
             //----------
