@@ -49,7 +49,7 @@ p {
 
 .az-main {
   position: relative;
-  padding: 100px 20px 130px;
+  padding: 100px 20px 100px;
 }
 
 .az-header,
@@ -103,12 +103,13 @@ p {
 }
 
 .az-suggestions {
+  position: absolute;
   overflow: hidden;
   left: 0;
   right: 0;
   bottom: 100%;
-  height: 34px;
-  line-height: 17px;
+  height: 44px;
+  line-height: 22px;
 }
 .az-suggestions:before {
   content: '';
@@ -122,19 +123,19 @@ p {
 
 .az-suggestions__item {
   display: inline-block;
-  padding: 0.2em 0.5em;
+  padding: 0.4em 0.6em;
   margin-left: 1em;
-  line-height: 1.1;
-  background: rgba(222, 222, 222, 0.8);
+  line-height: 1.2;
+  background: rgba(0, 0, 0, 0.5);
   border-radius: 5px;
-  color: #3087ff;
+  color: #fff;
   cursor: pointer;
 }
 .az-suggestions__item:first-of-type {
   margin-left: 0;
 }
 .az-suggestions__item:hover {
-  color: #000;
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .az-inputs {
@@ -164,7 +165,7 @@ p {
   padding: 0.2em;
   border: 0;
   background: transparent;
-  font-size: 16px;
+  font-size: 18px;
   font-family: "PT Sans", "sans-serif";
   color: #555;
 }
@@ -198,13 +199,13 @@ p {
   background: 50% 50% no-repeat;
   background-size: 24px;
   cursor: pointer;
-  opacity: 0.45;
+  opacity: 0.6;
 }
 .az-inputs__btn:focus {
   outline: none;
 }
 .az-inputs__btn:hover {
-  opacity: 0.6;
+  opacity: 0.8;
 }
 
 .az-inputs__execute {
@@ -244,6 +245,6 @@ p {
   }
 
   .az-inputs__text {
-    font-size: 19px;
+    font-size: 20px;
   }
 }
