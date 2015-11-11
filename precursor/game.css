@@ -35,11 +35,10 @@ body,
 .az-header {
     height: 100%;
     clip: rect(0, 660px, 100px, 0);
-    -webkit-mask-image: -webkit-linear-gradient(top, #000 85px, transparent 100px);
 }
 
 .az-footer {
-    -webkit-mask-image: -webkit-linear-gradient(bottom, #000 80%, transparent 100%);
+
 }
 
 .az-main {

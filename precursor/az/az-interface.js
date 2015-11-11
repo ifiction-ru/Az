@@ -729,6 +729,7 @@ window.INTERFACE = (function () {
                     submitInput();
                 } else if (key === 27) {
                     clearInput();
+                    clearSuggestions();
                 } else if (key === 9) {
                     event.preventDefault();
                     item = dom.query(selectors.suggestionItem)[0];
