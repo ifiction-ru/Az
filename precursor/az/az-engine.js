@@ -32,7 +32,7 @@ window.AZ = (function() {
             var objects1 = position.object.container.getContent();
             //----------
             // Добавляем в перечень доступных объектов содержимое инвентаря
-            var objects2 = protagonist.object.container.getContent();
+            var objects2 = []; //protagonist.object.container.getContent();
             //----------
             var objects=objects1.concat(objects2);
             //----------
