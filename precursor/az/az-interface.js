@@ -901,12 +901,27 @@ window.SCREEN = {
         }
     } // end function "Clear"
 };
-
+//----------
 // ФУНКЦИИ РАБОТЫ С ЭКРАНОМ
 window.print = function (_text) {
     //----------
     SCREEN.Out(_text);
     //----------
+};
+//--------------------------------------------------
+window.printOnes = function (_name, _text) {
+    //----------
+    var value = getProperty(_name);
+    //----------
+    if (value === undefined || value != true) {
+        print(_text);
+        //----------
+        setProperty(_name, true);
+        //----------
+        return true;
+    } else {
+        return false;
+    } // end if
 };
 //--------------------------------------------------
 window.printCommand = function (_text) {
@@ -917,7 +932,8 @@ window.printCommand = function (_text) {
 //--------------------------------------------------
 window.printInventory = function () {
     //----------
-    SCREEN.Out(DECOR.Inventory.get());
+    markContainerAsExam(AZ.getProtagonist());
     //----------
+    SCREEN.Out(DECOR.Inventory.get());
 };
 /* --------------------------------------------------------------------------- */
