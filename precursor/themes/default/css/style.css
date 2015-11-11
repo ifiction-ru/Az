@@ -231,6 +231,12 @@ p {
   background-image: url(../images/inv.png);
 }
 
+.az-inputs__game-more {
+  -webkit-order: 1;
+  order: 1;
+  background-image: url(../images/more.png);
+}
+
 /* Media queries */
 @media screen and (min-width: 700px) {
   body {

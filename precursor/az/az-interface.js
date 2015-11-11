@@ -438,6 +438,7 @@ window.INTERFACE = (function () {
             executeTitle: 'Выполнить',
             gameLookTitle: 'Осмотреться',
             gameInventoryTitle: 'Инвентарь',
+            gameMoreTitle: 'Далее',
             // Шаблон интерфейса
             template: '<header class="az-header">\
                            <div class="az-title">{{ this.title }}</div>\
@@ -451,6 +452,7 @@ window.INTERFACE = (function () {
                                    <button type="button" class="az-inputs__btn az-inputs__execute" title="{{ this.executeTitle }}"></button>\
                                    <button type="button" class="az-inputs__btn az-inputs__game-look" title="{{ this.gameLookTitle }}"></button>\
                                    <button type="button" class="az-inputs__btn az-inputs__game-inv" title="{{ this.gameInventoryTitle }}"></button>\
+                                   <button type="button" class="az-inputs__btn az-inputs__game-more" title="{{ this.gameMoreTitle }}"></button>\
                                </div>\
                            </div>\
                        </footer>',
@@ -467,6 +469,7 @@ window.INTERFACE = (function () {
             execute: '.az-inputs__execute',
             gameLook: '.az-inputs__game-look',
             gameInventory: '.az-inputs__game-inv',
+            gameMore: '.az-inputs__game-more',
             storyCommand: '.az-story__command'
         },
         classes = {
@@ -499,7 +502,8 @@ window.INTERFACE = (function () {
                 input: dom.get(selectors.input, main),
                 execute: dom.get(selectors.execute, main),
                 gameLook: dom.get(selectors.gameLook, main),
-                gameInventory: dom.get(selectors.gameInventory, main)
+                gameInventory: dom.get(selectors.gameInventory, main),
+                gameMore: dom.get(selectors.gameMore, main)
             });
         },
 
@@ -603,12 +607,14 @@ window.INTERFACE = (function () {
                 words;
 
             if (text && typeof text === 'string') {
-                text.trim();
                 value = elements.input.value.trim().replace(/\s+/g, ' ');
                 words = value.split(' ');
                 words[words.length - 1] = text;
                 elements.input.value = words.join(' ') + ' ';
                 elements.input.focus();
+
+                PARSER.parse(elements.input.value, true);
+                checkMaySubmit();
                 clearSuggestions();
             }
         },
@@ -637,7 +643,7 @@ window.INTERFACE = (function () {
                 clearSuggestions();
                 // text && triggerEvent('submit', { value: text });
 
-                if (CMD.action == null) {
+                if (CMD == null || CMD.action == null) {
                     print('Ничего не понятно.');
                 } else {
                     // Вызываем событие "Перед выполнением действия с объектом"
@@ -756,6 +762,10 @@ window.INTERFACE = (function () {
                 submitInput('Инвентарь');
             });
 
+            dom.on(elements.gameMore, 'click', function () {
+                submitInput('Далее');
+            });
+
             dom.on(elements.suggestions, 'click', function (event) {
                 if (dom.is(event.target, selectors.suggestionItem)) {
                     applySuggestion(event.target.innerHTML.trim());
@@ -837,16 +847,20 @@ window.INTERFACE = (function () {
         render: render,
         on: on,
         init: init,
-        updateCommandPanel: function (_mode) {
+        updateCommandPanel: function (mode) {
             // Обновление командной панели игрока
-            if (_mode == 'text') {
+            if (mode === 'text') {
                 // Кнопки для текста
-                
+                elements.gameInventory.style.display = 'none';
+                elements.gameLook.style.display = 'none';
+                elements.gameMore.style.display = null;
             } else {
                 // Кнопки для всего остального
-                
-            } // end if
-        } // end function "updateCommandPanel"
+                elements.gameInventory.style.display = null;
+                elements.gameLook.style.display = null;
+                elements.gameMore.style.display = 'none';
+            }
+        }
     };
 })();
 
