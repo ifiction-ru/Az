@@ -490,7 +490,15 @@ window.INTERFACE = (function () {
 
             return {
                 add: function (text) {
-                    if (text && list.indexOf(text.trim()) < 0) {
+                    var copyIndex;
+
+                    if (text) {
+                        copyIndex = list.indexOf(text.trim());
+
+                        if (copyIndex >= 0) {
+                            list.splice(copyIndex, 1);
+                        }
+
                         list.push(text);
                         index = list.length;
                     }
