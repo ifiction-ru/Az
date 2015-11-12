@@ -290,16 +290,20 @@ window.tSimpleObject = function (_id) {
                                 priority_all = priority;
                                 
                             } else if (typeof(rec) == 'string') {
-                                var word = DICTIONARY.getWord(rec);
-                                //----------
-                                if (word === null) {
-                                    console.warn('У объекта "'+this.ID+'" в качестве связки указано неизвестное слово: "'+rec+'"!');
-                                    continue;
+                                if (rec == ANYTHING) {
+                                    rec_elems.push({'any':priority});
+                                } else {
+                                    var word = DICTIONARY.getWord(rec);
+                                    //----------
+                                    if (word === null) {
+                                        console.warn('У объекта "'+this.ID+'" в качестве связки указано неизвестное слово: "'+rec+'"!');
+                                        continue;
+                                    } // end if
+                                    //----------
+                                    //PARSER.add_link_to_object({'obj':object_id, 'priority':priority, 'loc':loc_id, 'vid':verb_id, 'wid':word.bid, 'action':action_id});
+                                    //----------
+                                    rec_elems.push({'wid':word.bid, 'fid':word.fid});
                                 } // end if
-                                //----------
-                                //PARSER.add_link_to_object({'obj':object_id, 'priority':priority, 'loc':loc_id, 'vid':verb_id, 'wid':word.bid, 'action':action_id});
-                                //----------
-                                rec_elems.push({'wid':word.bid, 'fid':word.fid});
                                 //----------
                                 priority_all = priority;
                                 
@@ -398,6 +402,7 @@ window.tSimpleObject = function (_id) {
                                 fill_elem(rec2, elem, 'to1');
                                 fill_elem(rec2, elem, 'to2');
                                 fill_elem(rec2, elem, 'to3');
+                                fill_elem(rec2, elem, 'any');
                                 //----------
                                 if (priority < 3) {
                                     fill_data(priority+1, data, rec2);

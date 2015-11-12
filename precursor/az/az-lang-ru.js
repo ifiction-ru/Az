@@ -2,9 +2,15 @@
 // КОНСТАНТЫ
     window.ДА               = true;
     window.НЕТ              = false;
+    //----------
     window.БезРазницы       = ANYTHING;
+    window.ЧтоУгодно        = ANYTHING;
+    //----------
+    window.ЛюбоеСлово       = ANYTHING;
+    //----------
     window.ДляОписания      = for_description;
     window.ДляСодержимого   = for_container;
+    //----------
 /* --------------------------------------------------------------------------- */
 // ТИПЫ ОБЪЕКТОВ
     window.Локация  = Location;
@@ -77,11 +83,15 @@
     //--------------------------------------------------
     window.localizeCMD = function (CMD) {
         //----------
-        CMD.глагол = CMD.verb;
-        CMD.объект = CMD.object;
-        CMD.А      = {объект:CMD.A.object, слово:CMD.A.word, предлог:CMD.A.prep};
-        CMD.Б      = {объект:CMD.B.object, слово:CMD.B.word, предлог:CMD.B.prep};
-        CMD.В      = {объект:CMD.C.object, слово:CMD.C.word, предлог:CMD.C.prep};
+        CMD.фраза   = CMD.phrase;
+        CMD.команда = CMD.phrase;
+        CMD.глагол  = CMD.verb;
+        CMD.объект  = CMD.object;
+        CMD.прочиеслова  = CMD.anyword;
+        CMD.ПрочиеСлова  = CMD.anyword;
+        CMD.А       = {объект:CMD.A.object, слово:CMD.A.word, предлог:CMD.A.prep};
+        CMD.Б       = {объект:CMD.B.object, слово:CMD.B.word, предлог:CMD.B.prep};
+        CMD.В       = {объект:CMD.C.object, слово:CMD.C.word, предлог:CMD.C.prep};
         //----------
     }
     //localizeCMD = _localizeCMD;

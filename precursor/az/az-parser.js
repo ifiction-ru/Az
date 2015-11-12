@@ -34,7 +34,9 @@ window.PARSER = (function() {
         var to2 = _options['to2'] || null;
         var to3 = _options['to3'] || null;
         //----------
-        var search = {'obj':AZ.availObjects(true, false), 'priority':priority, 'loc':L, 'vid':V, 'pid':P, 'wid':W, 'to1':to1, 'to2':to2, 'to3':to3};
+        var any = _options['any'] || null;
+        //----------
+        var search = {'obj':AZ.availObjects(true, false), 'priority':priority, 'loc':L, 'vid':V, 'pid':P, 'wid':W, 'to1':to1, 'to2':to2, 'to3':to3, 'any':any};
         //----------
         var object_id   = null;
         var priority    = null;
@@ -151,7 +153,13 @@ window.PARSER = (function() {
         priority = priority['priority'];
         //----------
         if (priority>=1 && priority<=3) {
-            var objrec = _get_link_to_object({'priority':priority, 'loc':LOC_ID, 'vid':CMD.verb.bid, 'pid':prep_id, 'wid':word.bid});
+            var search = {'priority':priority, 'loc':LOC_ID, 'vid':CMD.verb.bid, 'pid':prep_id, 'wid':word.bid};
+            //----------
+            if (CMD.unknown.length > 0) {search.any = [1,2,3];} // end if
+            //----------
+            var objrec = _get_link_to_object(search);
+            //----------
+            if (objrec != null) {CMD.unknown = [];} // end if
             //----------
             _set_cmd_param(CMD, priority, word, prep, objrec, _nouns4pronouns, _pr_occupied);
             //----------
@@ -244,12 +252,16 @@ window.PARSER = (function() {
         var limited_ids = AZ.availObjects(true, true); // Получаем перечень объектов, доступных лишь из-за действия с ними в данной локации
         //----------
         // Получаем перечень объектов, сопоставленных с переданным словом в текущей локации (или во всех).
-        var objs_list = db_words_and_objects({'obj':full_IDs, 'priority':0, 'loc':[LOC_ID, null], 'wid':_word_id}).get();
+        var search = {'obj':full_IDs, 'priority':0, 'loc':[LOC_ID, null], 'wid':_word_id};
+        //if (CMD.unknown.length > 0) {search.any = [1,2,3];} // end if
+        var objs_list = db_words_and_objects(search).get();
         for (var x=0; x<objs_list.length; x++) {
             var objrec = objs_list[x];
             //----------
             // Теперь ищем действия с каким-либо приоритетом, где указана ссылка на объект, найденный по слову: to1, to2 или to3
             var search = {'obj':full_IDs, 'priority':[1,2,3], 'loc':[LOC_ID, null], 'vid': _verb_id};
+            //----------
+            if (CMD.unknown.length > 0) {search.any = [1,2,3];} // end if
             //----------
             for (var priority=maxmin.min; priority<=maxmin.max; priority++) {
                 if (CMD.objects[priority] != null) {continue;} // end if
@@ -269,6 +281,8 @@ window.PARSER = (function() {
                             CMD.actions[priority]   = actrec.action;
                             //----------
                             result = actrec;
+                            //----------
+                            if (CMD.unknown.length > 0) {CMD.unknown = [];} // end if
                             //----------
                             break;
                         } // end if
@@ -305,9 +319,10 @@ window.PARSER = (function() {
                 'to2':      _options.to2 || null,
                 'to3':      _options.to3 || null,
                 //----------
+                'any':      _options.any || null,
                 };
             //----------
-            if ((search.vid && search.pid && search.wid && search.to1 && search.to2 && search.to3) == false) {return false;} // end if
+            if ((search.vid && search.pid && search.wid && search.to1 && search.to2 && search.to3 && search.any) == false) {return false;} // end if
             //----------
             // Ищем, нет ли уже такой связки
             var rec = db_words_and_objects(search).first();
@@ -322,6 +337,7 @@ window.PARSER = (function() {
                     ', t1:'+(rec.to1 || '-')+
                     ', t2:'+(rec.to2 || '-')+
                     ', t3:'+(rec.to3 || '-')+
+                    ', any:'+(rec.any || '-')+
                     ', a:'+rec.action);
                 console.log(
                     '    2: L:'+search.loc+
@@ -331,12 +347,13 @@ window.PARSER = (function() {
                     ', t1:'+(search.to1 || '-')+
                     ', t2:'+(search.to2 || '-')+
                     ', t3:'+(search.to3 || '-')+
+                    ', any:'+(search.any || '-')+
                     ', a:'+_options.action);
             } else {
                 search['action']    = _options.action || null;
                 search['nums']      = _options.nums || null;
                 //----------
-                /*if (search.obj == 'ПОРОХ') {
+                if (search.obj == 'БЕРЕГ') {
                    console.log(
                         'id:'+search.obj+', t:'+search.priority+', n:'+search.nums+
                         ', L:'+search.loc+
@@ -347,8 +364,9 @@ window.PARSER = (function() {
                         ', t1:'+(search.to1 || '-')+
                         ', t2:'+(search.to2 || '-')+
                         ', t3:'+(search.to3 || '-')+
+                        ', any:'+(search.any || '-')+
                         ', a:'+search.action);
-                } // end if */
+                } // end if
                 //----------
                 db_words_and_objects.insert(search);
                 //----------
@@ -387,6 +405,9 @@ window.PARSER = (function() {
                 any_errors: false,
                 error:      {type:null, word:''}, // Описание ошибки
                 //----------
+                unknown:    [],
+                anyword:    [],
+                //----------
                 verb:       null,
                 params:     [undefined, null, null, null], // undefined - пустой элемент на 0-й позиции массива
                 objects:    [undefined, null, null, null], // undefined - пустой элемент на 0-й позиции массива
@@ -398,6 +419,8 @@ window.PARSER = (function() {
             var adverbs         = {list:[], bids:[]};
             //----------
             LOC_ID  = AZ.getLocation(true);
+            //----------
+            AUTOCOMPLETE.setStatus(0);
             //----------
             var priority    = null; // Приоритет параметра команды
             var objrec      = null;
@@ -423,9 +446,38 @@ window.PARSER = (function() {
             var word_str    = '';
             var word        = null;
             //----------
-            var wx      = 0;
             var maxwx   = words_list.length;
             //----------
+            // +++ Нужно понять, есть ли во фразе незнакомые слова
+            var wx = 0;
+            while (wx <= maxwx-1) {
+                word_str = words_list[wx++];
+                //----------
+                if (_preparsing == true && wx == maxwx && have_a_space == false) {
+                    break;
+                } // end if
+                // Получаем информацию о полученном слове
+                word = DICTIONARY.getWord(word_str, true, preposition, last_params);
+                //----------
+                if (word === null) {
+                    if (AUTOCOMPLETE.lenght(0) == 1) {
+                        var ac_word = AUTOCOMPLETE.firstWord(0);
+                        //----------
+                        if (ac_word.substr(0, word_str.length) == word_str) {
+                            word = DICTIONARY.getWord(ac_word, true, preposition, last_params);
+                        } // end if
+                    } // end if
+                } // end if
+                //----------
+                if (word === null) {
+                    if (CMD.unknown.indexOf(word_str) == -1) {
+                        CMD.unknown.push(word_str);
+                        CMD.anyword.push(word_str);
+                    } // end if
+                } // end if
+            } // end while wx
+            //----------
+            var wx = 0;
             while (wx <= maxwx-1) {
                 // Если есть глагол и буфер слов не пуст, то берём слово из него
                 if (CMD.verb !== null && buffer.length > 0) {
@@ -435,6 +487,8 @@ window.PARSER = (function() {
                 } else {
                     // Получаем из фразы очередную порцию
                     word_str = words_list[wx++];
+                    //----------
+                    if (CMD.unknown.indexOf(word_str) >= 0) {continue;}
                     //----------
                     if (_preparsing == true && wx == maxwx && have_a_space == false) {
                         break;
@@ -453,14 +507,21 @@ window.PARSER = (function() {
                         } // end if
                     } // end if
                     //----------
-                    if (word === null) {
+                    if (word === null) {continue;} // end if
+                    /*if (word === null) {
+                        if (CMD.unknown.indexOf(word_str) == -1) {
+                            CMD.unknown.push(word_str);
+                            //buffer.push(DICTIONARY.getWord(ANYTHING, true, preposition, last_params));
+                        } // end if
+                        //----------
+                        continue;
                         CMD.any_errors = true;
                         //----------
                         CMD.error.type  = 1; // 1 - незнакомое слово
                         CMD.error.word  = word_str;
                         //----------
                         break;
-                    } // end if
+                    } // end if */
                     //----------
                     // Если глагол ещё не нашли, то помещаем слово в буфер
                     if (word.morph != 'Г' && CMD.verb === null) {
@@ -550,7 +611,7 @@ window.PARSER = (function() {
                 //----------
             } // end while (true)
             //----------
-            if (CMD.any_errors == true) {
+            /*if (CMD.any_errors == true) {
                 if (_preparsing == false || (wx < maxwx || (wx == maxwx && have_a_space == true))) {
                     if (_preparsing == false) {
                         print('Слово "<strong>'+word_str+'</strong>" мне незнакомо.');
@@ -564,7 +625,8 @@ window.PARSER = (function() {
                 
             } else {
                 if (have_a_space == true) {word_str = '';} // end if
-            } // end if
+            } // end if*/
+            if (have_a_space == true) {word_str = '';} // end if
             //----------
             // Если после разбора фразы у нас осталось наречие, то пытаемся определить к чему оно относится
             priority = null;
@@ -601,7 +663,11 @@ window.PARSER = (function() {
                             // Если параметр команды данного приоритета не занят...
                             if (pr_occupied.indexOf(priority) == -1) {
                                 // ...пытаемся опеределить, подходит ли данное слово к какому либо объекту по приоритету
-                                objrec = _get_link_to_object({'priority':priority, 'loc':LOC_ID, 'pid':(preposition == null ? null : preposition.bid), 'wid':word.bid});
+                                var search = {'priority':priority, 'loc':LOC_ID, 'pid':(preposition == null ? null : preposition.bid), 'wid':word.bid};
+                                //----------
+                                if (CMD.verb != null) {search.vid = CMD.verb.bid;} // end if
+                                //----------
+                                objrec = _get_link_to_object(search);
                                 if (objrec !== null) {
                                     break;
                                 } // end if
@@ -659,7 +725,7 @@ window.PARSER = (function() {
                     } // end if
                     //----------
                 } // end for x
-            } // end if
+            } // end if buffer.length > 0
             //----------
             // Если после разбора буфера остались наречия, которые не были использованы как предлоги
             _check_adverbs(CMD, adverbs, nouns4pronouns, pr_occupied);
@@ -669,9 +735,15 @@ window.PARSER = (function() {
                 priority = null;
                 for (priority=1; priority<=3; priority++) {
                     if (pr_occupied.indexOf(priority) == -1) {
-                        objrec = _get_link_to_object({'priority':priority, 'loc':LOC_ID, 'vid':CMD.verb.bid});
+                        var search = {'priority':priority, 'loc':LOC_ID, 'vid':CMD.verb.bid};
+                        //----------
+                        if (CMD.unknown.length > 0) {search.any = [1,2,3];} // end if
+                        //----------
+                        objrec = _get_link_to_object(search);
                         if (objrec !== null) {
                             priority = objrec.priority;
+                            //----------
+                            if (CMD.unknown.length > 0) {CMD.unknown = [];} // end if
                             break;
                         } // end if
                     } // end if
@@ -700,6 +772,21 @@ window.PARSER = (function() {
                 } // end for priority
             } // end if
             //----------
+            if (CMD.unknown.length > 0) {
+                CMD.any_errors = true;
+                CMD.error.type  = 1; // 1 - незнакомое слово
+                //----------
+                if (_preparsing == false) {
+                    for (var x=0; x<CMD.unknown.length; x++) {
+                        print('Слово "<strong>'+CMD.unknown[x]+'</strong>" мне незнакомо.');
+                    } // end for x
+                }
+                //----------
+                AUTOCOMPLETE.setStatus(-1);
+                //----------
+                return {phrase:CMD.phrase, object:null, action:null};
+            } // end if
+            //----------
             CMD.object = null;
             CMD.action = null;
             CMD.A      = {object:null, word:null, prep:null};
@@ -721,6 +808,8 @@ window.PARSER = (function() {
                 if (obj != null && act != null) {
                     CMD.object = obj;
                     CMD.action = obj.actions_list[act-1];
+                    //----------
+                    AUTOCOMPLETE.setStatus(1);
                     //----------
                     break;
                 } // end if
@@ -1103,7 +1192,11 @@ window.PARSER = (function() {
             //----------
             AUTOCOMPLETE.sort();
             //----------
-            for (var priority=1; priority<=3; priority++) {
+            if (CMD.action != null) {
+                AUTOCOMPLETE.setActionFlag(); // --- Убрать
+                AUTOCOMPLETE.setStatus(1);
+            } // end if
+            /*for (var priority=1; priority<=3; priority++) {
                 if (CMD.objects[priority] != null) {
                     var action_id = CMD.actions[priority];
                     //----------
@@ -1117,7 +1210,7 @@ window.PARSER = (function() {
                         break;
                     } // end if
                 } // end if
-            } // end for priority
+            } // end for priority*/
             //----------
             //return txt_words;
         }, // end function "pre_parse"
