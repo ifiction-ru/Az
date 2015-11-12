@@ -34,8 +34,6 @@
 // РАБОТА С ПЕРСОНАЖАМИ
     //--------------------------------------------------
     tSimpleObject.prototype.СделатьТекущим  = Character.prototype.SetCurrent;
-    //----------
-    СодержимоеИзвестно = markContainerAsExam;
 /* --------------------------------------------------------------------------- */
 // РАБОТА С ТЕКСТАМИ
     //--------------------------------------------------
@@ -61,6 +59,8 @@
     tSimpleObject.prototype.Находится   = tSimpleObject.prototype.isThere;
     tSimpleObject.prototype.Содержит    = tSimpleObject.prototype.Includes;
     tSimpleObject.prototype.Содержимое  = tSimpleObject.prototype.getContent;
+    //----------
+    tSimpleObject.prototype.СодержимоеИзвестно = tSimpleObject.prototype.examineContainer;
 /* --------------------------------------------------------------------------- */
 // РАБОТА СО СЛОВАРЁМ
     //--------------------------------------------------

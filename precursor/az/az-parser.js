@@ -444,6 +444,16 @@ window.PARSER = (function() {
                     //----------
                     // +++ Если слово незнакомое
                     if (word === null) {
+                        if (AUTOCOMPLETE.lenght(0) == 1) {
+                            var ac_word = AUTOCOMPLETE.firstWord(0);
+                            //----------
+                            if (ac_word.substr(0, word_str.length) == word_str) {
+                                word = DICTIONARY.getWord(ac_word, true, preposition, last_params);
+                            } // end if
+                        } // end if
+                    } // end if
+                    //----------
+                    if (word === null) {
                         CMD.any_errors = true;
                         //----------
                         CMD.error.type  = 1; // 1 - незнакомое слово

@@ -985,7 +985,8 @@ window.printCommand = function (_text) {
 //--------------------------------------------------
 window.printInventory = function () {
     //----------
-    markContainerAsExam(AZ.getProtagonist());
+    var protagonist = AZ.getProtagonist();
+    if (protagonist != null) {protagonist.examineContainer();} // end if
     //----------
     SCREEN.Out(DECOR.Inventory.get());
 };
