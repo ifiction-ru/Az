@@ -1,0 +1,22 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+        "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <mask id="fade-bottom" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
+            <linearGradient id="g1" gradientUnits="objectBoundingBox" x1="0" y1="0" x2="0" y2="1">
+                <stop stop-color="white" offset="0.85"/>
+                <stop stop-color="white" stop-opacity="0" offset="1"/>
+            </linearGradient>
+            <rect x="0" y="0" width="1" height="1" fill="url(#g1)"/>
+        </mask>
+
+        <mask id="fade-top" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
+            <linearGradient id="g2" gradientUnits="objectBoundingBox" x1="0" y1="1" x2="0" y2="0" >
+                <stop stop-color="white" offset="0.85"/>
+                <stop stop-color="white" stop-opacity="0" offset="1"/>
+            </linearGradient>
+            <rect x="0" y="0" width="1" height="1" fill="url(#g2)"/>
+        </mask>
+    </defs>
+</svg>

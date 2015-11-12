@@ -21,8 +21,8 @@
 
 
 body,
-.az-footer,
-.az-header {
+.az-header,
+.az-footer:before {
     background: rgb(237, 185, 102) 0 100% no-repeat fixed url(images/bg-page.png);
     background-size: auto 100%;
 }
@@ -35,10 +35,23 @@ body,
 .az-header {
     height: 100%;
     clip: rect(0, 660px, 100px, 0);
+    -webkit-mask-image: -webkit-linear-gradient(top, rgba(0,0,0,1) 85px, rgba(0,0,0,0) 100px); /* Chrome */
 }
 
 .az-footer {
+    background: none;
+}
 
+.az-footer:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    z-index: 0;
+    -webkit-mask-image: -webkit-linear-gradient(bottom, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%); /* Chrome */
+    mask: url(images/masks.svg#fade-top); /* FF */
 }
 
 .az-main {
@@ -68,7 +81,7 @@ body,
 @media screen and (min-width: 700px) {
     body,
     .az-header,
-    .az-footer {
+    .az-footer:before {
         background-position: 50% 100%;
         background-size: 1280px auto;
     }
