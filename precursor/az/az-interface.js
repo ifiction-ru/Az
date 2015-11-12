@@ -482,6 +482,47 @@ window.INTERFACE = (function () {
         _ready = false,
         _readyQueue = [],
 
+        // История команд
+
+        commandsHistory = (function () {
+            var list = [],
+                index = 0;
+
+            return {
+                add: function (text) {
+                    if (text && list.indexOf(text.trim()) < 0) {
+                        list.push(text);
+                        index = list.length;
+                    }
+                },
+
+                get: function (id) {
+                    if (list[id]) {
+                        return list[id];
+                    }
+                },
+
+                up: function () {
+                    index = index > 0 ? index - 1 : 0;
+                    return this.get(index) || '';
+                },
+
+                down: function () {
+                    index = index < list.length ? index + 1 : list.length;
+                    return this.get(index) || '';
+                },
+
+                reset: function () {
+                    index = list.length;
+                },
+
+                clear: function () {
+                    list = [];
+                    this.reset();
+                }
+            };
+        })(),
+
         /**
          * Строим базовый интерфейс игры.
          */
@@ -672,6 +713,7 @@ window.INTERFACE = (function () {
                 PARSER.pre_parse();
 
                 autocomplete();
+                commandsHistory.add(text);
             }
 
             elements.input.focus();
@@ -727,16 +769,25 @@ window.INTERFACE = (function () {
 
                 if (key === 13) { // Enter
                     submitInput();
-                } else if (key === 27) {
+                } else if (key === 27) { // Esc
                     clearInput();
                     clearSuggestions();
-                } else if (key === 9) {
+                    commandsHistory.reset();
+                } else if (key === 9) { // Tab
                     event.preventDefault();
                     item = dom.query(selectors.suggestionItem)[0];
 
                     if (item) {
                         applySuggestion(item.innerHTML);
                     }
+
+                    commandsHistory.reset();
+                } else if (key === 38) { // Up
+                    elements.input.value = commandsHistory.up();
+                    event.preventDefault();
+                } else if (key === 40) { // Down
+                    elements.input.value = commandsHistory.down();
+                    event.preventDefault();
                 }
             });
 
@@ -765,15 +816,15 @@ window.INTERFACE = (function () {
             });
 
             dom.on(elements.gameLook, 'click', function () {
-                submitInput('Осмотреться');
+                submitInput('осмотреться');
             });
 
             dom.on(elements.gameInventory, 'click', function () {
-                submitInput('Инвентарь');
+                submitInput('инвентарь');
             });
 
             dom.on(elements.gameMore, 'click', function () {
-                submitInput('Далее');
+                submitInput('далее');
             });
 
             dom.on(elements.suggestions, 'click', function (event) {
@@ -826,8 +877,10 @@ window.INTERFACE = (function () {
                 changeSettings(options);
                 renderView();
                 handleEvents();
+                clearInput();
                 clearSuggestions();
                 elements.input.focus();
+                commandsHistory.clear();
 
                 callback && callback();
                 _runReadyQueue();

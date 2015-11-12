@@ -167,19 +167,19 @@ p {
   background: transparent;
   font-size: 18px;
   font-family: "PT Sans", "sans-serif";
-  color: #555;
+  color: rgba(0, 0, 0, 0.6);
 }
 .az-inputs__text:-moz-placeholder {
-  color: #777;
+  color: rgba(0, 0, 0, 0.4);
 }
 .az-inputs__text::-moz-placeholder {
-  color: #777;
+  color: rgba(0, 0, 0, 0.4);
 }
 .az-inputs__text:-ms-input-placeholder {
-  color: #777;
+  color: rgba(0, 0, 0, 0.4);
 }
 .az-inputs__text::-webkit-input-placeholder {
-  color: #777;
+  color: rgba(0, 0, 0, 0.4);
 }
 .az-inputs__text:focus {
   outline: 0;
