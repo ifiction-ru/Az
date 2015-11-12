@@ -965,12 +965,16 @@ window.SCREEN = {
 //----------
 // ФУНКЦИИ РАБОТЫ С ЭКРАНОМ
 window.print = function (_text) {
+    _text = _text || '';
     //----------
-    SCREEN.Out(_text);
+    if (_text != '') {SCREEN.Out(_text);} // end if
     //----------
 };
 //--------------------------------------------------
 window.printOnes = function (_name, _text) {
+    _text = _text || '';
+    //----------
+    if (_text == '') {return false;} // end if
     //----------
     var value = getProperty(_name);
     //----------
