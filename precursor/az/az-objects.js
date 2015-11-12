@@ -146,6 +146,21 @@ window.tSimpleObject = function (_id) {
     tSimpleObject.prototype.getContent = function () {
         return this.container.getContent.apply(this.container, arguments);
     }; // end function "tSimpleObject.getContent"
+    //--------------------------------------------------
+    tSimpleObject.prototype.examineContainer = function () {
+        var protagonist = AZ.getProtagonist();
+        if (protagonist == null) {return false;} // end if
+        //----------
+        if (protagonist.what_he_exam.now.indexOf(this.ID) == -1) {
+            protagonist.what_he_exam.now.push(this.ID);
+        } // end if
+        //----------
+        if (protagonist.what_he_exam.past.indexOf(this.ID) == -1) {
+            protagonist.what_he_exam.past.push(this.ID);
+        } // end if
+        //----------
+        return true;
+    }; // end function "tSimpleObject.examineContainer"
 /* --------------------------------------------------------------------------- */
 // РАБОТА СО СВОЙСТВАМИ ОБЪЕКТОВ
     //--------------------------------------------------

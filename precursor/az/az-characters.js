@@ -20,22 +20,3 @@ Character.prototype.SetCurrent = function() {
     return true;
 }; //end function "<Character>.SetCurrent"
 /* --------------------------------------------------------------------------- */
-window.markContainerAsExam = function(_container) {
-    var id = AZ.getID(_container);
-    if (id == null) {return false;} // end if
-    //----------
-    var protagonist = AZ.getProtagonist();
-    if (protagonist == null) {return false;} // end if
-    //----------
-    if (protagonist.what_he_exam.now.indexOf(id) == -1) {
-        protagonist.what_he_exam.now.push(id);
-    } // end if
-    //----------
-    if (protagonist.what_he_exam.past.indexOf(id) == -1) {
-        protagonist.what_he_exam.past.push(id);
-    } // end if
-    //----------
-    return true;
-}; // end function "markContainerAsExam"
-//--------------------------------------------------
-
