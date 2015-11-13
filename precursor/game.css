@@ -35,7 +35,7 @@ body,
 .az-header {
     height: 100%;
     clip: rect(0, 660px, 100px, 0);
-    -webkit-mask-image: -webkit-linear-gradient(top, rgba(0,0,0,1) 85px, rgba(0,0,0,0) 100px); /* Chrome */
+    /* -webkit-mask-image: -webkit-linear-gradient(top, rgba(0,0,0,1) 85px, rgba(0,0,0,0) 100px); /* Chrome */
 }
 
 .az-footer {
@@ -50,8 +50,8 @@ body,
     bottom: 0;
     height: 100%;
     z-index: 0;
-    -webkit-mask-image: -webkit-linear-gradient(bottom, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%); /* Chrome */
-    mask: url(images/masks.svg#fade-top); /* FF */
+    /*-webkit-mask-image: -webkit-linear-gradient(bottom, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%); /* Chrome */
+    /*mask: url(images/masks.svg#fade-top); /* FF */
 }
 
 .az-main {
