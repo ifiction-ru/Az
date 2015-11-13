@@ -96,9 +96,9 @@ window.length2symbol = function (_list) {
     //----------
     if (value == 0) {
         return 'N';
-    } else if (value < 3) {
+    } else if (value < 2) {
         return 'S';
-    } else if (value > 2) {
+    } else if (value > 1) {
         return 'P';
     } else {
         return null;
@@ -155,5 +155,27 @@ window.text2html = function (_text) {
     return _text;
     //----------
 }; // end function "text2html"
+/* --------------------------------------------------------------------------- */
+window.param2data = function (_param, _data) {
+    var result = {};
+    //----------
+    if (_param !== undefined) {
+        if (typeof(_param) == 'object' && _param != null) {
+            for (var k in _param) {
+                result[k] = _param[k];
+            } // end for
+        } else {
+            result['параметр'] = _param;
+        } // end if
+    } // end if
+    //----------
+    if (_data !== undefined) {
+        for (var k in _data) {
+            result[k] = _data[k];
+        } // end for
+    } // end if
+    //----------
+    return result;
+}; // end function "iNN"
 /* --------------------------------------------------------------------------- */
 

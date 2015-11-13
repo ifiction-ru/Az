@@ -58,18 +58,17 @@ tDescription.prototype.getTitle = function (_param, _html) {
 }; // end function "<Объект>.getTitle"
 /* --------------------------------------------------------------------------- */
 tDescription.prototype.getText = function (_param, _html) {
-    /*var counter = getProperty(this.OWNER, 'descr.counter');
+    //----------
+    var counter = getProperty(this.OWNER, 'descr.counter');
     if (counter === undefined) {
         setProperty(this.OWNER, 'descr.counter', 1);
         counter = 1;
     } // end if
+    var data = param2data(_param, {'счётчик': counter});
     //----------
-    if (_param === undefined) {
-        _param = {'счётчик': counter};
-    } // end if*/
-    var text    = (typeof(this.descr_text) == 'function') ? this.descr_text(_param) : this.descr_text;
+    var text = (typeof(this.descr_text) == 'function') ? this.descr_text(data) : this.descr_text;
     //----------
-    //setProperty(this.OWNER, 'descr.counter', counter+1);
+    setProperty(this.OWNER, 'descr.counter', counter + 1);
     //----------
     var ownerID = AZ.getID(this.OWNER);
     //----------
