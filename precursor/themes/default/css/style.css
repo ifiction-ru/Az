@@ -288,6 +288,7 @@ p {
 
 .az-splash__content {
   margin: auto;
+  width: 90%;
 }
 
 /* Media queries */
@@ -304,5 +305,9 @@ p {
 
   .az-inputs__text {
     font-size: 20px;
+  }
+
+  .az-splash__content {
+    width: auto;
   }
 }

@@ -90,11 +90,10 @@ body,
 }
 
 .game-title {
-    width: 660px;
     height: 73px;
     margin: 20px auto 0;
     text-align: center;
-    background: 0 50% no-repeat url("images/title.png");
+    background: 0 50% no-repeat url("images/title-mobile.png");
     background-size: 100% auto;
 }
 
@@ -109,7 +108,7 @@ body,
     display: block;
     width: 250px;
     height: 50px;
-    margin: -60px auto 0;
+    margin: 20px auto 0;
     border-radius: 5px;
     background: rgba(255,255,255,0.5);
     line-height: 50px;
@@ -123,7 +122,7 @@ body,
     background: rgba(255,255,255,0.65);
 }
 
-.game-titles {
+.game-credits {
     line-height: 1.6;
     font-size: 18px;
     padding: 40px;
@@ -131,13 +130,13 @@ body,
     text-shadow: 0 0 5px #fff;
 }
 
-.game-titles h2 {
+.game-credits h2 {
     margin-top: 1.5em;
     font-size: 24px;
     text-align: center;
 }
 
-.game-titles p {
+.game-credits p {
     margin-bottom: 1em;
 }
 
@@ -165,5 +164,9 @@ body,
     .az-splash {
         background-position: 50% 100%;
         background-attachment: scroll;
+    }
+
+    .az-start-game {
+        margin: -60px auto 0;
     }
 }

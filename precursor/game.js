@@ -15,7 +15,7 @@
                                  <div class="game-title"></div>\
                                  <a class="az-start-game">Начать игру</a>',
             startEndingContent: '\
-                                <div class="game-titles">\
+                                <div class="game-credits">\
                                  <img src="images/pirate_start.png" class="game-pirate" alt="">\
                                     <p><strong>Олег Алейников</strong> — идея и код игры, ядро движка</p>\
                                     <p><strong>Иван «Нафанин» Нарожный</strong> — ядро движка, дизайн, вдохновение, идея затеять всё это</p>\
