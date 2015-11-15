@@ -458,10 +458,14 @@ window.INTERFACE = (function () {
                        </footer>',
             templateSuggestion: '<span class="az-suggestions__item">{{ this }}</span>',
             templateStartSplash: '<div class="az-splash az-splash_start">\
-                                    {{ this.content }}\
+                                    <div class="az-splash__content">\
+                                        {{ this.content }}\
+                                    </div>\
                                   </div>',
             templateEndingSplash: '<div class="az-splash az-splash_ending">\
-                                    {{ this.content }}\
+                                    <div class="az-splash__content">\
+                                        {{ this.content }}\
+                                    </div>\
                                   </div>'
         },
 
@@ -898,7 +902,7 @@ window.INTERFACE = (function () {
                     if (dom.is(event.target, selectors.gameStart)) {
                         hideStart();
                     }
-                })
+                });
             }
         },
 
@@ -908,14 +912,11 @@ window.INTERFACE = (function () {
                         content: settings.startEndingContent
                     });
 
-                dom.addClass(elements.body, classes.endingSplashVisible);
                 elements.splash = dom.create(content);
                 dom.appendTo(elements.splash, elements.body);
-                dom.on(elements.splash, 'click', function (event) {
-                    if (dom.is(event.target, selectors.gameStart)) {
-                        hideStart();
-                    }
-                })
+                setTimeout(function () {
+                    dom.addClass(elements.body, classes.endingSplashVisible);
+                }, 100);
             }
         },
 

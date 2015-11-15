@@ -14,9 +14,17 @@
                                  <img src="images/pirate_start.png" class="game-pirate" alt="">\
                                  <div class="game-title"></div>\
                                  <a class="az-start-game">Начать игру</a>',
-            startEndingContent: '<img src="images/pirate_start.png" class="game-pirate" alt="">\
+            startEndingContent: '\
                                 <div class="game-titles">\
-                                    <p></p>\
+                                 <img src="images/pirate_start.png" class="game-pirate" alt="">\
+                                    <p><strong>Олег Алейников</strong> — идея и код игры, ядро движка</p>\
+                                    <p><strong>Иван «Нафанин» Нарожный</strong> — ядро движка, дизайн, вдохновение, идея затеять всё это</p>\
+                                        <h2>Благодарности:</h2>\
+                                    <p><strong>Дима Мирошниченко и группа Дом ветров</strong> — за вдохновение и идею тематики игры</p>\
+                                    <p><strong>Лисёна</strong>  — за вдохновение и обкатку идей</p>\
+                                    <p><strong>Андрей «Kelot» Сидоров</strong>  — за отличный рисунок с пиратом</p>\
+                                    <p><strong>abbilder/Depositphotos.com</strong>  — за фоновый рисунок</p>\
+                                    <p><strong>Сергей «Серый Волк» Скиба</strong>  — за сроки и проведение КРИЛа</p>\
                                 </div>'
         });
         INTERFACE.showStart();

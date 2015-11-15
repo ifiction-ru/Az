@@ -106,20 +106,39 @@ body,
 
 .az-start-game {
     transition: background 0.25s;
-    cursor: pointer;
+    display: block;
+    width: 250px;
     height: 50px;
     margin: -60px auto 0;
-    padding: 0 50px;
     border-radius: 5px;
     background: rgba(255,255,255,0.5);
     line-height: 50px;
     font-size: 24px;
     color: #000;
     text-shadow: 0 0 5px #fff;
+    cursor: pointer;
 }
 
 .az-start-game:hover {
     background: rgba(255,255,255,0.65);
+}
+
+.game-titles {
+    line-height: 1.6;
+    font-size: 18px;
+    padding: 40px;
+    background: rgba(255,255,255,0.5);
+    text-shadow: 0 0 5px #fff;
+}
+
+.game-titles h2 {
+    margin-top: 1.5em;
+    font-size: 24px;
+    text-align: center;
+}
+
+.game-titles p {
+    margin-bottom: 1em;
 }
 
 @media screen and (min-width: 700px) {
