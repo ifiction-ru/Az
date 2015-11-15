@@ -456,7 +456,13 @@ window.INTERFACE = (function () {
                                </div>\
                            </div>\
                        </footer>',
-            templateSuggestion: '<span class="az-suggestions__item">{{ this }}</span>'
+            templateSuggestion: '<span class="az-suggestions__item">{{ this }}</span>',
+            templateStartSplash: '<div class="az-splash az-splash_start">\
+                                    {{ this.content }}\
+                                  </div>',
+            templateEndingSplash: '<div class="az-splash az-splash_ending">\
+                                    {{ this.content }}\
+                                  </div>'
         },
 
         selectors = {
@@ -470,10 +476,13 @@ window.INTERFACE = (function () {
             gameLook: '.az-inputs__game-look',
             gameInventory: '.az-inputs__game-inv',
             gameMore: '.az-inputs__game-more',
-            storyCommand: '.az-story__command'
+            storyCommand: '.az-story__command',
+            gameStart: '.az-start-game'
         },
         classes = {
-            main: 'az-main'
+            main: 'az-main',
+            startSplashVisible: 'az_start_splash_visible',
+            endingSplashVisible: 'az_ending_splash_visible'
         },
         elements = {
             // Заполняются в renderView
@@ -544,6 +553,7 @@ window.INTERFACE = (function () {
             document.body.appendChild(main);
 
             utils.extend(elements, {
+                body: document.body,
                 main: main,
                 heading: dom.get(selectors.heading, main),
                 story: dom.get(selectors.story, main),
@@ -875,6 +885,44 @@ window.INTERFACE = (function () {
             }
         },
 
+        showStart = function () {
+            if (settings.startSplashContent) {
+                var content = render(settings.templateStartSplash, {
+                        content: settings.startSplashContent
+                    });
+
+                dom.addClass(elements.body, classes.startSplashVisible);
+                elements.splash = dom.create(content);
+                dom.appendTo(elements.splash, elements.body);
+                dom.on(elements.body, 'click', function (event) {
+                    if (dom.is(event.target, selectors.gameStart)) {
+                        hideStart();
+                    }
+                })
+            }
+        },
+
+        showEnding = function () {
+            if (settings.startEndingContent) {
+                var content = render(settings.templateEndingSplash, {
+                        content: settings.startEndingContent
+                    });
+
+                dom.addClass(elements.body, classes.endingSplashVisible);
+                elements.splash = dom.create(content);
+                dom.appendTo(elements.splash, elements.body);
+                dom.on(elements.splash, 'click', function (event) {
+                    if (dom.is(event.target, selectors.gameStart)) {
+                        hideStart();
+                    }
+                })
+            }
+        },
+
+        hideStart = function () {
+            dom.removeClass(elements.body, classes.startSplashVisible);
+        },
+
         /**
          * Инициализация интерфейса игры
          * @param options Настройки интерфейса. Значения по умолчанию см. в переменной settings.
@@ -884,6 +932,7 @@ window.INTERFACE = (function () {
             dom.onReady(function () {
                 changeSettings(options);
                 renderView();
+
                 handleEvents();
                 clearInput();
                 clearSuggestions();
@@ -918,6 +967,8 @@ window.INTERFACE = (function () {
         render: render,
         on: on,
         init: init,
+        showStart: showStart,
+        showEnding: showEnding,
         updateCommandPanel: function (mode) {
             // Обновление командной панели игрока
             if (mode === 'text') {

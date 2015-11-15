@@ -3,11 +3,23 @@
     //--------------------------------------------------
     DEBUG.Enable();
     //----------
-    Установить('ИГРА.Название', 'Островок');
+    Установить('ИГРА.Название', 'Остров Клайда');
     //----------
     INTERFACE.ready(function () {
         INTERFACE.setTitle(Получить('ИГРА.Название'));
         INTERFACE.setHeading(Получить('ИГРА.Название'));
+
+        INTERFACE.changeSettings({
+            startSplashContent: '<div class="game-author">Олег Алейников</div>\
+                                 <img src="images/pirate_start.png" class="game-pirate" alt="">\
+                                 <div class="game-title"></div>\
+                                 <a class="az-start-game">Начать игру</a>',
+            startEndingContent: '<img src="images/pirate_start.png" class="game-pirate" alt="">\
+                                <div class="game-titles">\
+                                    <p></p>\
+                                </div>'
+        });
+        INTERFACE.showStart();
     });
 /* --------------------------------------------------------------------------- */
 // СОЗДАНИЕ ОБЪЕКТОВ ИГРЫ
