@@ -922,6 +922,7 @@ window.INTERFACE = (function () {
 
         hideStart = function () {
             dom.removeClass(elements.body, classes.startSplashVisible);
+            elements.input.focus();
         },
 
         /**
