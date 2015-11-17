@@ -179,3 +179,11 @@ window.param2data = function (_param, _data) {
 }; // end function "iNN"
 /* --------------------------------------------------------------------------- */
 
+window.checkFuncDuration = function (func) {
+    var start = new Date().getTime(),
+        finish;
+
+    func();
+    finish = new Date().getTime();
+    console.log(func.name + ' выполнилась за ' + (finish - start) + ' миллисекунд.')
+};
