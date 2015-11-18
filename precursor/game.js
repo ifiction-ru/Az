@@ -12,9 +12,14 @@
                                  <img src="images/pirate_start.png" class="game-pirate" alt="">\
                                  <div class="game-title"></div>\
                                  <a class="az-start-game">Начать игру</a>',
+            //<img src="images/pirate_start.png" class="game-pirate" alt="">\
             startEndingContent: '\
                                 <div class="game-credits">\
-                                    <img src="images/pirate_start.png" class="game-pirate" alt="">\
+                                    <p>\
+                                        Буду очень благодарен, если вы пришлёте мне лог игры на почту <a href="mailto:oleg@aleynikov.com">oleg@aleynikov.com</a>.<br/>\
+                                        Для этого нажмите Ctrl+A, Ctrl+C (буквы англ.) — и вставьте скопированный текст в письмо.<br/>\
+                                        Это поможет сделать игру лучше.\
+                                    </p>\
                                     <h2>Авторы:</h2>\
                                         <p><strong>Олег Алейников</strong> — идея и код игры, ядро движка, парсерная часть</p>\
                                         <p><strong>Иван «Нафанин» Нарожный</strong> — идея затеять всё это, дизайн,<br/>ядро движка, моральная поддержка</p>\
