@@ -43,10 +43,10 @@
 /* --------------------------------------------------------------------------- */
 // РАБОТА С ТЕКСТАМИ
     //--------------------------------------------------
-    window.Текст = SimpleText;
-    SimpleText.prototype.Вывести  = SimpleText.prototype.print;
-    SimpleText.prototype.Далее    = SimpleText.prototype.next;
-    //SimpleText.prototype.Действие = tSimpleObject.prototype.Action;
+    window.Текст = tSimpleText;
+    tSimpleText.prototype.Вывести  = tSimpleText.prototype.print;
+    tSimpleText.prototype.Далее    = tSimpleText.prototype.next;
+    //tSimpleText.prototype.Действие = tSimpleObject.prototype.Action;
 /* --------------------------------------------------------------------------- */
 // РАБОТА СО СВОЙСТВАМИ ОБЪЕКТОВ
     //--------------------------------------------------
@@ -65,8 +65,6 @@
     tSimpleObject.prototype.Находится   = tSimpleObject.prototype.isThere;
     tSimpleObject.prototype.Содержит    = tSimpleObject.prototype.Includes;
     tSimpleObject.prototype.Содержимое  = tSimpleObject.prototype.getContent;
-    //----------
-    tSimpleObject.prototype.СодержимоеИзвестно = tSimpleObject.prototype.examineContainer;
 /* --------------------------------------------------------------------------- */
 // РАБОТА СО СЛОВАРЁМ
     //--------------------------------------------------
@@ -80,21 +78,23 @@
     //--------------------------------------------------
     tSimpleObject.prototype.Описывается = tSimpleObject.prototype.Notation;
     tSimpleObject.prototype.Действие    = tSimpleObject.prototype.Action;
+    tSimpleObject.prototype.ВключитьДействие  = tSimpleObject.prototype.EnableAction;
+    tSimpleObject.prototype.ВыключитьДействие = tSimpleObject.prototype.DisableAction;
+    tSimpleObject.prototype.ВыполнитьДействие = tSimpleObject.prototype.ExecuteAction;
     //--------------------------------------------------
     window.localizeCMD = function (CMD) {
         //----------
-        CMD.фраза   = CMD.phrase;
-        CMD.команда = CMD.phrase;
-        CMD.глагол  = CMD.verb;
-        CMD.объект  = CMD.object;
-        CMD.прочиеслова  = CMD.anyword;
+        CMD.Фраза        = CMD.phrase;
+        CMD.Действие     = CMD.action_name;
+        CMD.Команда      = CMD.phrase;
+        CMD.Глагол       = CMD.verb;
+        CMD.Объект       = CMD.object;
         CMD.ПрочиеСлова  = CMD.anyword;
-        CMD.А       = {объект:CMD.A.object, слово:CMD.A.word, предлог:CMD.A.prep};
-        CMD.Б       = {объект:CMD.B.object, слово:CMD.B.word, предлог:CMD.B.prep};
-        CMD.В       = {объект:CMD.C.object, слово:CMD.C.word, предлог:CMD.C.prep};
+        CMD.А            = {Объект:CMD.A.object, Слово:CMD.A.word, Предлог:CMD.A.prep};
+        CMD.Б            = {Объект:CMD.B.object, Слово:CMD.B.word, Предлог:CMD.B.prep};
+        CMD.В            = {Объект:CMD.C.object, Слово:CMD.C.word, Предлог:CMD.C.prep};
         //----------
     }
-    //localizeCMD = _localizeCMD;
 /* --------------------------------------------------------------------------- */
 // РАБОТА С АВТОДОПОЛНЕНИЕМ
     //--------------------------------------------------
@@ -109,9 +109,9 @@
 // СОБЫТИЯ
     window.События = EVENTS;
     //----------
-    Object.defineProperty(EVENTS, 'Перед',   {configurable:false, writable:false, value:EVENTS.BEFORE});
-    Object.defineProperty(EVENTS, 'После',   {configurable:false, writable:false, value:EVENTS.AFTER});
-    Object.defineProperty(EVENTS, 'ВоВремя', {configurable:false, writable:false, value:EVENTS.DURING});
+    Object.defineProperty(EVENTS, 'Перед',       {configurable:false, writable:false, value:EVENTS.BEFORE});
+    Object.defineProperty(EVENTS, 'После',       {configurable:false, writable:false, value:EVENTS.AFTER});
+    Object.defineProperty(EVENTS, 'ВоВремя',     {configurable:false, writable:false, value:EVENTS.DURING});
     //----------
     Object.defineProperty(EVENTS, 'Поместить',   {configurable:false, writable:false, value:EVENTS.PUT});
     Object.defineProperty(EVENTS, 'Убрать',      {configurable:false, writable:false, value:EVENTS.REMOVE});
@@ -120,6 +120,8 @@
     Object.defineProperty(EVENTS, 'Свойство',    {configurable:false, writable:false, value:EVENTS.PROPERTY});
     //----------
     Object.defineProperty(EVENTS, 'Действие',    {configurable:false, writable:false, value:EVENTS.ACTION});
+    //----------
+    Object.defineProperty(EVENTS, 'Текст',       {configurable:false, writable:false, value:EVENTS.TEXT});
     //----------
     EVENTS.setLocalization ({
         //'имя':     'name',
@@ -131,6 +133,7 @@
         'кто':      'what',
         'кого':     'what',
         'чего':     'what',
+        'текст':     'what',
         'объект':   'what',
         'предмет':  'what',
         'персонаж': 'what',

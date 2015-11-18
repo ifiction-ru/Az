@@ -107,9 +107,14 @@ window.AUTOCOMPLETE = (function() {
         }, // end function "AUTOCOMPLETE.addWordWithFlag"
         //--------------------------------------------------
         // Получение перечня словоформ с учётом исключаемых из автодополнения. Вызывается из модуля PARSER.
-        getByBID: function (_bid) {
+        getByBID: function (_bid, word_str) {
+            var search = {'bid': _bid, 'inc':true};
             //----------
-            return db_autocomplete({'bid': _bid, 'inc':true}).get();
+            if (word_str !== undefined && word_str.length > 0) {
+                search.fid = DICTIONARY.getListByWord(word_str, 'fid');
+            } // end if
+            //----------
+            return db_autocomplete(search).get();
             //----------
         }, // end function "AUTOCOMPLETE.getByBID"
         //--------------------------------------------------
@@ -124,17 +129,25 @@ window.AUTOCOMPLETE = (function() {
             //----------
         }, // end function "AUTOCOMPLETE.setCharsMin"
         //--------------------------------------------------
+        // Установка минимального числа символов для формирования краткого перечняавтодополнения. Используется АВТОРОМ.
+        getCharsMin: function () {
+            return ac_chars;
+        }, // end function "AUTOCOMPLETE.getCharsMin"
+        //--------------------------------------------------
         // Добавление словоформы в перечень автодополнения. Вызывается из модуля PARSER.
-        add: function (_str, _fid, _word, _morph) {
+        add: function (_len, _fid, _word, _morph, _control) {
             //----------
-            if (ac_exclude.indexOf(_fid) >= 0) {return;} // end if
+            if (_control == true && ac_exclude.indexOf(_fid) >= 0) {return false;} // end if
             //----------
             _add(ac_data[0].list, _word, _morph);
             //----------
-            if (_str.length >= ac_chars) {
+            if (_len < ac_chars) {
+                return false;
+            } else {
                 _add(ac_data[1].list, _word, _morph);
+                //----------
+                return true;
             } // end if
-            //----------
         }, // end function "AUTOCOMPLETE.add"
         //--------------------------------------------------
         // Сортировка полного и краткого перечней слов для автодополнения. Вызывается из модуля PARSER.

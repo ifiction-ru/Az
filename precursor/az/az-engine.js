@@ -7,6 +7,8 @@ window.AZ = (function() {
         //  1 - Переназначение в процессе игры.
         //  2 - Переназначение в процессе последнего хода.
     //----------
+    var silence     = false;
+    //----------
     var protagonist = {object:null, ID:null}; // Текущий персонаж
     var position    = {object:null, ID:null}; // Текущее местоположение (персонажа)
     //----------
@@ -54,9 +56,9 @@ window.AZ = (function() {
             var arr = protagonist.object.what_he_exam.now;
             for (var x=0; x<arr.length; x++) {
                 var container    = AZ.getObject(arr[x]);
-                var container_id = AZ.getObject(arr[x]);
+                var container_id = container.ID;
                 //----------
-                if (AZ.getID(container_id) == position.ID) {continue;} // end if
+                if (container.ID == position.ID) {continue;} // end if
                 //----------
                 var content = container.getContent();
                 //----------
@@ -103,6 +105,8 @@ window.AZ = (function() {
         //----------
         toDoOnStart:  toDoOnStart,
         updateAvailableObjects: updateAvailableObjects,
+        //----------
+        silence: silence,
         //--------------------------------------------------
         // РАБОТА С БАЗОВЫМИ ОБЪЕКТАМИ
             //--------------------------------------------------
@@ -141,6 +145,28 @@ window.AZ = (function() {
                 //----------
                 return object;
             }, // end function "AZ.getObject"
+            //--------------------------------------------------
+            /*getObjectType: function(_id, _error) {
+                _id = _id || null;
+                //----------
+                if (_error === undefined) {_error = false;} // end if
+                //----------
+                var object = null;
+                //----------
+                if (_id !== null) {
+                    if (typeof(_id) == 'string') {
+                        object = objects_list[_id.trim().toUpperCase()];
+                    } else if (this.isObject(_id) == true) {
+                        object = _id;
+                    } // end if
+                } // end if
+                //----------
+                if (object === null && _error == true) {
+                    console.error('Объект с ID "'+_id+'" не найден!');
+                } // end if
+                //----------
+                return object.type;
+            }, // end function "AZ.getObject" */
             //--------------------------------------------------
             getID: function(_object, _error) {
                 if (_error === undefined) {_error = false;} // end if
@@ -224,6 +250,8 @@ window.AZ = (function() {
                     position.object = loc;
                     position.ID     = AZ.getID(loc);
                 } // end if
+                window.ЛОКАЦИЯ = position.object;
+                //----------
             }, // end function "AZ.setProtagonist"
             //--------------------------------------------------
             getLocation: function(_as_id) {
@@ -273,6 +301,35 @@ window.startWith = function (_module) {
     AZ.startWith(_module);
 }
 /* --------------------------------------------------------------------------- */
+window.Execute = function(text) {
+    printCommand(text);
+    var CMD = PARSER.parse(text);
+    if (CMD == null || CMD.action == null) {
+        print('Не совсем понятно, что вы хотите сделать.');
+    } else {
+        // Вызываем событие "Перед выполнением действия с объектом"
+        var check = true;
+        if (AZ.outputLayers.length == 0) {
+            check = EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.object, 'when':EVENTS.BEFORE}, {'parameter': CMD});
+        } // end if
+        if (check == true) {
+            //----------
+            incProperty('turns.all');
+            incProperty('turns.loc');
+            //----------
+            CMD.action(CMD);
+            //----------
+            // Вызываем событие "После выполнением действия с объектом"
+            if (AZ.outputLayers.length == 0) {
+                EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.object, 'when':EVENTS.AFTER}, {'parameter': CMD});
+            } // end if
+        } // end if
+    } // end if
+    //----------
+    AZ.startNewTurn();
+    PARSER.pre_parse();
+}
+/* --------------------------------------------------------------------------- */
 window.START = function (_param) {
     window.markdown  = new showdown.Converter();
     window.typograph = new Typograf({lang: 'ru'});
@@ -296,6 +353,8 @@ window.START = function (_param) {
         if (typeof(AZ.toDoOnStart) == 'function') {
             AZ.toDoOnStart();
         } else {
+            AZ.updateAvailableObjects();
+            //----------
             var loc = AZ.getLocation();
             //----------
             INTERFACE.write(loc.getTitle(null, true));
@@ -307,6 +366,75 @@ window.START = function (_param) {
         PARSER.pre_parse();
         DEBUG.updateWordsFullList();
         DEBUG.updateWordsShortList();
+        //----------
+/*Execute('далее');
+Execute('помощь');
+Execute('осмотреть пальму');
+Execute('залезть на пальму');
+Execute('взять пльму');
+Execute('взять пальму');
+Execute('оторвать лист');
+Execute('юг');
+Execute('осм');
+Execute('плыть');
+Execute('плыть к кораблю');
+Execute('осм пальму');
+Execute('осм остров');
+Execute('осмотреться');
+Execute('осм тень');
+Execute('кричать');
+Execute('осм океан');
+Execute('идти к пальме');
+Execute('осм пальму');
+Execute('лезть на пальму');
+Execute('осм себя');
+Execute('инв');
+Execute('рубить пальму саблей');
+Execute('плыть на плоту');
+Execute('сесть на плот');
+Execute('плыть к кораблю');
+Execute('плыть');
+Execute('тащить плот');
+Execute('привязать веревку к плоту');
+Execute('привязать веревку к пальме');
+Execute('привязать веревку');
+Execute('инв');
+Execute('инвентарь');
+Execute('думать');
+Execute('инвентарь');
+Execute('осм инвентарь');
+Execute('далее');
+Execute('далее');
+Execute('осм');
+Execute('срубить пальму саблей');
+Execute('привязать веревку к пальме');
+Execute('привязать веревку');
+Execute('дернуть веревку');
+Execute('тянуть веревку');
+Execute('тянуть за веревку');
+Execute('осмотреть');
+Execute('инв');
+Execute('стрелять в пальму');
+Execute('привязаться к веревке');
+Execute('привязать верёвку');
+Execute('привязать саблю');
+Execute('привязать саблю к веревке');
+Execute('лезть на пальму');
+Execute('залезть на пальму');
+Execute('осмотреть');
+Execute('подойти к пальме');
+Execute('взять пальму');
+Execute('взять веревку');
+Execute('тянуть за веревку');
+Execute('осм веревку');
+Execute('взять веревку');
+Execute('поднять сундук');
+Execute('поднять сундук');
+Execute('поднять сундук');
+Execute('поднять сундук');
+Execute('рубить веревку');
+Execute('осм пистолет');*/
+        
     });
 }; // end function "START"
 /* --------------------------------------------------------------------------- */

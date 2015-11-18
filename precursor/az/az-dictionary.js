@@ -789,10 +789,6 @@ window.DICTIONARY = (function() {
             return db_objects_of_verbs(_search).get();
         },
         //------------------------------
-        /*get_forms_list: function (_search) {
-            return db_search_form(_search).get();
-        },*/
-        //------------------------------
         getFormsListByCaseAndNumber: function (_search) {
             return db_search_form(_search).get();
         }, // end function "getFormsListByCaseAndNumber"
@@ -800,6 +796,11 @@ window.DICTIONARY = (function() {
         getFormsListByBID: function (_search) {
             return db_forms(_search).get();
         }, // end function "getFormsListByBID"
+        //------------------------------
+        getListByWord: function (_text, _field) {
+            return db_forms({form:{leftnocase:_text}}).distinct(_field);
+        }, // end function "getListByWord"
+        
     };
 })(); // end object DICTIONARY
 /* --------------------------------------------------------------------------- */

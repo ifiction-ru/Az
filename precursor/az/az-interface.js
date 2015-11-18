@@ -716,10 +716,14 @@ window.INTERFACE = (function () {
                 // text && triggerEvent('submit', { value: text });
 
                 if (CMD == null || CMD.action == null) {
-                    print('Ничего не понятно.');
+                    print('Не совсем понятно, что вы хотите сделать.');
                 } else {
                     // Вызываем событие "Перед выполнением действия с объектом"
-                    if (EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.object, 'when':EVENTS.BEFORE}, {'parameter': CMD}) == true) {
+                    var check = true;
+                    if (AZ.outputLayers.length == 0) {
+                        check = EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.object, 'when':EVENTS.BEFORE}, {'parameter': CMD});
+                    } // end if
+                    if (check == true) {
                         //----------
                         incProperty('turns.all');
                         incProperty('turns.loc');
@@ -727,7 +731,9 @@ window.INTERFACE = (function () {
                         CMD.action(CMD);
                         //----------
                         // Вызываем событие "После выполнением действия с объектом"
-                        EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.object, 'when':EVENTS.AFTER}, {'parameter': CMD});
+                        if (AZ.outputLayers.length == 0) {
+                            EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.object, 'when':EVENTS.AFTER}, {'parameter': CMD});
+                        } // end if
                     } // end if
                 } // end if
                 //----------
@@ -1020,7 +1026,17 @@ window.SCREEN = {
 window.print = function (_text) {
     _text = _text || '';
     //----------
-    if (_text != '') {SCREEN.Out(_text);} // end if
+    if (_text != '') {
+        if (_text.search(/[\s|\n]*\<\-\s*далее\s*\-\>[\s|\n]*/gi) == -1) {
+            if (AZ.silence == false) {
+                SCREEN.Out(_text);
+            } // end if
+        } else {
+            sysTextForOutput.Текст = _text;
+            sysTextForOutput.print();
+        } // end if
+        
+    } // end if
     //----------
 };
 //--------------------------------------------------
@@ -1044,15 +1060,15 @@ window.printOnes = function (_name, _text) {
 //--------------------------------------------------
 window.printCommand = function (_text) {
     //----------
-    SCREEN.Out(DECOR.Command.print(_text));
+    print(DECOR.Command.print(_text));
     //----------
 };
 //--------------------------------------------------
 window.printInventory = function () {
     //----------
     var protagonist = AZ.getProtagonist();
-    if (protagonist != null) {protagonist.examineContainer();} // end if
+    if (protagonist != null) {protagonist.СодержимоеИзвестно = true;} // end if
     //----------
-    SCREEN.Out(DECOR.Inventory.get());
+    print(DECOR.Inventory.get());
 };
 /* --------------------------------------------------------------------------- */

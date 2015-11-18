@@ -79,7 +79,7 @@ tDescription.prototype.getText = function (_param, _html) {
         prefix:     this.descr_prefix,
     };          
     //----------
-    if (this.hideContent == false) {
+    if (this.OWNER.СкрыватьСодержимое == false) {
         // Получаем перечень объектов, которые автор указал как упомянутые в описании
         var list_already    = this.descr_includes.slice();
         //----------
@@ -114,8 +114,8 @@ tDescription.prototype.getText = function (_param, _html) {
             // Получаем слово
             var word = DICTIONARY.getFormIDs(obj_inside[x]);
             //----------
-            if (word != null) {
-                var list = PARSER.get_objects_by_word({'priority':0, 'loc':[ownerID,null], 'wid':word.bid}); // Ищем по этому слову объект
+            if (word.bid != null) {
+                var list = PARSER.get_objects_by_word({'priority':0, 'loc':[ownerID,null], 'wid1':word.bid}); // Ищем по этому слову объект
                 //----------
                 for (var y=0; y<list.length; y++) {list_already.push(list[y]);} // end for y
             } // end if
@@ -124,7 +124,8 @@ tDescription.prototype.getText = function (_param, _html) {
         // Вычищаем из содержимого те объекты, что указаны автором и упомянуты в тексте описания
         var x=0;
         while (x < list_inside.length) {
-            if (list_already.indexOf(AZ.getID(list_inside[x].what)) == -1) {
+            obj = list_inside[x].what;
+            if (obj.СкрыватьВСодержимом == НЕТ && list_already.indexOf(AZ.getID(obj)) == -1) { // +++ Заменить на "obj.ID"
                 x++;
             } else {
                 list_inside.splice(x, 1);
@@ -164,7 +165,7 @@ tDescription.prototype.getText = function (_param, _html) {
         } // end for
     } // end if
     //----------
-    this.OWNER.examineContainer();
+    this.OWNER.СодержимоеИзвестно = true;
     //----------
     return DECOR.Description.getText(descr, this.OWNER);
     //----------

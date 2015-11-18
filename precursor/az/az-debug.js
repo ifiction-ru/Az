@@ -137,6 +137,7 @@ window.DEBUG = (function() {
             clear('debug-objects-list');
             //----------
             if (txt_objects.length > 0) {
+                txt_objects.sort();
                 write(txt_objects.join('<br/>'), 'debug-objects-list');
             } // end if
             //----------

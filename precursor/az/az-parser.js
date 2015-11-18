@@ -22,21 +22,61 @@ window.PARSER = (function() {
         ---------- */
         var db_words_and_objects = TAFFY();
     /* --------------------------------------------------------------------------- */
+    // Добавляем наречие в перечень наречий
+    function _add_adverb (_adverbs, _word) {
+        _adverbs.list.push(_word);
+        _adverbs.bids.push(_word.bid);
+    } // end function "_add_adverb"
+    /* --------------------------------------------------------------------------- */
+    // Удаляем наречие из перечня наречий
+    function _remove_adverb (_adverbs, _word) {
+        if (_word == null) {return;} // end if
+        //----------
+        var pos = _adverbs.bids.indexOf(_word.bid);
+        if (pos >= 0) {
+            _adverbs.list.splice(pos,1);
+            _adverbs.bids.splice(pos,1);
+        } // end if
+    } // end function "_remove_adverb"
+    /* --------------------------------------------------------------------------- */
+    // Проверяем, подходит ли предлог к существительному по падежу
+    function _check_prep_by_noun (_noun, _prep) {
+        if (_prep == null) {return null;}
+        //----------
+        for (var y=0; y<_prep.cases.length; y++) {
+            var prep_case = _prep.cases[y];
+            if (_noun.cases.united.indexOf(prep_case) >= 0) {
+                is_prep_correct = true;
+                return _prep;
+            } // end if
+        } // end for
+        //----------
+        return null;
+    } // end function "_check_prep_by_noun"
+    /* --------------------------------------------------------------------------- */
     function _get_link_to_object (_options) {
-        var priority    = _options['priority'] || 0;
+        var enable   = _options['enable'] || true;
+        //----------
+        var priority = _options['priority'] || 0;
         //----------
         var L   = _options['loc'] || null;
         var V   = _options['vid'] || null;
-        var P   = _options['pid'] || null;
-        var W   = _options['wid'] || null;
-        //var F = _options['fid'] || null;
+        //----------
         var to1 = _options['to1'] || null;
+        var P1  = _options['pid1'] || null;
+        var W1  = _options['wid1'] || null;
+        //----------
         var to2 = _options['to2'] || null;
+        var P2  = _options['pid2'] || null;
+        var W2  = _options['wid2'] || null;
+        //----------
         var to3 = _options['to3'] || null;
+        var P3  = _options['pid3'] || null;
+        var W3  = _options['wid3'] || null;
         //----------
         var any = _options['any'] || null;
         //----------
-        var search = {'obj':AZ.availObjects(true, false), 'priority':priority, 'loc':L, 'vid':V, 'pid':P, 'wid':W, 'to1':to1, 'to2':to2, 'to3':to3, 'any':any};
+        var search = {'enable':enable, 'obj':AZ.availObjects(true, false), 'priority':priority, 'loc':L, 'vid':V, 'to1':to1, 'pid1':P1, 'wid1':W1, 'to2':to2, 'pid2':P2, 'wid2':W2, 'to3':to3, 'pid3':P3, 'wid3':W3, 'any':any};
         //----------
         var object_id   = null;
         var priority    = null;
@@ -60,70 +100,8 @@ window.PARSER = (function() {
         //----------
     } // end function "_get_link_to_object"
     /* --------------------------------------------------------------------------- */
-    function _get_objects_by_word (_search, _morph) {
-        _search.obj = AZ.availObjects(true, false);
-        //----------
-        var list = db_words_and_objects(_search).get();
-        //----------
-        var result = [];
-        //----------
-        for (var x=0; x<list.length; x++) {
-            result.push(list[x].obj);
-        } // end for
-        //----------
-        return result;
-    } // end function "_get_objects_by_word"
-    /* --------------------------------------------------------------------------- */
-    function _get_noun_of_object_by_pronoun (_wid) {
-        var result = null;
-        //----------
-        var search = {
-            priority: 0,
-            obj:      AZ.availObjects(true, false),
-            loc:      [AZ.getLocation(true), null],
-            wid:      _wid,
-        }; // end search
-        //----------
-        var list = db_words_and_objects(search).get();
-        if (list.length == 0) {return null;} // end if
-        //----------
-        var object = list[0].obj;
-        //----------
-        search.obj = list[0].obj;
-        delete search.wid;
-        //----------
-        var list = db_words_and_objects(search).get();
-        for (var x=0; x<list.length; x++) {
-            var wid = list[x].wid;
-            //----------
-            var rec = DICTIONARY.getBase(wid);
-            if (rec.morph == 'С') {
-                result = rec;
-                break;
-            } // end if
-        } // end for
-        //----------
-        return result;
-    } // end function "_get_noun_of_object_by_pronoun"
-    /* --------------------------------------------------------------------------- */
-    // Добавляем наречие в перечень наречий
-    function _add_adverb (_adverbs, _word) {
-        _adverbs.list.push(_word);
-        _adverbs.bids.push(_word.bid);
-    } // end function "_add_adverb"
-    /* --------------------------------------------------------------------------- */
-    // Удаляем наречие из перечня наречий
-    function _remove_adverb (_adverbs, _word) {
-        if (_word == null) {return;} // end if
-        //----------
-        var pos = _adverbs.bids.indexOf(_word.bid);
-        if (pos >= 0) {
-            _adverbs.list.splice(pos,1);
-            _adverbs.bids.splice(pos,1);
-        } // end if
-    } // end function "_remove_adverb"
-    /* --------------------------------------------------------------------------- */
-    function _set_cmd_param (CMD, _priority, _word, _prep, _objrec, _nouns4pronouns, _pr_occupied) {
+    // Заполняем указанный слот данными слова
+    function _set_cmd_param (CMD, _priority, _word, _prep, _nouns4pronouns, _pr_occupied) {
         //----------
         if (CMD.params[_priority] === null) {
             //----------
@@ -135,33 +113,29 @@ window.PARSER = (function() {
                 _nouns4pronouns[_word.gender+':'+_priority] = _word;
             } // end if
             //----------
-            if (_objrec !== null) {
-                CMD.objects[_priority] = _objrec.object;
-                CMD.actions[_priority] = _objrec.action;
-            } // end if
-            //----------
             _pr_occupied.push(_priority);
         } // end if
         //----------
     } // end function "_set_cmd_param"
     /* --------------------------------------------------------------------------- */
+    // Проставляем слово в нужный слот по словарю
     function _check_param_priority (CMD, word, prep, _nouns4pronouns, _pr_occupied) {
         var prep_id = (prep === null ? null : prep.bid);
-        var priority = DICTIONARY.getNounPriority(CMD.verb, word, prep_id, _pr_occupied);
-        if (priority === null) {return null;} // end if
         //----------
-        priority = priority['priority'];
+        var priority = null;
         //----------
-        if (priority>=1 && priority<=3) {
-            var search = {'priority':priority, 'loc':LOC_ID, 'vid':CMD.verb.bid, 'pid':prep_id, 'wid':word.bid};
+        if (CMD.verb == null) {
+            priority = 1;
+        } else {
+            priority = DICTIONARY.getNounPriority(CMD.verb, word, prep_id, _pr_occupied);
+            if (priority == null) {return null;} // end if
             //----------
-            if (CMD.unknown.length > 0) {search.any = [1,2,3];} // end if
-            //----------
-            var objrec = _get_link_to_object(search);
-            //----------
-            if (objrec != null) {CMD.unknown = [];} // end if
-            //----------
-            _set_cmd_param(CMD, priority, word, prep, objrec, _nouns4pronouns, _pr_occupied);
+            priority = priority['priority'];
+        } // end if
+        //----------
+        // Проверяем, может ли это слово стоять в данном слоте по данным возможных действий
+        if (priority >= 1 && priority <= 3) {
+            _set_cmd_param(CMD, priority, word, prep, _nouns4pronouns, _pr_occupied);
             //----------
             return priority;
             
@@ -171,24 +145,9 @@ window.PARSER = (function() {
         //----------
     } // end function "_check_param_priority"
     /* --------------------------------------------------------------------------- */
-    // Проверяем, подходит ли предлог существительному по падежу
-    function _check_prep_by_noun (_noun, _prep) {
-        if (_prep == null) {return null;}
-        //----------
-        for (var y=0; y<_prep.cases.length; y++) {
-            var prep_case = _prep.cases[y];
-            if (_noun.cases.united.indexOf(prep_case) >= 0) {
-                is_prep_correct = true;
-                return _prep;
-            } // end if
-        }
-        //----------
-        return null;
-    } // end function "_check_prep_by_noun"
-    /* --------------------------------------------------------------------------- */
     // Примеряем накопившиеся наречия
     function _check_adverbs (CMD, _adverbs, _nouns4pronouns, _pr_occupied) {
-        var objrec = null;
+        var rec = null;
         //----------
         // Если после разбора фразы остались наречия, которые не были использованы как предлоги
         if (_adverbs.list.length > 0) {
@@ -196,26 +155,23 @@ window.PARSER = (function() {
             for (var x=0; x<_adverbs.list.length; x++) {
                 var adverb = _adverbs.list[x];
                 //----------
-                objrec = null;
+                rec = null;
                 // Пытаемся пристроить наречие в порядке приоритета типа: 1-2-3
                 for (priority=1; priority<=3; priority++) {
                     // Если параметр команды данного приоритета не занят...
                     if (_pr_occupied.indexOf(priority) == -1) {
-                        // ...пытаемся опеределить, подходит ли данное слово к какому либо объекту
-                        objrec = _get_link_to_object({
-                                        'priority':priority,
-                                        'loc':LOC_ID,
-                                        'vid':(CMD.verb == null ? null : CMD.verb.bid),
-                                        'wid':adverb.bid});
+                        // ...пытаемся опеределить, подходит ли данное наречие к какому либо объекту вообще
+                        var search = { 'enable':true, 'priority':priority, 'loc':LOC_ID, 'vid':(CMD.verb == null ? null : CMD.verb.bid) };
+                        search['wid'+priority] = adverb.bid;
                         //----------
-                        if (objrec !== null) {
-                            break;
-                        } // end if
+                        rec = _get_link_to_object(search);
+                        //----------
+                        if (rec != null) {break;} // end if
                     } // end if
                 } // end for priority
-                if (objrec !== null) {
+                if (rec != null) {
                     //----------
-                    _set_cmd_param(CMD, objrec.priority, adverb, null, objrec, _nouns4pronouns, _pr_occupied);
+                    _set_cmd_param(CMD, rec.priority, adverb, null, _nouns4pronouns, _pr_occupied);
                     //----------
                     _remove_adverb(_adverbs, adverb);
                     //----------
@@ -230,9 +186,7 @@ window.PARSER = (function() {
                     //----------
                     if (priority>=1 && priority<=3) {
                         //----------
-                        objrec = _get_link_to_object({'priority':priority, 'loc':LOC_ID, 'vid':CMD.verb.bid, 'wid':adverb.bid});
-                        //----------
-                        _set_cmd_param(CMD, priority, adverb, null, objrec, _nouns4pronouns, _pr_occupied);
+                        _set_cmd_param(CMD, priority, adverb, null, _nouns4pronouns, _pr_occupied);
                         //----------
                         _remove_adverb(_adverbs, adverb);
                     } // end if
@@ -241,88 +195,60 @@ window.PARSER = (function() {
         } // end if
     } // end function "_check_adverbs"
     /* --------------------------------------------------------------------------- */
-    // Ищем объект по сопоставленным с ним словам с нулевым приоритетом
-    function _search_object_by_priority (CMD, _verb_id, _word_id, _priority) {
-        //----------
-        //_priority = _priority || 1;
-        var maxmin = (_priority === undefined ? {min:1, max:3} : {min:_priority, max:_priority});
-        var result = null;
-        //----------
-        var full_IDs    = AZ.availObjects(true, false); // Получаем перечень объектов, доступных лишь из-за действия с ними в данной локации
-        var limited_ids = AZ.availObjects(true, true); // Получаем перечень объектов, доступных лишь из-за действия с ними в данной локации
-        //----------
-        // Получаем перечень объектов, сопоставленных с переданным словом в текущей локации (или во всех).
-        var search = {'obj':full_IDs, 'priority':0, 'loc':[LOC_ID, null], 'wid':_word_id};
-        //if (CMD.unknown.length > 0) {search.any = [1,2,3];} // end if
-        var objs_list = db_words_and_objects(search).get();
-        for (var x=0; x<objs_list.length; x++) {
-            var objrec = objs_list[x];
-            //----------
-            // Теперь ищем действия с каким-либо приоритетом, где указана ссылка на объект, найденный по слову: to1, to2 или to3
-            var search = {'obj':full_IDs, 'priority':[1,2,3], 'loc':[LOC_ID, null], 'vid': _verb_id};
-            //----------
-            if (CMD.unknown.length > 0) {search.any = [1,2,3];} // end if
-            //----------
-            for (var priority=maxmin.min; priority<=maxmin.max; priority++) {
-                if (CMD.objects[priority] != null) {continue;} // end if
-                //----------
-                // Если объект из "неполного перечня", то локация должна совпадать.
-                search['loc'] = (limited_ids.indexOf(objrec.obj) == -1 ? [LOC_ID, null]: LOC_ID);
-                //----------
-                search['to'+priority] = objrec.obj;
-                //----------
-                // Получаем перечень записей объект + локация + приоритет + глагол
-                var actions_list = db_words_and_objects(search).get();
-                for (var y=0; y<actions_list.length; y++) {
-                    var actrec = actions_list[y];
-                    if (actrec != null) {
-                        if (actrec.priority == priority) {
-                            CMD.objects[priority]   = AZ.getObject(actrec.obj);
-                            CMD.actions[priority]   = actrec.action;
-                            //----------
-                            result = actrec;
-                            //----------
-                            if (CMD.unknown.length > 0) {CMD.unknown = [];} // end if
-                            //----------
-                            break;
-                        } // end if
-                    } // end if
-                    //----------
-                    if (result != null) {break;} // end if
-                } // end for y
-                //----------
-                delete search['to'+priority];
-                //----------
-                if (result != null) {break;} // end if
-            } // end for priority
-            //----------
-            if (result != null) {break;} // end if
-        } // end for x
-        //----------
-        return result === null ? null : {'object':AZ.getObject(result.obj), 'priority':result.priority, 'action':result.action};
-    } // end function "_search_object_by_priority"
-    /* --------------------------------------------------------------------------- */
     return {
-        add_link_to_object: function (_options) {
-            //_object_id, _priority, _location_id, _verb_id, _prep_id, _word_id, _tobj1, _tobj2, _tobj3, _action_id
+        actionEnableDisable: function (_obj, _name, _enable) {
+            db_words_and_objects({'obj':_obj, 'name':_name}).each(function (rec, num) {
+                db_words_and_objects(rec).update({'enable':_enable});
+            });
+        }, // end function "PARSER.actionEnableDisable"
+        //--------------------------------------------------
+        executeAction: function (_obj, _name, _params) {
+            var rec = db_words_and_objects({'enable':true, 'obj':_obj, 'name':_name}).first();
+            //----------
+            if (rec == false) {return;} // end if
+            //----------
+            var obj = AZ.getObject(_obj);
+            var action = obj.actions_list[rec.action-1];
+            if (typeof(action) == 'function') {
+                AZ.silence = true;
+                //----------
+                action(_params);
+                //----------
+                AZ.silence = false;
+            } // end if
+        }, // end function "PARSER.actionEnableDisable"
+        //--------------------------------------------------
+        add_link_to_object: function (_options) { // *** проверено
             //----------
             var search = {
+                'name':      _options.name,
+                'enable':    _options.enable,
+                //----------
                 'obj':      _options.obj,
                 'priority': _options.priority,
                 //----------
                 'loc':      _options.loc || null,
                 'vid':      _options.vid || null,
-                'pid':      _options.pid || null,
-                'wid':      _options.wid || null,
-                'fid':      _options.fid || null,
+                //----------
                 'to1':      _options.to1 || null,
+                'pid1':     _options.pid1 || null,
+                'wid1':     _options.wid1 || null,
+                'fid1':     _options.fid1 || null,
+                //----------
                 'to2':      _options.to2 || null,
+                'pid2':     _options.pid2 || null,
+                'wid2':     _options.wid2 || null,
+                'fid2':     _options.fid2 || null,
+                //----------
                 'to3':      _options.to3 || null,
+                'pid3':     _options.pid3 || null,
+                'wid3':     _options.wid3 || null,
+                'fid3':     _options.fid3 || null,
                 //----------
                 'any':      _options.any || null,
                 };
             //----------
-            if ((search.vid && search.pid && search.wid && search.to1 && search.to2 && search.to3 && search.any) == false) {return false;} // end if
+            if ((search.vid && search.to1 && search.pid1 && search.wid1 && search.to2 && search.pid2 && search.wid2 && search.to3 && search.pid3 && search.wid3 && search.any) == false) {return false;} // end if
             //----------
             // Ищем, нет ли уже такой связки
             var rec = db_words_and_objects(search).first();
@@ -332,41 +258,57 @@ window.PARSER = (function() {
                 console.log(
                     '    1: L:'+rec.loc+
                     ', v:'+(rec.vid == null ? '-' : DICTIONARY.getBase(rec.vid).base+' ('+rec.vid+')')+
-                    ', p:'+(rec.pid == null ? '-' : DICTIONARY.getBase(rec.pid).base+' ('+rec.pid+')')+
-                    ', w:'+(rec.wid == null ? '-' : DICTIONARY.getBase(rec.wid).base+' ('+rec.wid+')')+
                     ', t1:'+(rec.to1 || '-')+
+                    ', p1:'+(rec.pid1 == null ? '-' : DICTIONARY.getBase(rec.pid1).base+' ('+rec.pid1+')')+
+                    ', w1:'+(rec.wid1 == null ? '-' : DICTIONARY.getBase(rec.wid1).base+' ('+rec.wid1+')')+
                     ', t2:'+(rec.to2 || '-')+
+                    ', p2:'+(rec.pid2 == null ? '-' : DICTIONARY.getBase(rec.pid2).base+' ('+rec.pid2+')')+
+                    ', w2:'+(rec.wid2 == null ? '-' : DICTIONARY.getBase(rec.wid2).base+' ('+rec.wid2+')')+
                     ', t3:'+(rec.to3 || '-')+
+                    ', p3:'+(rec.pid3 == null ? '-' : DICTIONARY.getBase(rec.pid3).base+' ('+rec.pid3+')')+
+                    ', w3:'+(rec.wid3 == null ? '-' : DICTIONARY.getBase(rec.wid3).base+' ('+rec.wid3+')')+
                     ', any:'+(rec.any || '-')+
                     ', a:'+rec.action);
                 console.log(
                     '    2: L:'+search.loc+
                     ', v:'+(search.vid == null ? '-' : DICTIONARY.getBase(search.vid).base+' ('+search.vid+')')+
-                    ', p:'+(search.pid == null ? '-' : DICTIONARY.getBase(search.pid).base+' ('+search.pid+')')+
-                    ', w:'+(search.wid == null ? '-' : DICTIONARY.getBase(search.wid).base+' ('+search.wid+')')+
                     ', t1:'+(search.to1 || '-')+
+                    ', p1:'+(search.pid1 == null ? '-' : DICTIONARY.getBase(search.pid1).base+' ('+search.pid1+')')+
+                    ', w1:'+(search.wid1 == null ? '-' : DICTIONARY.getBase(search.wid1).base+' ('+search.wid1+')')+
                     ', t2:'+(search.to2 || '-')+
+                    ', p2:'+(search.pid2 == null ? '-' : DICTIONARY.getBase(search.pid2).base+' ('+search.pid2+')')+
+                    ', w2:'+(search.wid2 == null ? '-' : DICTIONARY.getBase(search.wid2).base+' ('+search.wid2+')')+
                     ', t3:'+(search.to3 || '-')+
+                    ', p3:'+(search.pid3 == null ? '-' : DICTIONARY.getBase(search.pid3).base+' ('+search.pid3+')')+
+                    ', w3:'+(search.wid3 == null ? '-' : DICTIONARY.getBase(search.wid3).base+' ('+search.wid3+')')+
                     ', any:'+(search.any || '-')+
                     ', a:'+_options.action);
             } else {
                 search['action']    = _options.action || null;
                 search['nums']      = _options.nums || null;
                 //----------
-                if (search.obj == 'БЕРЕГ') {
+                //if (search.obj == 'ПОРОХ' || search.obj == 'ФИТИЛЬ') {
+                /*if (search.obj == 'ПОРОХ') {
                    console.log(
-                        'id:'+search.obj+', t:'+search.priority+', n:'+search.nums+
+                        'name:'+(search.name == null ? '-' : search.name)+', '+
+                        'id:'+search.obj+', p:'+search.priority+', n:'+search.nums+
                         ', L:'+search.loc+
                         ', v:'+(search.vid == null ? '-' : DICTIONARY.getBase(search.vid).base+' ('+search.vid+')')+
-                        ', p:'+(search.pid == null ? '-' : DICTIONARY.getBase(search.pid).base+' ('+search.pid+')')+
-                        ', w:'+(search.wid == null ? '-' : DICTIONARY.getBase(search.wid).base+' ('+search.wid+')')+
-                        ', f:'+(search.fid == null ? '-' : DICTIONARY.getForm(search.fid).form+' ('+search.fid+')')+
                         ', t1:'+(search.to1 || '-')+
+                        ', p1:'+(search.pid1 == null ? '-' : DICTIONARY.getBase(search.pid1).base+' ('+search.pid1+')')+
+                        ', w1:'+(search.wid1 == null ? '-' : DICTIONARY.getBase(search.wid1).base+' ('+search.wid1+')')+
+                        ', f1:'+(search.fid1 == null ? '-' : DICTIONARY.getForm(search.fid1).form+' ('+search.fid1+')')+
                         ', t2:'+(search.to2 || '-')+
+                        ', p2:'+(search.pid2 == null ? '-' : DICTIONARY.getBase(search.pid2).base+' ('+search.pid2+')')+
+                        ', w2:'+(search.wid2 == null ? '-' : DICTIONARY.getBase(search.wid2).base+' ('+search.wid2+')')+
+                        ', f2:'+(search.fid2 == null ? '-' : DICTIONARY.getForm(search.fid2).form+' ('+search.fid2+')')+
                         ', t3:'+(search.to3 || '-')+
+                        ', p3:'+(search.pid3 == null ? '-' : DICTIONARY.getBase(search.pid3).base+' ('+search.pid3+')')+
+                        ', w3:'+(search.wid3 == null ? '-' : DICTIONARY.getBase(search.wid3).base+' ('+search.wid3+')')+
+                        ', f3:'+(search.fid3 == null ? '-' : DICTIONARY.getForm(search.fid3).form+' ('+search.fid3+')')+
                         ', any:'+(search.any || '-')+
                         ', a:'+search.action);
-                } // end if
+                } // end if*/
                 //----------
                 db_words_and_objects.insert(search);
                 //----------
@@ -376,27 +318,61 @@ window.PARSER = (function() {
         }, // end function "add_link_to_object"
         //--------------------------------------------------
         // Возвращает массив с идентификаторами объектов, которые имеют действия в указанной локации
-        get_objects_by_loc_and_actions: function (_loc) {
+        get_objects_by_loc_and_actions: function (_loc) { // *** проверено
             //----------
-            var result = db_words_and_objects({'priority':[1,2,3], 'loc':_loc}).distinct('obj');
+            var result = db_words_and_objects({'enable':true, 'priority':[1,2,3], 'loc':_loc}).distinct('obj');
             //----------
             return (result == false ? [] : result);
             //----------
         }, // end function "get_objects_by_loc_and_actions"
         //--------------------------------------------------
-        get_link_to_object: _get_link_to_object,
-        //--------------------------------------------------
-        get_objects_by_word:            _get_objects_by_word,
-        get_noun_of_object_by_pronoun:  _get_noun_of_object_by_pronoun,
-        //--------------------------------------------------
-        parse: function (_phrase, _preparsing, _prepart2) {
-            _prepart2 = _prepart2 || false;
+        get_objects_by_word: function (_search, _morph) { // *** проверено
+            _search.obj = AZ.availObjects(true, false);
             //----------
-            /*  
-                1. Фраза должна начинаться с действия / глагола.
-                2. Если у действия есть качественная характеристика (быстро, аккуратно), оно должно идти перед действием.
-                3. Если 
-                */
+            var list = db_words_and_objects(_search).get();
+            //----------
+            var result = [];
+            //----------
+            for (var x=0; x<list.length; x++) {
+                result.push(list[x].obj);
+            } // end for
+            //----------
+            return result;
+        }, // end function "get_objects_by_word"
+        /* --------------------------------------------------------------------------- */
+        get_noun_of_object_by_pronoun: function (_wid) { // *** проверено
+            var result = null;
+            //----------
+            var search = {
+                priority: 0,
+                obj:      AZ.availObjects(true, false),
+                loc:      [AZ.getLocation(true), null],
+                wid1:     _wid,
+            }; // end search
+            //----------
+            var list = db_words_and_objects(search).get();
+            if (list.length == 0) {return null;} // end if
+            //----------
+            var object = list[0].obj;
+            //----------
+            search.obj = list[0].obj;
+            delete search.wid1;
+            //----------
+            var list = db_words_and_objects(search).get();
+            for (var x=0; x<list.length; x++) {
+                var wid = list[x].wid1;
+                //----------
+                var rec = DICTIONARY.getBase(wid);
+                if (rec.morph == 'С') {
+                    result = rec;
+                    break;
+                } // end if
+            } // end for
+            //----------
+            return result;
+        }, // end function "get_noun_of_object_by_pronoun"
+        //--------------------------------------------------
+        parse: function (_phrase, _preparsing) {
             _preparsing = _preparsing || false;
             //----------
             var CMD = {
@@ -412,6 +388,9 @@ window.PARSER = (function() {
                 params:     [undefined, null, null, null], // undefined - пустой элемент на 0-й позиции массива
                 objects:    [undefined, null, null, null], // undefined - пустой элемент на 0-й позиции массива
                 actions:    [undefined, null, null, null], // undefined - пустой элемент на 0-й позиции массива
+                //----------
+                object:     null,
+                action:     null
             }; // end CMD
             //----------
             var nouns4pronouns  = {};
@@ -436,9 +415,7 @@ window.PARSER = (function() {
             _phrase = _phrase.replace(/[^а-яёА-ЯЁa-zA-Z0-9\-\s]/gim, '');
             //----------
             _phrase = _phrase.trim().toLowerCase().replace(/\s+/g,' ');
-            if (_phrase == '') {
-                return {phrase:CMD.phrase, object:null, action:null};
-            } // end if
+            if (_phrase == '') {return {phrase:CMD.phrase, object:null, action:null};} // end if
             //----------
             var words_list = _phrase.split(' ');
             //if (words_list.length == 0) {return null;} // end if
@@ -508,20 +485,6 @@ window.PARSER = (function() {
                     } // end if
                     //----------
                     if (word === null) {continue;} // end if
-                    /*if (word === null) {
-                        if (CMD.unknown.indexOf(word_str) == -1) {
-                            CMD.unknown.push(word_str);
-                            //buffer.push(DICTIONARY.getWord(ANYTHING, true, preposition, last_params));
-                        } // end if
-                        //----------
-                        continue;
-                        CMD.any_errors = true;
-                        //----------
-                        CMD.error.type  = 1; // 1 - незнакомое слово
-                        CMD.error.word  = word_str;
-                        //----------
-                        break;
-                    } // end if */
                     //----------
                     // Если глагол ещё не нашли, то помещаем слово в буфер
                     if (word.morph != 'Г' && CMD.verb === null) {
@@ -572,10 +535,9 @@ window.PARSER = (function() {
                 } else if (word.morph == 'С') {
                     // Если есть предлог, стоящий перед этим словом, то проверяем, подходит ли предлог по падежу
                     preposition = _check_prep_by_noun(word, preposition);
+                    priority    = _check_param_priority(CMD, word, preposition, nouns4pronouns, pr_occupied);
                     //----------
-                    priority = _check_param_priority(CMD, word, preposition, nouns4pronouns, pr_occupied);
-                    //----------
-                    if (preposition !== null && priority !== null) {
+                    if (preposition != null && priority != null) {
                         // Если предлог ещё и наречие, то удаляем его из списка
                         _remove_adverb(preposition);
                     } // end if
@@ -611,21 +573,6 @@ window.PARSER = (function() {
                 //----------
             } // end while (true)
             //----------
-            /*if (CMD.any_errors == true) {
-                if (_preparsing == false || (wx < maxwx || (wx == maxwx && have_a_space == true))) {
-                    if (_preparsing == false) {
-                        print('Слово "<strong>'+word_str+'</strong>" мне незнакомо.');
-                    } // end if
-                    //----------
-                    AUTOCOMPLETE.setStatus(-1);
-                    //----------
-                    return {phrase:CMD.phrase, object:null, action:null};
-                } // end if
-                //----------
-                
-            } else {
-                if (have_a_space == true) {word_str = '';} // end if
-            } // end if*/
             if (have_a_space == true) {word_str = '';} // end if
             //----------
             // Если после разбора фразы у нас осталось наречие, то пытаемся определить к чему оно относится
@@ -642,6 +589,7 @@ window.PARSER = (function() {
                 for (var x=0; x<buffer.length; x++) {
                     word = buffer[x];
                     //----------
+                    // Обрабатываем предлог
                     if (word.morph == 'ПР') {
                         preposition = word;
                         
@@ -655,35 +603,12 @@ window.PARSER = (function() {
                     } else if (word.morph == 'С') {
                         // Если есть предлог, стоящий перед этим словом, то проверяем, подходит ли предлог по падежу
                         preposition = _check_prep_by_noun(word, preposition);
+                        priority    = _check_param_priority(CMD, word, preposition, nouns4pronouns, pr_occupied);
                         //----------
-                        objrec = null;
-                        //----------
-                        // Пытаемся пристроить существительное в порядке приоритета типа: 1-2-3
-                        for (priority=1; priority<=3; priority++) {
-                            // Если параметр команды данного приоритета не занят...
-                            if (pr_occupied.indexOf(priority) == -1) {
-                                // ...пытаемся опеределить, подходит ли данное слово к какому либо объекту по приоритету
-                                var search = {'priority':priority, 'loc':LOC_ID, 'pid':(preposition == null ? null : preposition.bid), 'wid':word.bid};
-                                //----------
-                                if (CMD.verb != null) {search.vid = CMD.verb.bid;} // end if
-                                //----------
-                                objrec = _get_link_to_object(search);
-                                if (objrec !== null) {
-                                    break;
-                                } // end if
-                            } // end if
-                        } // end for priority
-                        if (objrec == null) {
-                            // ...пытаемся опеределить, подходит ли данное слово к какому либо объекту вообще
-                            objrec = _search_object_by_priority(CMD, (CMD.verb == null ? null : CMD.verb.bid), word.bid);
-                        }
-                        if (objrec !== null) {
-                            //----------
-                            _set_cmd_param(CMD, objrec.priority, word, preposition, objrec, nouns4pronouns, pr_occupied);
-                            //----------
+                        if (preposition != null && priority != null) {
+                            // Если предлог ещё и наречие, то удаляем его из списка
                             _remove_adverb(preposition);
                         } // end if
-                        //----------
                         
                     // Обрабатываем местоимение
                     } else if (word.morph == 'М') {
@@ -691,30 +616,12 @@ window.PARSER = (function() {
                             var noun2 = word.nouns_list[x];
                             var prep2 = _check_prep_by_noun(noun2, prep2);
                             //----------
-                            objrec = null;
+                            priority  = _check_param_priority(CMD, noun2, prep2, nouns4pronouns, pr_occupied);
                             //----------
-                            // Пытаемся пристроить существительное в порядке приоритета типа: 1-2-3
-                            for (priority=1; priority<=3; priority++) {
-                                // Если параметр команды данного приоритета не занят...
-                                if (pr_occupied.indexOf(priority) == -1) {
-                                    // ...пытаемся опеределить, подходит ли данное слово к какому либо объекту
-                                    objrec = _get_link_to_object({'priority':priority, 'loc':LOC_ID, 'pid':(prep2 == null ? null : prep2.bid), 'wid':noun2.bid});
-                                    if (objrec !== null) {
-                                        break;
-                                    } // end if
-                                } // end if
-                            } // end for priority
-                            if (objrec == null) {
-                                // ...пытаемся опеределить, подходит ли данное слово к какому либо объекту вообще
-                                objrec = _search_object_by_priority(CMD, (CMD.verb == null ? null : CMD.verb.bid), noun2.bid);
-                            }
-                            if (objrec !== null) {
-                                //----------
-                                _set_cmd_param(CMD, objrec.priority, word, preposition, objrec, nouns4pronouns, pr_occupied);
-                                //----------
+                            if (preposition != null && priority != null) {
+                                // Если предлог ещё и наречие, то удаляем его из списка
                                 _remove_adverb(preposition);
                             } // end if
-                            //----------
                         } // end for x
                         
                     } // end if word.morph == ...
@@ -730,48 +637,136 @@ window.PARSER = (function() {
             // Если после разбора буфера остались наречия, которые не были использованы как предлоги
             _check_adverbs(CMD, adverbs, nouns4pronouns, pr_occupied);
             //----------
-            if (CMD.verb != null && CMD.params[1] == null && CMD.params[2] == null && CMD.params[3] == null) {
-                objrec = null;
-                priority = null;
-                for (priority=1; priority<=3; priority++) {
-                    if (pr_occupied.indexOf(priority) == -1) {
-                        var search = {'priority':priority, 'loc':LOC_ID, 'vid':CMD.verb.bid};
-                        //----------
-                        if (CMD.unknown.length > 0) {search.any = [1,2,3];} // end if
-                        //----------
-                        objrec = _get_link_to_object(search);
-                        if (objrec !== null) {
-                            priority = objrec.priority;
-                            //----------
-                            if (CMD.unknown.length > 0) {CMD.unknown = [];} // end if
-                            break;
+            // Если все слова в команде завершены, то разбираем команду
+            if (word_str == '') {
+                var full_IDs    = AZ.availObjects(true, false); // Получаем перечень доступных объектов
+                var limited_ids = AZ.availObjects(true, true);  // Получаем перечень объектов, доступных лишь из-за действия с ними в данной локации
+                //----------
+                var list = null;
+                //----------
+                var search = {'enable':true, 'obj':full_IDs, 'loc':[null,LOC_ID], 'priority':[1,2,3], 'vid':(CMD.verb == null ? null : CMD.verb.bid)};
+                //----------
+                var obj_by_word = {};
+                //----------
+                for (var priority=1; priority<=3; priority++) {
+                    if (CMD.params[priority] == null) {continue;} // end if
+                    //----------
+                    search['pid'+priority] = [null];
+                    var prep2 = CMD.params[priority].prep;
+                    if (prep2 != null) {search['pid'+priority].push(prep2.bid);} // end if
+                    //----------
+                    search['wid'+priority] = [null, CMD.params[priority].bid];
+                    //----------
+                    search['to' +priority] = [null];
+                    //----------
+                    // Получаем список объектов по найденному в команде слову
+                    list = PARSER.get_objects_by_word({'priority':0, 'loc':[null,LOC_ID], 'wid1':CMD.params[priority].bid});
+                    for (var x=0; x<list.length; x++) {
+                        search['to'+priority].push(list[x]);
+                    } // end for x
+                    // Запоминаем перечень объектов по этому слову
+                    obj_by_word[''+CMD.params[priority].bid] = list.slice();
+                    //----------
+                } // end for priority
+                //----------
+                if (CMD.unknown.length > 0) {search.any = [1,2,3];} // end if
+                //----------
+                var list  = db_words_and_objects(search).get();
+                var list2 = [];
+                //----------
+                for (var x=0; x<list.length; x++) {
+                    var rec = list[x];
+                    //----------
+                    // Если объект из ограниченного перечня, то локация у действия должна быть заполнена
+                    if (limited_ids.indexOf(rec.obj) != -1) {
+                        if (rec.loc == null) {continue;} // end if
+                    } // end if
+                    //----------
+                    var include = true;
+                    var pass_it = 0;
+                    //----------
+                    for (var priority=1; priority<=3; priority++) {
+                        if (CMD.params[priority] == null && rec['pid'+priority] == null && rec['wid'+priority] == null && rec['to'+priority] == null) {
+                            pass_it++;
+                            continue;
                         } // end if
+                        //----------
+                        // Если в данных действия слот заполнен, то и в команде должно быть какое-то слово
+                            if (rec['pid'+priority] != null || rec['wid'+priority] != null || rec['to'+priority] != null) {
+                                if (CMD.params[priority] == null) {
+                                    include = false;
+                                    break;
+                                } // end if
+                            } // end if
+                            //----------
+                            // Если в данных действия заполнен предлог, то и в команде он должен быть заполнен
+                            if (rec['pid'+priority] != null) {
+                                if (CMD.params[priority].prep == null || CMD.params[priority].prep.bid != rec['pid'+priority]) {
+                                    include = false;
+                                    break;
+                                } // end if
+                            } // end if
+                            //----------
+                            // Если в данных действия заполнено слово, то и в команде оно должно быть заполнено
+                            if (rec['wid'+priority] != null) {
+                                if (CMD.params[priority].bid != rec['wid'+priority]) {
+                                    include = false;
+                                    break;
+                                } // end if
+                            } // end if
+                            //----------
+                            // Если в данных действия заполнен объект, то и в команде оно должно быть заполнено
+                            //if ((rec['to'+priority] != null) && ()) {
+                            if (rec['to'+priority] != null) {
+                                /*if (full_IDs.indexOf(rec['to'+priority]) >= 0) {
+                                    include = false;
+                                    break;
+                                } // end if*/
+                                //----------
+                                if (obj_by_word[''+CMD.params[priority].bid].indexOf(rec['to'+priority]) == -1) {
+                                    include = false;
+                                    break;
+                                } // end if
+                            } // end if
+                        //----------
+                        // Если в команде слот заполнен, то и в данных действия должно быть какие-то данные
+                        if (CMD.params[priority] != null) {
+                            if (rec.any == null && rec['pid'+priority] == null && rec['wid'+priority] == null && rec['to'+priority] == null) {
+                                include = false;
+                                break;
+                            } // end if
+                        } // end if
+                        
+                    } // end for priority
+                    if (include == true && (pass_it<3 || CMD.verb != null)) {
+                        list2.push(rec);
                     } // end if
                 } // end for x
                 //----------
-                if (objrec !== null && word_str == '') {
-                    CMD.params[objrec.priority] = null;
+                if (list2.length > 0) {
+                    rec = list2[0];
                     //----------
-                    CMD.objects[objrec.priority]    = objrec.object;
-                    CMD.actions[objrec.priority]    = objrec.action;
+                    CMD.object = AZ.getObject(rec.obj);
+                    CMD.action = CMD.object.actions_list[rec.action-1];
+                    CMD.action_name = rec.name || '';
                     //----------
-                    pr_occupied.push(objrec.priority);
+                    for (var priority=1; priority<=3; priority++) {
+                        if (CMD.params[priority] != null) {
+                            list = obj_by_word[''+CMD.params[priority].bid];
+                            if (list !== undefined) {
+                                CMD.objects[priority] = AZ.getObject(list[0]);
+                            } // end if
+                        } // end if
+                        //----------
+                        /*if (CMD.unknown.length > 0 && rec.any != null && CMD.params[rec.any] != null) {
+                        } // end if*/
+                    } // end if
+                    //----------
+                    if (CMD.unknown.length > 0) {CMD.unknown = [];} // end if
                 } // end if
             } // end if
             //----------
-            if (CMD.verb != null && word_str == '') {
-                for (var priority=1; priority<=3; priority++) {
-                    if (CMD.objects[priority] != null) {continue;} // end if
-                    //----------
-                    var param = CMD.params[priority] || null;
-                    if (param == null) {continue;} // end if
-                    //----------
-                    objrec = _search_object_by_priority(CMD, CMD.verb.bid, param.bid, priority);
-                    if (objrec != null) {break;} // end if
-                    //----------
-                } // end for priority
-            } // end if
-            //----------
+            // Ругаемся на незнакомые слова
             if (CMD.unknown.length > 0) {
                 CMD.any_errors = true;
                 CMD.error.type  = 1; // 1 - незнакомое слово
@@ -787,33 +782,21 @@ window.PARSER = (function() {
                 return {phrase:CMD.phrase, object:null, action:null};
             } // end if
             //----------
-            CMD.object = null;
-            CMD.action = null;
             CMD.A      = {object:null, word:null, prep:null};
             CMD.B      = {object:null, word:null, prep:null};
             CMD.C      = {object:null, word:null, prep:null};
             //----------
             if (CMD.objects[1] != null) {CMD.A.object = CMD.objects[1];} // end if
             if (CMD.objects[2] != null) {CMD.B.object = CMD.objects[2];} // end if
-            if (CMD.objects[3] != null) {CMD.B.object = CMD.objects[3];} // end if
+            if (CMD.objects[3] != null) {CMD.C.object = CMD.objects[3];} // end if
             //----------
             if (CMD.params[1] != null) {CMD.A.word = CMD.params[1]; CMD.A.prep = CMD.params[1].prep;} // end if
             if (CMD.params[2] != null) {CMD.B.word = CMD.params[2]; CMD.B.prep = CMD.params[2].prep;} // end if
             if (CMD.params[3] != null) {CMD.C.word = CMD.params[3]; CMD.C.prep = CMD.params[3].prep;} // end if
             //----------
-            for (var priority=1; priority<=3; priority++) {
-                var obj = CMD.objects[priority];
-                var act = CMD.actions[priority];
-                //----------
-                if (obj != null && act != null) {
-                    CMD.object = obj;
-                    CMD.action = obj.actions_list[act-1];
-                    //----------
-                    AUTOCOMPLETE.setStatus(1);
-                    //----------
-                    break;
-                } // end if
-            } // end for priority
+            if (CMD.action != null) {
+                AUTOCOMPLETE.setStatus(1);
+            } // end if
             //----------
             for (var key in nouns4pronouns) {
                 last_params[key] = nouns4pronouns[key];
@@ -824,20 +807,26 @@ window.PARSER = (function() {
             } // end if
             //----------
             if (_preparsing == true) {
-                this.pre_parse(word_str, iNN(CMD.verb, 'bid'), iNN(preposition, 'bid'), CMD, _prepart2);
+                this.pre_parse(word_str, iNN(CMD.verb, 'bid'), iNN(preposition, 'bid'), CMD);
             } // end if
             //----------
             return CMD;
             //----------
         }, // end function "parse"
         //--------------------------------------------------
-        pre_parse: function (word_str, verb_id, prep_id, CMD, _prepart2) {
+        pre_parse: function (word_str, verb_id, prep_id, CMD) {
             word_str    = word_str || '';
+            //----------
+            if (word_str.length == 0 && AUTOCOMPLETE.getCharsMin() > 0 && DEBUG.isEnable() == false) {
+                AUTOCOMPLETE.init();
+                return;
+            } // end if
+            //word_str = word_str.replace('ё', 'е');
             //----------
             verb_id     = verb_id || null;
             prep_id     = prep_id || null;
             //----------
-            _prepart2   = _prepart2 || false;
+            var availableBIDs = (word_str.length == 0) ? null : DICTIONARY.getListByWord(word_str, 'bid');
             //----------
             var bids_list = [];
             var bids_data = [];
@@ -850,13 +839,17 @@ window.PARSER = (function() {
             //--------------------------------------------------
             // Добавляем слово в список на выдачу (+ доп. информация в values)
             function _add_bid (_list, _data, _bid, _values) {
+                if (availableBIDs !== null) {
+                    if (availableBIDs.indexOf(_bid) == -1) {return;} // end if
+                } // end if
+                //----------
                 if (_list.indexOf(_bid) == -1) {
                     _list.push(_bid);
                     //----------
                     var word = DICTIONARY.getBase(_bid);
                     var rec = {'wid':_bid, 'base':word.base, 'morph':word.morph};
                     //----------
-                    if (_values != undefined) {
+                    if (_values !== undefined) {
                         for (var key in _values) {
                             rec[key] = _values[key];
                         } // end for
@@ -879,23 +872,19 @@ window.PARSER = (function() {
                 } // end if
             } // end function "_cases2word"
             //--------------------------------------------------
-            function _add_words_from_links (_list, _data, _obj, _search, _wrdcases, _cases) {
+            function _add_words_from_links (bids_to_add, _obj, _search, _cases) {
                 if (_obj == null) {return;} // end if
                 if (obj_to_pass.indexOf(_obj) >= 0) {return;} // end if
                 //----------
                 _search.obj = _obj;
                 _cases      = _cases || null;
                 //----------
-                //obj_to_pass.push(_obj);
-                //----------
                 var words_list = db_words_and_objects(_search).get();
                 //----------
                 for (var x=0; x<words_list.length; x++) {
                     var word = words_list[x];
                     //----------
-                    _add_bid(_list, _data, word.wid, {'nums':word.nums});
-                    //----------
-                    _cases2word(_wrdcases, word.wid, _cases); // Добавляем падежи для данного слова
+                    bids_to_add.push({'bid':word.wid1, 'value':{nums:word.nums}, 'cases':_cases.slice()});
                 } // end for wx
             } // end function "_add_words_from_links"
             //--------------------------------------------------
@@ -924,10 +913,6 @@ window.PARSER = (function() {
                         preps_to_pass.push(CMD.params[priority].prep.bid);
                     } // end if
                 } // end if
-                //----------
-                //if (CMD.objects[priority] != null) {
-                //  obj_to_pass.push(AZ.getID(CMD.objects[priority])); //+++ на время
-                //} // end if
             } // end for x
             // >> Закончили запоминать уже распознанные в команде слова
             //----------
@@ -990,17 +975,24 @@ window.PARSER = (function() {
                 //----------
             } // end if
             //----------
+            // Перечень доступных в настоящий момент объектов
+            var availableObjects = AZ.availObjects(true, false); // Получаем перечень доступных объектов
+            var isText = (availableObjects.length == 1 && AZ.getObject(availableObjects[0]).type == 'text') ? true : false;
+            //----------
             // Шаблон фильтра отбора слов, сопоставленных с объектом
-            var search_toN = {'priority':0, 'loc':[LOC_ID, null]};
+            var search_toN = {'priority':0};
+            if (isText == false) {search_toN.loc = [LOC_ID, null];} // end if
             //----------
             // Фильтр отбора записей-действий
             var search = {
-                'obj':      AZ.availObjects(true, false), // [AZ.current_character.ID]
+                'enable':   true, 
+                'obj':      availableObjects,
                 'priority': [1,2,3],
                 //----------
-                'loc':      [LOC_ID, null],
+                //'loc':      [LOC_ID, null],
                 };
-                if (verb_id !== null) {search.vid = verb_id;} // end if
+            if (verb_id !== null) {search.vid = verb_id;} // end if
+            if (isText == false)  {search.loc = [LOC_ID, null];} // end if
             //----------
             // Отбираем все комбинации слов, используемых в действиях с доступными объектами
             var list = db_words_and_objects(search).get();
@@ -1010,7 +1002,11 @@ window.PARSER = (function() {
             for (var x=0; x<list.length; x++) {
                 var rec = list[x];
                 //----------
-                if (limited_ids.indexOf(rec.obj) != -1) {
+                var bids_to_add   = []; // Массив с данными для добавления
+                var pass_this_rec = false;
+                //----------
+                // Если объект из ограниченного перечня, то локация у действия должна быть заполнена
+                if (limited_ids.indexOf(rec.obj) >= 0) {
                     if (rec.loc == null) {continue;} // end if
                 } // end if
                 //----------
@@ -1020,7 +1016,7 @@ window.PARSER = (function() {
                 //----------
                 // Если глагол в данных есть, а в команде его нет (и в команде нет ни предлога, ни слова), то добавляем его в перечень
                 if (rec.vid != null && verb_id == null && pass_verb == false) {
-                    _add_bid(bids_list, bids_data, rec.vid);
+                    bids_to_add.push({'bid':rec.vid, 'value':undefined});
                 } // end if
                 //----------
                 // Если глагол есть в команде, то этот же глагол есть и в данных (условие фильтра)
@@ -1032,52 +1028,61 @@ window.PARSER = (function() {
                 //if (obj_to_pass.indexOf(rec.obj) == -1 && (CMD.objects[rec.priority] == null || rec.obj == AZ.getID(CMD.objects[rec.priority]))) {
                 //if (obj_to_pass.indexOf(rec.obj) == -1) {
                 //----------
-                // Предлог добавляем, если этого предлога в команде ещё нет.
-                if (rec.pid != null && prep_id == null && preps_to_pass.indexOf(rec.pid) == -1) {
-                    //  1. Глагола нет ни в данных, ни в команде.
-                    //  2. Глагол есть и в данных, и в команде.
-                    if (rec.vid == verb_id) {
-                        _add_bid(bids_list, bids_data, rec.pid);
-                        //----------
-                        cases2 = DICTIONARY.getWordCases(rec.pid, '-');
-                        _cases2word(words_cases, rec.wid, cases2);
-                        //----------
-                        preps_to_pass.push(rec.pid);
-                    } // end if
-                } // end if
-                //----------
-                // Слово добавляем если этого слова в команде ещё нет:
-                if (rec.wid != null && words_to_pass.indexOf(rec.wid) == -1 && prep_id == rec.pid) {
-                    //  1. Глагола нет ни в данных, ни в команде. Предлога нет ни в данных, ни в команде.
-                    //  2. Глагола нет ни в данных, ни в команде. Предлог есть и в данных, и в команде.
-                    //  3. Глагол есть и в данных, и в команде. Предлога нет ни в данных, ни в команде.
-                    //  4. Глагол есть и в данных, и в команде. Предлог есть и в данных, и в команде.
-                    if (rec.vid == verb_id && rec.pid == prep_id) {
-                        _add_bid(bids_list, bids_data, rec.wid, {'fid':rec.fid});
-                        words_to_pass.push(rec.wid);
-                    } // end if
-                } // end if
-                //} // end if "obj_to_pass"
-                //----------
                 // Если...
                 // Сопоставление слов с объектами
                 for (var priority=1; priority<=3; priority++) {
+                    if (CMD.params[priority] != null) {continue;} // end if
+                    //----------
+                    // Предлог добавляем, если этого предлога в команде ещё нет.
+                    if (rec['pid'+priority] != null && prep_id == null && preps_to_pass.indexOf(rec['pid'+priority]) == -1) {
+                        //  1. Глагола нет ни в данных, ни в команде.
+                        //  2. Глагол есть и в данных, и в команде.
+                        if (rec.vid == verb_id) {
+                            bids_to_add.push({'bid':rec['pid'+priority], 'value':undefined});
+                            //----------
+                            cases2 = DICTIONARY.getWordCases(rec['pid'+priority], '-');
+                            _cases2word(words_cases, rec['wid'+priority], cases2);
+                            //----------
+                            preps_to_pass.push(rec['pid'+priority]);
+                        } // end if
+                    } // end if
+                    //----------
+                    // Слово добавляем если этого слова в команде ещё нет:
+                    if (rec['wid'+priority] != null && words_to_pass.indexOf(rec['wid'+priority]) == -1 && prep_id == rec['pid'+priority]) {
+                        //  1. Глагола нет ни в данных, ни в команде. Предлога нет ни в данных, ни в команде.
+                        //  2. Глагола нет ни в данных, ни в команде. Предлог есть и в данных, и в команде.
+                        //  3. Глагол есть и в данных, и в команде. Предлога нет ни в данных, ни в команде.
+                        //  4. Глагол есть и в данных, и в команде. Предлог есть и в данных, и в команде.
+                        if (rec.vid == verb_id && rec['pid'+priority] == prep_id) {
+                            bids_to_add.push({'bid':rec['wid'+priority], 'value':{'fid':rec['fid'+priority]}});
+                            //----------
+                            words_to_pass.push(rec['wid'+priority]);
+                        } // end if
+                    } // end if
+                    //} // end if "obj_to_pass"
+                    //----------
                     var obj = rec['to'+priority];
                     //----------
                     // Если слот не заполнен, либо данный объект уже обрабатывался, то пропускаем запись
                     if (obj == null || obj_to_pass.indexOf(obj) >= 0) {continue;} // end if
                     //----------
+                    // Пропускаем комбинации, где один из объектов недоступен
+                    if (availableObjects.indexOf(obj) == -1) {pass_this_rec = true; continue;} // end if
+                    //----------
+                    // Пропускаем комбинации, где один из объектов в ограниченном списке - с ним можно манипулировать только по его действиям
+                    if (obj != rec.obj && limited_ids.indexOf(obj) >= 0) {pass_this_rec = true; continue;} // end if
+                    //----------
                     // Предлог должен совпадать и в данных и в команде (либо отсутствовать и там, и там).
                     if (verb_id == rec.vid) {
                         if (verb_id == null) {
-                            if (rec.pid != prep_id) {continue;} // end if
+                            if (rec['pid'+priority] != prep_id) {continue;} // end if
                             //----------
                             // Если предлога нет, то падеж только именительный, иначе - берём из предлога.
-                            cases2 = (rec.pid == null ? ['И'] : DICTIONARY.getWordCases(rec.pid, '-'));
+                            cases2 = (rec['pid'+priority] == null ? ['И'] : DICTIONARY.getWordCases(rec['pid'+priority], '-'));
                             
                         } else if (verb_id != null) {
                             // Если есть глагол, то может быть ситуация, когда предлога в данных нет, а в команде он есть - в этом случае берём предлоги глагола
-                            if (rec.pid != null && prep_id != rec.pid) {continue;} // end if
+                            if (rec['pid'+priority] != null && prep_id != rec['pid'+priority]) {continue;} // end if
                             //----------
                             var idx = verb_id+':'+priority;
                             if (preps_of_verbs[idx].length>0) {
@@ -1085,6 +1090,7 @@ window.PARSER = (function() {
                                     var prep2 = preps_of_verbs[idx][y];
                                     if (preps_to_pass.indexOf(prep2) == -1) {
                                         _add_bid(bids_list, bids_data, prep2);
+                                        //----------
                                         preps_to_pass.push(prep2);
                                     } // end if
                                 } // end for
@@ -1092,13 +1098,23 @@ window.PARSER = (function() {
                             //----------
                             cases2 = cases[verb_id+':'+priority+':'+prep_id];
                             if (cases2 === undefined) {continue;} // end if
-                            //if (cases2.indexOf(rec.pid) == -1) {continue;} // end if
+                            //if (cases2.indexOf(rec['pid'+priority]) == -1) {continue;} // end if
                         } // end if
                         //----------
                         // Добавляем слова-сопоставления с объектом из слота
-                        _add_words_from_links(bids_list, bids_data, obj, search_toN, words_cases, cases2);
+                        _add_words_from_links(bids_to_add, obj, search_toN, cases2);
                     } // end if
                 } // end for "priority"
+                //----------
+                if (pass_this_rec == false) {
+                    for (var bx=0; bx<bids_to_add.length; bx++) {
+                        var brec = bids_to_add[bx];
+                        _add_bid(bids_list, bids_data, brec.bid, brec.value);
+                        if (brec.cases !== undefined) {
+                            _cases2word(words_cases, brec.bid, brec.cases); // Добавляем падежи для данного слова
+                        } // end if
+                    } // end for
+                } // end if
             } // end for x
             //----------
             AUTOCOMPLETE.init(bids_list);
@@ -1106,46 +1122,43 @@ window.PARSER = (function() {
             var fid     = null;
             var form    = null;
             //----------
+            var word_len = word_str.length;
+            //----------
             for (var x=0; x<bids_list.length; x++) {
                 var bid = bids_list[x];
                 //----------
                 var morph   = bids_data[x].morph;
                 //----------
+                var missed_forms   = [];
+                var have_any_forms = false;
+                //----------
                 if (morph == 'Г') {
-                    var forms_list      = AUTOCOMPLETE.getByBID(bid);
-                    var forms_list_full = DICTIONARY.getFormsListByBID({'bid': bid});
+                    var forms_list = AUTOCOMPLETE.getByBID(bid, word_str);
                     //----------
-                    if (word_str == '') {
-                        for (var y=0; y<forms_list.length; y++) {
-                            fid     = forms_list[y].fid;
-                            form    = DICTIONARY.getForm(fid).form;
-                            //----------
-                            AUTOCOMPLETE.add(word_str, fid, form, morph);
-                        } // end for
-                    } else { // if (word_str != '')
-                        var have_any_verbs = false;
+                    var fsearch = {'bid': bid};
+                    if (word_len > 0) { fsearch.form = {leftnocase:word_str}; } // Если в искомом слове есть буквы, то ограничиваем фильтр ими
+                    var forms_list_full = DICTIONARY.getFormsListByBID(fsearch);
+                    //----------
+                    for (var y=0; y<forms_list.length; y++) {
+                        fid     = forms_list[y].fid;
+                        form    = DICTIONARY.getForm(fid).form;
                         //----------
-                        for (var y=0; y<forms_list.length; y++) {
-                            fid     = forms_list[y].fid;
-                            form    = DICTIONARY.getForm(fid).form;
-                            //----------
-                            if (form.substr(0, word_str.length) != word_str) {continue;} // end if
-                            //----------
-                            have_any_verbs = true;
-                            //----------
-                            AUTOCOMPLETE.add(word_str, fid, form, morph);
-                        } // end for
+                        if (word_len > 0 && form.substr(0, word_len) != word_str) {continue;} // end if
                         //----------
-                        if (have_any_verbs == false) {
-                            for (var y=0; y<forms_list_full.length; y++) {
-                                fid     = forms_list_full[y].fid;
-                                form    = DICTIONARY.getForm(fid).form;
-                                //----------
-                                if (form.substr(0, word_str.length) != word_str) {continue;} // end if
-                                //----------
-                                AUTOCOMPLETE.add(word_str, fid, form, morph);
-                            } // end for
+                        if (AUTOCOMPLETE.add(word_len, fid, form, morph, true) == true) {
+                            have_any_forms = true;
                         } // end if
+                    } // end for
+                    //----------
+                    if (have_any_forms == false) {
+                        for (var y=0; y<forms_list_full.length; y++) {
+                            fid  = forms_list_full[y].fid;
+                            form = DICTIONARY.getForm(fid).form;
+                            //----------
+                            if (word_len > 0 && form.substr(0, word_len) != word_str) {continue;} // end if
+                            //----------
+                            missed_forms.push({'fid':fid, 'form':form, 'morph':morph});
+                        } // end for
                     } // end if
                 
                 } else {
@@ -1163,29 +1176,39 @@ window.PARSER = (function() {
                         } // end if
                         //----------
                         for (var y=0; y<forms_list.length; y++) {
-                            fid     = forms_list[y].fid;
-                            form    = DICTIONARY.getForm(fid).form;
+                            fid  = forms_list[y].fid;
+                            form = DICTIONARY.getForm(fid).form;
                             //----------
-                            if (word_str != '') {
-                                if (form.substr(0, word_str.length) != word_str) {continue;} // end if
+                            if (word_len > 0 && form.substr(0, word_len) != word_str) {continue;} // end if
+                            //----------
+                            if (AUTOCOMPLETE.add(word_len, fid, form, morph, true) == true) {
+                                have_any_forms = true;
+                            } else {
+                                missed_forms.push({'fid':fid, 'form':form, 'morph':morph});
                             } // end if
-                            //----------
-                            AUTOCOMPLETE.add(word_str, fid, form, morph);
                         } // end for
                     
                     } else {
                         var forms_list = DICTIONARY.getFormsListByBID({'bid': bid});
                         for (var y=0; y<forms_list.length; y++) {
-                            fid     = forms_list[y].fid;
-                            form    = forms_list[y].form;
+                            fid  = forms_list[y].fid;
+                            form = forms_list[y].form;
                             //----------
-                            if (word_str != '') {
-                                if (form.substr(0, word_str.length) != word_str) {continue;} // end if
+                            if (word_len > 0 && form.substr(0, word_len) != word_str) {continue;} // end if
+                            //----------
+                            if (AUTOCOMPLETE.add(word_len, fid, form, morph, true) == true) {
+                                have_any_forms = true;
+                            } else {
+                                missed_forms.push({'fid':fid, 'form':form, 'morph':morph});
                             } // end if
-                            //----------
-                            AUTOCOMPLETE.add(word_str, fid, form, morph);
                         } // end for
                     } // end if
+                } // end if
+                //----------
+                if (have_any_forms == false && missed_forms.length > 0) {
+                    for (var y=0; y<missed_forms.length; y++) {
+                        AUTOCOMPLETE.add(word_len, missed_forms[y].fid, missed_forms[y].form, missed_forms[y].morph, false);
+                    } // end for
                 } // end if
                 //----------
             } // end for x
@@ -1196,38 +1219,9 @@ window.PARSER = (function() {
                 AUTOCOMPLETE.setActionFlag(); // --- Убрать
                 AUTOCOMPLETE.setStatus(1);
             } // end if
-            /*for (var priority=1; priority<=3; priority++) {
-                if (CMD.objects[priority] != null) {
-                    var action_id = CMD.actions[priority];
-                    //----------
-                    if (action_id != null) {
-                        var _action = CMD.objects[priority].actions_list[action_id-1];
-                        if (_action != null) {
-                            AUTOCOMPLETE.setActionFlag(); // --- Убрать
-                            AUTOCOMPLETE.setStatus(1);
-                        } // end if
-                        //----------
-                        break;
-                    } // end if
-                } // end if
-            } // end for priority*/
-            //----------
-            //return txt_words;
         }, // end function "pre_parse"
         //--------------------------------------------------
     };
     //--------------------------------------------------
 })(); // end object "PARSER"
 /* --------------------------------------------------------------------------- */
-/*
-"привязать пистолет за деревом " - "за деревом" попадает в третий слот
-
-
-CMD
-    phrase
-    object
-    action
-    A: object, word
-    B
-    C
-*/

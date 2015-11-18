@@ -17,6 +17,8 @@ window.EVENTS = (function() {
         '_events.property': TAFFY(),
         //----------
         '_events.action': TAFFY(),
+        //----------
+        '_events.text': TAFFY(),
     };
     //----------
     var fields_localization = {
@@ -65,6 +67,8 @@ window.EVENTS = (function() {
         '_events.property': 'location logicaldesc, what logicaldesc, property logicaldesc',
         //----------
         '_events.action':   'location logicaldesc, what logicaldesc',
+        //----------
+        '_events.text':     'location logicaldesc, what logicaldesc',
     };
     //--------------------------------------------------
     var events_id = 0;
@@ -86,6 +90,9 @@ window.EVENTS = (function() {
             return {'enable':false, 'location':null, 'what':null, 'property':null };
         //----------
         } else if (_event == EVENTS.ACTION) {
+            return {'enable':false, 'location':null, 'when':EVENTS.BEFORE, 'what':null };
+        //----------
+        } else if (_event == EVENTS.TEXT) {
             return {'enable':false, 'location':null, 'when':EVENTS.BEFORE, 'what':null };
         //----------
         } else {
@@ -275,18 +282,20 @@ window.EVENTS = (function() {
     };
 })(); // end object "EVENTS"
 /* --------------------------------------------------------------------------- */
-Object.defineProperty(EVENTS, 'BEFORE', {configurable:false, writable:false, value:'_events.before'});
-Object.defineProperty(EVENTS, 'AFTER',  {configurable:false, writable:false, value:'_events.after'});
-Object.defineProperty(EVENTS, 'DURING', {configurable:false, writable:false, value:'_events.during'});
+Object.defineProperty(EVENTS, 'BEFORE',   {configurable:false, writable:false, value:'_events.before'});
+Object.defineProperty(EVENTS, 'AFTER',    {configurable:false, writable:false, value:'_events.after'});
+Object.defineProperty(EVENTS, 'DURING',   {configurable:false, writable:false, value:'_events.during'});
 //--------------------------------------------------
-Object.defineProperty(EVENTS, 'FREE',    {configurable:false, writable:false, value:'_events.free'});
+Object.defineProperty(EVENTS, 'FREE',     {configurable:false, writable:false, value:'_events.free'});
 //----------
-Object.defineProperty(EVENTS, 'PUT',    {configurable:false, writable:false, value:'_events.put'});
-Object.defineProperty(EVENTS, 'REMOVE', {configurable:false, writable:false, value:'_events.remove'});
-Object.defineProperty(EVENTS, 'MOVE',   {configurable:false, writable:false, value:'_events.move'});
+Object.defineProperty(EVENTS, 'PUT',      {configurable:false, writable:false, value:'_events.put'});
+Object.defineProperty(EVENTS, 'REMOVE',   {configurable:false, writable:false, value:'_events.remove'});
+Object.defineProperty(EVENTS, 'MOVE',     {configurable:false, writable:false, value:'_events.move'});
 //----------
 Object.defineProperty(EVENTS, 'PROPERTY', {configurable:false, writable:false, value:'_events.property'});
 Object.defineProperty(EVENTS, 'ACTION',   {configurable:false, writable:false, value:'_events.action'});
+//----------
+Object.defineProperty(EVENTS, 'TEXT',     {configurable:false, writable:false, value:'_events.text'});
 /* --------------------------------------------------------------------------- */
 // СОБЫТИЕ
     window.runEvent = function (_event, _data) {

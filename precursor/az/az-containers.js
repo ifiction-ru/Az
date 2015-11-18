@@ -70,9 +70,12 @@ window.CONTAINERS = (function() {
             var result  = []; // Перечень результатов
             var list    = []; // Перечень уже добавленных объектов (чтобы пропускать нижние слои)
             //----------
-            db_arrangement({'where':_where, 'quantity':{'>':0}}).order('what asec, layer desc').each(function (rec) {
+            //db_arrangement({'where':_where, 'quantity':{'>':0}}).order('what asec, layer desc').each(function (rec) {
+            db_arrangement({'where':_where}).order('what asec, layer desc').each(function (rec) {
                 if (list.indexOf(rec.what) == -1) {
-                    result.push({'what':rec.what, 'where':_where, 'quantity':rec.quantity});
+                    if (rec.quantity > 0) {
+                        result.push({'what':rec.what, 'where':_where, 'quantity':rec.quantity});
+                    } // end if
                     list.push(rec.what);
                 } // end if
             }); // end query
@@ -86,9 +89,12 @@ window.CONTAINERS = (function() {
             var result  = []; // Перечень результатов
             var list    = []; // Перечень уже добавленных объектов (чтобы пропускать нижние слои)
             //----------
-            db_arrangement({'what':_what, 'quantity':{'>':0}}).order('where asec, layer desc').each(function (rec) {
+            //db_arrangement({'what':_what, 'quantity':{'>':0}}).order('where asec, layer desc').each(function (rec) {
+            db_arrangement({'what':_what}).order('where asec, layer desc').each(function (rec) {
                 if (list.indexOf(rec.where) == -1) {
-                    result.push({'what':_what, 'where':rec.where, 'quantity':rec.quantity});
+                    if (rec.quantity > 0) {
+                        result.push({'what':_what, 'where':rec.where, 'quantity':rec.quantity});
+                    } // end if
                     list.push(rec.where);
                 } // end if
             }); // end query
