@@ -99,8 +99,46 @@ body,
 
 .game-author {
     margin: 0 auto 20px;
-    font-size: 32px;
     text-shadow: 0 0 5px #fff;
+    font-size: 22px;
+    line-height: 28px;
+}
+
+.game-author a {
+    transition: color 0.2s;
+}
+
+.game-author__name {
+    display: inline-block;
+    margin: 0 0 4px;
+    font-size: 32px;
+    line-height: 1;
+    color: #3a3a3a;
+    text-decoration:none;
+}
+
+a.game-author__name:hover {
+    color: #000;
+}
+
+.game-author__info {
+    font-size: 18px;
+}
+
+.game-author__info a,
+.game-author__info a:visited {
+    margin: 0 12px;
+    text-decoration: none;
+    font-weight: bold;
+    color: #79491E;
+}
+
+.game-author__info a:hover {
+    color: #000;
+}
+
+.game-author__descr {
+    margin-top: 12px;
 }
 
 .az-start-game {
