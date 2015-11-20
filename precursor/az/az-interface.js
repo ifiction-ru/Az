@@ -983,11 +983,11 @@ window.INTERFACE = (function () {
                 // Кнопки для текста
                 elements.gameInventory.style.display = 'none';
                 elements.gameLook.style.display = 'none';
-                elements.gameMore.style.display = null;
+                elements.gameMore.style.removeProperty('display');
             } else {
                 // Кнопки для всего остального
-                elements.gameInventory.style.display = null;
-                elements.gameLook.style.display = null;
+                elements.gameInventory.style.removeProperty('display');
+                elements.gameLook.style.removeProperty('display');
                 elements.gameMore.style.display = 'none';
             }
         }
