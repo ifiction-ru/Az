@@ -61,6 +61,8 @@ tSimpleText.prototype.next = function () {
     //----------
     print(this.pages.texts[this.pages.current]);
     //----------
+    INTERFACE.setPlaceholder(getProperty('ИГРА.ПодсказкаДляТекста'));
+    //----------
     if (this.pages.current == this.pages.texts.length - 1) {
         this.pages.current = -1;
         //----------
@@ -78,6 +80,8 @@ tSimpleText.prototype.next = function () {
         PARSER.pre_parse();
         DEBUG.updateWordsFullList();
         DEBUG.updateWordsShortList();
+        //----------
+        INTERFACE.setPlaceholder(getProperty('ИГРА.ПодсказкаДляДействия'));
     } // end if
     //----------
 } // end function "<tSimpleText>.Next"

@@ -379,7 +379,7 @@ window.START = function (_param) {
     INTERFACE.init({
         title:       getProperty('ИГРА.Название'),
         heading:     getProperty('ИГРА.Название'),
-        placeholder: 'Введите команду'
+        placeholder: getProperty('ИГРА.ПодсказкаДляДействия'),
     }, function () {
         if (typeof(AZ.toDoOnStart) == 'function') {
             AZ.toDoOnStart();
