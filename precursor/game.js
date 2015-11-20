@@ -13,18 +13,19 @@
                                         Олег Алейников\
                                     </a>\
                                     <div class="game-author__info">\
-                                        <a href="#" target="_blank">Об игре</a> \
-                                        <a href="#" target="_blank">VK</a> \
-                                        <a href="mailto:" target="_blank">Почта</a> \
+                                        <a title="Карточка игры на форуме iFiction.Ru" href="http://forum.ifiction.ru/viewtopic.php?id=2154" target="_blank">об игре</a> \
+                                        &middot;\
+                                        <a title="Страница автора во ВКонтакте" href="http://vk.com/o.aleynikov" target="_blank">vk</a> \
+                                        &middot;\
+                                        <a title="Почта автора: oleg@aleynikov.com" href="mailto:oleg@aleynikov.com" target="_blank">почта</a> \
                                     </div> \
                                     <div class="game-author__descr">\
-                                        представляет игру в жанре<br/>Interactive Fiction\
+                                        представляет игру в жанре Interactive Fiction\
                                     </div>\
                                 </div>\
                                  <img src="images/pirate_start.png" class="game-pirate" alt="">\
                                  <div class="game-title"></div>\
                                  <a class="az-start-game">Начать игру</a>',
-            //<img src="images/pirate_start.png" class="game-pirate" alt="">\
             startEndingContent: '\
                                 <div class="game-credits">\
                                     <p>\
