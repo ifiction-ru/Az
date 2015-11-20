@@ -111,7 +111,7 @@ window.AZ = (function() {
 		__getSessionID: function () {
 			if (document.location.hostname != 'jshell.ifiction.ru') {return;}
 			//----------
-			var req = getXmlHttp();
+			var req = new XMLHttpRequest();
 			//----------
 			req.onreadystatechange = function() {
 				if (req.readyState == 4) { 
@@ -132,7 +132,7 @@ window.AZ = (function() {
 			//----------
 			if	(window.AZGameSessionID == '') {return;}
 			//----------
-			var req = getXmlHttp();
+			var req = new XMLHttpRequest();
 			//----------
 			req.open('GET','./gamelogs.php?a=add&s='+window.AZGameSessionID+'&r='+(result==true?'t':'f')+'&c='+command, true);
 			//----------
