@@ -97,7 +97,7 @@ window.AZ = (function() {
             DEBUG.updatePanelForObjects();
         } // end if
         //----------
-    }; // end function "AZ.get_available_objects"
+    } // end function "AZ.get_available_objects"
     //--------------------------------------------------
     return {
         //--------------------------------------------------
@@ -108,6 +108,37 @@ window.AZ = (function() {
         //----------
         silence: silence,
         //--------------------------------------------------
+		__getSessionID: function () {
+			if (document.location.hostname != 'jshell.ifiction.ru') {return;}
+			//----------
+			var req = getXmlHttp();
+			//----------
+			req.onreadystatechange = function() {
+				if (req.readyState == 4) { 
+					if (req.status == 200) {
+						var obj = document.getElementById('sessionID');
+						window.AZGameSessionID = req.responseText;
+					}
+				}
+			}
+			//----------
+			req.open('GET','./gamelogs.php?a=getID', true);
+			//----------
+			req.send(null);
+		}, // end function "AZ.__getSessionID"
+		//--------------------------------------------------
+		saveActionToLog: function (command, result) {
+			if (document.location.hostname != 'jshell.ifiction.ru') {return;}
+			//----------
+			if	(window.AZGameSessionID == '') {return;}
+			//----------
+			var req = getXmlHttp();
+			//----------
+			req.open('GET','./gamelogs.php?a=add&s='+window.AZGameSessionID+'&r='+(result==true?'t':'f')+'&c='+command, true);
+			//----------
+			req.send(null);
+		},
+		//--------------------------------------------------
         // РАБОТА С БАЗОВЫМИ ОБЪЕКТАМИ
             //--------------------------------------------------
             // Добавляем объект в "objects_list", чтобы можно было всегда получить по строковому ID сам объект.
@@ -367,74 +398,7 @@ window.START = function (_param) {
         DEBUG.updateWordsFullList();
         DEBUG.updateWordsShortList();
         //----------
-/*Execute('далее');
-Execute('помощь');
-Execute('осмотреть пальму');
-Execute('залезть на пальму');
-Execute('взять пльму');
-Execute('взять пальму');
-Execute('оторвать лист');
-Execute('юг');
-Execute('осм');
-Execute('плыть');
-Execute('плыть к кораблю');
-Execute('осм пальму');
-Execute('осм остров');
-Execute('осмотреться');
-Execute('осм тень');
-Execute('кричать');
-Execute('осм океан');
-Execute('идти к пальме');
-Execute('осм пальму');
-Execute('лезть на пальму');
-Execute('осм себя');
-Execute('инв');
-Execute('рубить пальму саблей');
-Execute('плыть на плоту');
-Execute('сесть на плот');
-Execute('плыть к кораблю');
-Execute('плыть');
-Execute('тащить плот');
-Execute('привязать веревку к плоту');
-Execute('привязать веревку к пальме');
-Execute('привязать веревку');
-Execute('инв');
-Execute('инвентарь');
-Execute('думать');
-Execute('инвентарь');
-Execute('осм инвентарь');
-Execute('далее');
-Execute('далее');
-Execute('осм');
-Execute('срубить пальму саблей');
-Execute('привязать веревку к пальме');
-Execute('привязать веревку');
-Execute('дернуть веревку');
-Execute('тянуть веревку');
-Execute('тянуть за веревку');
-Execute('осмотреть');
-Execute('инв');
-Execute('стрелять в пальму');
-Execute('привязаться к веревке');
-Execute('привязать верёвку');
-Execute('привязать саблю');
-Execute('привязать саблю к веревке');
-Execute('лезть на пальму');
-Execute('залезть на пальму');
-Execute('осмотреть');
-Execute('подойти к пальме');
-Execute('взять пальму');
-Execute('взять веревку');
-Execute('тянуть за веревку');
-Execute('осм веревку');
-Execute('взять веревку');
-Execute('поднять сундук');
-Execute('поднять сундук');
-Execute('поднять сундук');
-Execute('поднять сундук');
-Execute('рубить веревку');
-Execute('осм пистолет');*/
-        
+		AZ.__getSessionID();
     });
 }; // end function "START"
 /* --------------------------------------------------------------------------- */

@@ -717,7 +717,9 @@ window.INTERFACE = (function () {
 
                 if (CMD == null || CMD.action == null) {
                     print('Не совсем понятно, что вы хотите сделать.');
+					AZ.saveActionToLog(CMD.phrase, false);
                 } else {
+					AZ.saveActionToLog(CMD.phrase, true);
                     // Вызываем событие "Перед выполнением действия с объектом"
                     var check = true;
                     if (AZ.outputLayers.length == 0) {
