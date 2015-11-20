@@ -127,7 +127,6 @@ a.game-author__name:hover {
 
 .game-author__info a,
 .game-author__info a:visited {
-    margin: 0 12px;
     text-decoration: none;
     font-weight: bold;
     color: #79491E;
