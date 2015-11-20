@@ -231,7 +231,7 @@ window.tSimpleObject = function (_id) {
             var object_id = AZ.getID(this);
             //----------
             for (var y=0; y<_locations.length; y++) {
-                PARSER.add_link_to_object({'enable':true, 'obj':object_id, 'priority':0, 'loc':(_locations[x]==null ? null: AZ.getID(_locations[x])), 'wid1':word.bid, 'nums':_numbers});
+                PARSER.add_link_to_object({'enable':true, name:null, 'obj':object_id, 'priority':0, 'loc':(_locations[x]==null ? null: AZ.getID(_locations[x])), 'wid1':word.bid, 'nums':_numbers});
             } // end for y
             //----------
         } // end for x
@@ -355,7 +355,7 @@ window.tSimpleObject = function (_id) {
                                     //----------
                                     var e = {};
                                     e['wid'+priority] = word.bid;
-                                    e['fid'+priority] = word.fid;
+                                    //e['fid'+priority] = word.fid; // Удаляем фиксацию формы слова. Это отличает данный способ заполнения слота от варианта с предлогами.
                                     rec_elems.push(e);
                                 } // end if
                                 //----------

@@ -256,7 +256,8 @@ window.PARSER = (function() {
             if (rec !== false) {
                 console.error('У объекта "'+search.obj+'" дублирующий набор параметров действия:');
                 console.log(
-                    '    1: L:'+rec.loc+
+                    '    1: PR:'+rec.priority+
+                    ', L:'+rec.loc+
                     ', v:'+(rec.vid == null ? '-' : DICTIONARY.getBase(rec.vid).base+' ('+rec.vid+')')+
                     ', t1:'+(rec.to1 || '-')+
                     ', p1:'+(rec.pid1 == null ? '-' : DICTIONARY.getBase(rec.pid1).base+' ('+rec.pid1+')')+
@@ -270,7 +271,8 @@ window.PARSER = (function() {
                     ', any:'+(rec.any || '-')+
                     ', a:'+rec.action);
                 console.log(
-                    '    2: L:'+search.loc+
+                    '    2: PR:'+search.priority+
+                    ', L:'+search.loc+
                     ', v:'+(search.vid == null ? '-' : DICTIONARY.getBase(search.vid).base+' ('+search.vid+')')+
                     ', t1:'+(search.to1 || '-')+
                     ', p1:'+(search.pid1 == null ? '-' : DICTIONARY.getBase(search.pid1).base+' ('+search.pid1+')')+
@@ -288,7 +290,7 @@ window.PARSER = (function() {
                 search['nums']      = _options.nums || null;
                 //----------
                 //if (search.obj == 'ПОРОХ' || search.obj == 'ФИТИЛЬ') {
-                /*if (search.obj == 'ПОРОХ') {
+                /*if (search.obj == 'ПАЛЬМА') {
                    console.log(
                         'name:'+(search.name == null ? '-' : search.name)+', '+
                         'id:'+search.obj+', p:'+search.priority+', n:'+search.nums+
@@ -377,6 +379,8 @@ window.PARSER = (function() {
             //----------
             var CMD = {
                 phrase:     _phrase, // Текст команды
+                object:     null,
+                action:     null,
                 //----------
                 any_errors: false,
                 error:      {type:null, word:''}, // Описание ошибки
@@ -389,8 +393,7 @@ window.PARSER = (function() {
                 objects:    [undefined, null, null, null], // undefined - пустой элемент на 0-й позиции массива
                 actions:    [undefined, null, null, null], // undefined - пустой элемент на 0-й позиции массива
                 //----------
-                object:     null,
-                action:     null
+                notparams:  [], // сюда сваливаются слова, которые игра знает, но не понимает, куда отнести: "возьми пила"
             }; // end CMD
             //----------
             var nouns4pronouns  = {};
@@ -537,14 +540,14 @@ window.PARSER = (function() {
                     preposition = _check_prep_by_noun(word, preposition);
                     priority    = _check_param_priority(CMD, word, preposition, nouns4pronouns, pr_occupied);
                     //----------
-                    if (preposition != null && priority != null) {
+                    if (priority == null) {
+                        buffer_after.push(word);
+                        
+                    } else if (preposition != null && priority != null) {
                         // Если предлог ещё и наречие, то удаляем его из списка
                         _remove_adverb(preposition);
                     } // end if
                     //----------
-                    if (priority == null) {
-                        buffer_after.push(word);
-                    } // end if
                 
                 // Обрабатываем местоимение
                 } else if (word.morph == 'М') {
@@ -605,7 +608,10 @@ window.PARSER = (function() {
                         preposition = _check_prep_by_noun(word, preposition);
                         priority    = _check_param_priority(CMD, word, preposition, nouns4pronouns, pr_occupied);
                         //----------
-                        if (preposition != null && priority != null) {
+                        if (priority == null) {
+                            CMD.notparams.push(word);
+                            
+                        } else if (preposition != null && priority != null) {
                             // Если предлог ещё и наречие, то удаляем его из списка
                             _remove_adverb(preposition);
                         } // end if
@@ -616,9 +622,12 @@ window.PARSER = (function() {
                             var noun2 = word.nouns_list[x];
                             var prep2 = _check_prep_by_noun(noun2, prep2);
                             //----------
-                            priority  = _check_param_priority(CMD, noun2, prep2, nouns4pronouns, pr_occupied);
+                            priority = _check_param_priority(CMD, noun2, prep2, nouns4pronouns, pr_occupied);
                             //----------
-                            if (preposition != null && priority != null) {
+                            if (priority == null) {
+                                CMD.notparams.push(word);
+                                
+                            } else if (preposition != null && priority != null) {
                                 // Если предлог ещё и наречие, то удаляем его из списка
                                 _remove_adverb(preposition);
                             } // end if
@@ -767,14 +776,22 @@ window.PARSER = (function() {
             } // end if
             //----------
             // Ругаемся на незнакомые слова
-            if (CMD.unknown.length > 0) {
+            if (CMD.unknown.length > 0 || CMD.notparams.length > 0) {
                 CMD.any_errors = true;
-                CMD.error.type  = 1; // 1 - незнакомое слово
+                //CMD.error.type  = 1; // 1 - незнакомое слово
                 //----------
                 if (_preparsing == false) {
-                    for (var x=0; x<CMD.unknown.length; x++) {
-                        print('Слово "<strong>'+CMD.unknown[x]+'</strong>" мне незнакомо.');
-                    } // end for x
+                    if (CMD.unknown.length > 0) {
+                        for (var x=0; x<CMD.unknown.length; x++) {
+                            print('Слово "<strong>'+CMD.unknown[x]+'</strong>" мне незнакомо.');
+                        } // end for x
+                    }
+                    //----------
+                    if (CMD.notparams.length > 0) {
+                        for (var x=0; x<CMD.notparams.length; x++) {
+                            print('Слово "<strong>'+CMD.notparams[x].form+'</strong>" знакомо, но его форма не подходит к команде.');
+                        } // end for x
+                    }
                 }
                 //----------
                 AUTOCOMPLETE.setStatus(-1);
@@ -1024,11 +1041,6 @@ window.PARSER = (function() {
                 //----------
                 cases2 = []; // Перечень падежей предлога из записи данных. Падежи распространяются на слово и объекты toN.
                 //----------
-                // Предлог и слово связаны с основным объектом команды. Если данный объект уже распознан в команде, то ни предлог, ни слово не нужны.
-                //if (obj_to_pass.indexOf(rec.obj) == -1 && (CMD.objects[rec.priority] == null || rec.obj == AZ.getID(CMD.objects[rec.priority]))) {
-                //if (obj_to_pass.indexOf(rec.obj) == -1) {
-                //----------
-                // Если...
                 // Сопоставление слов с объектами
                 for (var priority=1; priority<=3; priority++) {
                     if (CMD.params[priority] != null) {continue;} // end if
@@ -1048,16 +1060,28 @@ window.PARSER = (function() {
                     } // end if
                     //----------
                     // Слово добавляем если этого слова в команде ещё нет:
-                    if (rec['wid'+priority] != null && words_to_pass.indexOf(rec['wid'+priority]) == -1 && prep_id == rec['pid'+priority]) {
+                    if (rec['wid'+priority] != null && words_to_pass.indexOf(rec['wid'+priority]) == -1 && rec['pid'+priority] == prep_id) {
                         //  1. Глагола нет ни в данных, ни в команде. Предлога нет ни в данных, ни в команде.
                         //  2. Глагола нет ни в данных, ни в команде. Предлог есть и в данных, и в команде.
                         //  3. Глагол есть и в данных, и в команде. Предлога нет ни в данных, ни в команде.
                         //  4. Глагол есть и в данных, и в команде. Предлог есть и в данных, и в команде.
-                        if (rec.vid == verb_id && rec['pid'+priority] == prep_id) {
+                        /*if (rec.vid == verb_id && rec['pid'+priority] == prep_id) {
                             bids_to_add.push({'bid':rec['wid'+priority], 'value':{'fid':rec['fid'+priority]}});
                             //----------
                             words_to_pass.push(rec['wid'+priority]);
+                        } // end if*/
+                        if (verb_id == null) {
+                            // Если предлога нет, то падеж только именительный, иначе - берём из предлога.
+                            cases2 = (rec['pid'+priority] == null ? ['И'] : DICTIONARY.getWordCases(rec['pid'+priority], '-'));
+                        } else if (verb_id != null) {
+                            cases2 = cases[verb_id+':'+priority+':'+prep_id];
                         } // end if
+                        //----------
+                        if ((cases2 || null) == null) {pass_this_rec = true; continue;} // end if
+                        
+                        // Добавляем слова-сопоставления с объектом из слота
+                        bids_to_add.push({'bid':rec['wid'+priority], 'value':{nums:['Е','М']}, 'cases':cases2.slice()});
+                        //_add_words_from_links(bids_to_add, obj, search_toN, cases2);
                     } // end if
                     //} // end if "obj_to_pass"
                     //----------
