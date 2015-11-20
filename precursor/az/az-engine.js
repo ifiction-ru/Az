@@ -109,7 +109,7 @@ window.AZ = (function() {
         silence: silence,
         //--------------------------------------------------
 		__getSessionID: function () {
-			if (document.location.hostname != 'jshell.ifiction.ru') {return;}
+			if (document.location.hostname != 'games.ifiction.ru') {return;}
 			//----------
 			var req = new XMLHttpRequest();
 			//----------
@@ -128,7 +128,7 @@ window.AZ = (function() {
 		}, // end function "AZ.__getSessionID"
 		//--------------------------------------------------
 		saveActionToLog: function (command, result) {
-			if (document.location.hostname != 'jshell.ifiction.ru') {return;}
+			if (document.location.hostname != 'games.ifiction.ru') {return;}
 			//----------
 			if	(window.AZGameSessionID == '') {return;}
 			//----------

@@ -18,7 +18,7 @@ if ($action == 'getID') {
 	#----------
 	$time = date('Y.m.d H:i:s');
 	#----------
-	$fname = './logs/'.md5('files'.$session);
+	$fname = './_logs/'.md5('files'.$session);
 	#----------
 	if (!file_exists($fname.'.log')) {
 		$file = fopen($fname.'.log', 'a');
