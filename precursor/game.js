@@ -8,7 +8,19 @@
         INTERFACE.setHeading(Получить('ИГРА.Название'));
 
         INTERFACE.changeSettings({
-            startSplashContent: '<div class="game-author"><a target="_blank" href="http://olegus.ifiction.ru" style="color: #3a3a3a; text-decoration:none;">Олег Алейников</a><br/><small>представляет игру в жанре<br/>Interactive Fiction</small></div>\
+            startSplashContent: '<div class="game-author">\
+                                    <a target="_blank" class="game-author__name" href="http://olegus.ifiction.ru">\
+                                        Олег Алейников\
+                                    </a>\
+                                    <div class="game-author__info">\
+                                        <a href="#" target="_blank">Об игре</a> \
+                                        <a href="#" target="_blank">VK</a> \
+                                        <a href="mailto:" target="_blank">Почта</a> \
+                                    </div> \
+                                    <div class="game-author__descr">\
+                                        представляет игру в жанре<br/>Interactive Fiction\
+                                    </div>\
+                                </div>\
                                  <img src="images/pirate_start.png" class="game-pirate" alt="">\
                                  <div class="game-title"></div>\
                                  <a class="az-start-game">Начать игру</a>',
