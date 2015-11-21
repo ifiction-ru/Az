@@ -3,8 +3,7 @@
     TO-DO
         +++ Добавить проверку наличия объекта в текущем контексте. А лучше фильтр
         ----------
-        Формат параметров для "tSimpleObject.prototype.Описывается":
-            2. Перечень: [{words:[слова1], locs:[локации1]}, {words:[слова2], locs:[локации2]}]
+        +++ Добавить понятие числа слова. Потому как сейчас число есть только у объекта, и у игрока вылазят "инвентари"
         ----------
         +++ Добавить прилагательные: возьми золотой кубок // возьми деревянный кубок
             
@@ -1060,7 +1059,7 @@ window.PARSER = (function() {
                     } // end if
                     //----------
                     // Слово добавляем если этого слова в команде ещё нет:
-                    if (rec['wid'+priority] != null && words_to_pass.indexOf(rec['wid'+priority]) == -1 && rec['pid'+priority] == prep_id) {
+                    if (rec['wid'+priority] != null && words_to_pass.indexOf(rec['wid'+priority]) == -1) {
                         //  1. Глагола нет ни в данных, ни в команде. Предлога нет ни в данных, ни в команде.
                         //  2. Глагола нет ни в данных, ни в команде. Предлог есть и в данных, и в команде.
                         //  3. Глагол есть и в данных, и в команде. Предлога нет ни в данных, ни в команде.
@@ -1071,14 +1070,18 @@ window.PARSER = (function() {
                             words_to_pass.push(rec['wid'+priority]);
                         } // end if*/
                         if (verb_id == null) {
+                            // Если глагола в команде нет, то предлог данных должен совпадать с предлогом в команде
+                            if (rec['pid'+priority] != prep_id) {pass_this_rec = true; continue;} // end if
+                            //----------
                             // Если предлога нет, то падеж только именительный, иначе - берём из предлога.
                             cases2 = (rec['pid'+priority] == null ? ['И'] : DICTIONARY.getWordCases(rec['pid'+priority], '-'));
+                            
                         } else if (verb_id != null) {
                             cases2 = cases[verb_id+':'+priority+':'+prep_id];
                         } // end if
                         //----------
                         if ((cases2 || null) == null) {pass_this_rec = true; continue;} // end if
-                        
+                        //----------
                         // Добавляем слова-сопоставления с объектом из слота
                         bids_to_add.push({'bid':rec['wid'+priority], 'value':{nums:['Е','М']}, 'cases':cases2.slice()});
                         //_add_words_from_links(bids_to_add, obj, search_toN, cases2);
