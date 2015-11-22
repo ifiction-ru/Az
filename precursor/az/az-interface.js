@@ -821,6 +821,12 @@ window.INTERFACE = (function () {
                 }
             });
 
+            dom.on(elements.body, 'keydown', function (event) {
+                if (event.keyCode === 8 && event.target != elements.input) { // Backspace
+                    event.preventDefault();
+                }
+            });
+
             dom.on(elements.input, 'input', function (event) {
                // triggerEvent('input', { text : elements.input.value.trim() });
                 //----------
