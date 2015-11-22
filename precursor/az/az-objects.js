@@ -81,6 +81,7 @@ window.tSimpleObject = function (_id) {
     // Объявление объекта с типом "Location"
     window.Location = function (_id) {
         tSimpleObject.apply(this, arguments);
+        this.type = 'location';
     }; // end function "Location"
     //----------
     Location.prototype = Object.create(tSimpleObject.prototype);

@@ -77,6 +77,8 @@ window.AZ = (function() {
             for (var x=0; x<arr.length; x++) {
                 var object = AZ.getObject(arr[x]);
                 //----------
+                if (object.type != 'location' && object.Where() == null) {continue;} // end if
+                //----------
                 if (available_objects.full_IDs.indexOf(arr[x]) == -1) {
                     available_objects.full.push(object);
                     available_objects.full_IDs.push(arr[x]);
@@ -333,6 +335,8 @@ window.startWith = function (_module) {
 }
 /* --------------------------------------------------------------------------- */
 window.Execute = function(text) {
+    if (text.length == 0) {return;} // end if
+    //----------
     printCommand(text);
     var CMD = PARSER.parse(text);
     if (CMD == null || CMD.action == null) {
@@ -398,7 +402,7 @@ window.START = function (_param) {
         DEBUG.updateWordsFullList();
         DEBUG.updateWordsShortList();
         //----------
-		AZ.__getSessionID();
+        AZ.__getSessionID();
     });
 }; // end function "START"
 /* --------------------------------------------------------------------------- */
