@@ -939,6 +939,22 @@ window.INTERFACE = (function () {
             elements.input.focus();
         },
 
+        openWindow = function (url, options) {
+            if (!url) {
+                return;
+            }
+
+            options = utils.extend({
+                scrollbars: true,
+                width: 700,
+                height: 600
+            }, options);
+
+            return window.open(url, 'az-window-' + new Date().getTime(),
+                'menubar=no,location=no,resizable=yes,status=yes,scrollbars='
+                + (options.scrollbars ? 'yes' : 'no') + ',width=' + options.width + ',height=' + options.height);
+        },
+
         /**
          * Инициализация интерфейса игры
          * @param options Настройки интерфейса. Значения по умолчанию см. в переменной settings.
@@ -985,6 +1001,7 @@ window.INTERFACE = (function () {
         init: init,
         showStart: showStart,
         showEnding: showEnding,
+        openWindow: openWindow,
         updateCommandPanel: function (mode) {
             // Обновление командной панели игрока
             if (mode === 'text') {
