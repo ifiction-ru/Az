@@ -21,5 +21,15 @@
 
 body {
     font-family: "Roboto Slab", "sans-serif";
-    
+}
+p {
+    padding: 0 2em 1em 2em;
+    text-align:justify;
+}
+li {
+    text-align:justify;
+}
+
+small {
+    font-size: 0.8em;
 }

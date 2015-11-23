@@ -17,9 +17,11 @@
                                     <div class="game-author__info">\
                                         <a title="Карточка игры на форуме iFiction.Ru" href="http://forum.ifiction.ru/viewtopic.php?id=2154" target="_blank">об игре</a> \
                                         &middot;\
-                                        <a title="Страница автора во ВКонтакте" href="http://vk.com/o.aleynikov" target="_blank">vk</a> \
+                                        <a title="Справочная информация по игре" href="help.html" target="_blank">как играть</a>\
                                         &middot;\
-                                        <a title="Почта автора: oleg@aleynikov.com" href="mailto:oleg@aleynikov.com" target="_blank">почта</a> \
+                                        <a title="Страница автора во ВКонтакте" href="http://vk.com/o.aleynikov" target="_blank">vk</a>\
+                                        &middot;\
+                                        <a title="Почта автора: oleg@aleynikov.com" href="mailto:oleg@aleynikov.com" target="_blank">почта</a>\
                                     </div> \
                                     <div class="game-author__descr">\
                                         представляет игру в жанре Interactive Fiction\
@@ -197,10 +199,13 @@
             {А:['помощь', 'справка']},
             //----------
             ], function() {
-                //Вывести('Можете открыть справку по игре по этой ссылке: <a href="help.html" target="_blank">help.html</a>.');
-                Вывести('\n\n\
-                    *Увы, справка пока в процессе написания. Но вы можете поспрашивать, как играть в эту игру в IRC на канале #urq: <a href="http://chat.forestnet.org/?channels=urq" target="_blank">irc.forestnet.org</a>.*\n\n\
-                ');
+                var help = INTERFACE.openWindow('help.html');
+                //----------
+                if (help === undefined) {
+                    Вывести('*Возможно у вас стоит блокировка открытия окон браузера. Но вы можете ознакомиться со справкой по игре, перейдя по этой ссылке: <a href="help.html" target="_blank">help.html</a>*');
+                } else {
+                    Вывести('*Справочная информация выведена в отдельном окне.*');
+                } // end if
             });
         //----------
         ИГРОК.Действие({глагол:'кто', А:ИГРОК}, function() {ВывестиОписание();});
@@ -1665,7 +1670,6 @@
     });
     ПослеВыводаТекста.Включить();
 /* --------------------------------------------------------------------------- */
-//DEBUG.Enable();
 DEBUG.Disable();
 //----------
 СЧегоНачать(function () {
