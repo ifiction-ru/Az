@@ -81,6 +81,9 @@
     tSimpleObject.prototype.ВключитьДействие  = tSimpleObject.prototype.EnableAction;
     tSimpleObject.prototype.ВыключитьДействие = tSimpleObject.prototype.DisableAction;
     tSimpleObject.prototype.ВыполнитьДействие = tSimpleObject.prototype.ExecuteAction;
+    //----------
+    ВключитьДействие  = EnableAction;
+    ВыключитьДействие = DisableAction;
     //--------------------------------------------------
     window.localizeCMD = function (CMD) {
         //----------

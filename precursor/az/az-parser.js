@@ -196,9 +196,10 @@ window.PARSER = (function() {
     /* --------------------------------------------------------------------------- */
     return {
         actionEnableDisable: function (_obj, _name, _enable) {
-            db_words_and_objects({'obj':_obj, 'name':_name}).each(function (rec, num) {
-                db_words_and_objects(rec).update({'enable':_enable});
-            });
+            var search = {'name':_name};
+            if ((_obj || null) !== null) {search.obj = _obj} // end if
+            //----------
+            db_words_and_objects(search).update({'enable':_enable});
         }, // end function "PARSER.actionEnableDisable"
         //--------------------------------------------------
         executeAction: function (_obj, _name, _params) {
@@ -215,7 +216,7 @@ window.PARSER = (function() {
                 //----------
                 AZ.silence = false;
             } // end if
-        }, // end function "PARSER.actionEnableDisable"
+        }, // end function "PARSER.executeAction"
         //--------------------------------------------------
         add_link_to_object: function (_options) { // *** проверено
             //----------
@@ -1251,4 +1252,12 @@ window.PARSER = (function() {
     };
     //--------------------------------------------------
 })(); // end object "PARSER"
+/* --------------------------------------------------------------------------- */
+function EnableAction (_name) {
+    PARSER.actionEnableDisable(null, _name, true);
+}
+//--------------------------------------------------
+function DisableAction (_name) {
+    PARSER.actionEnableDisable(null, _name, false);
+}
 /* --------------------------------------------------------------------------- */
