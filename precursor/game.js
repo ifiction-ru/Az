@@ -29,7 +29,8 @@
                                 </div>\
                                  <img src="images/pirate_start.png" class="game-pirate" alt="">\
                                  <div class="game-title"></div>\
-                                 <a class="az-start-game">Начать игру</a>',
+                                 <a class="az-start-game">Начать игру</a>\
+                                 <a class="az-continue-game">Продолжить игру</a>',
             startEndingContent: '\
                                 <div class="game-credits">\
                                     <img src="images/pirate_start.png" class="game-pirate" alt="">\
@@ -42,7 +43,12 @@
                                         <p><strong>Андрею «Kelot» Сидорову</strong> — за отличный рисунок с пиратом</p>\
                                         <p><strong>abbilder/Depositphotos.com</strong> — за фоновый рисунок</p>\
                                         <p><strong>Сергею «Серому Волку» Скибе</strong> — за КРИЛ и гостеприимство</p>\
-                                </div>'
+                                </div>',
+
+            // Функция проверки, нужно ли показывать кнопку "Продолжить игру"
+            canContinue: function () {
+                return true;
+            }
         });
         INTERFACE.showStart();
     });

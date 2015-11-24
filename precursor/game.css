@@ -140,10 +140,11 @@ a.game-author__name:hover {
     margin-top: 8px;
 }
 
-.az-start-game {
+.az-start-game,
+.az-continue-game {
     transition: background 0.25s;
     display: block;
-    width: 250px;
+    width: 280px;
     height: 50px;
     margin: 20px auto 0;
     border-radius: 5px;
@@ -155,8 +156,13 @@ a.game-author__name:hover {
     cursor: pointer;
 }
 
-.az-start-game:hover {
+.az-start-game:hover,
+.az-continue-game:hover {
     background: rgba(255,255,255,0.65);
+}
+
+.az-continue-game {
+    display: none;
 }
 
 .game-credits {

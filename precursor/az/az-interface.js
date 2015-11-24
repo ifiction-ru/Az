@@ -138,7 +138,7 @@ window.INTERFACE = (function () {
         },
 
         each: function (elements, func) {
-            elements = Array.isArray(elements) ? elements : [elements];
+            elements = (typeof elements !== 'string' && typeof elements !== 'function' && elements.length !== undefined) ? elements : [elements];
             Array.prototype.forEach.call(elements, func);
         },
 
@@ -466,7 +466,12 @@ window.INTERFACE = (function () {
                                     <div class="az-splash__content">\
                                         {{ this.content }}\
                                     </div>\
-                                  </div>'
+                                  </div>',
+
+            onContinue: function () {},
+            canContinue: function () {
+                return false;
+            }
         },
 
         selectors = {
@@ -481,7 +486,8 @@ window.INTERFACE = (function () {
             gameInventory: '.az-inputs__game-inv',
             gameMore: '.az-inputs__game-more',
             storyCommand: '.az-story__command',
-            gameStart: '.az-start-game'
+            gameStart: '.az-start-game',
+            gameContinue: '.az-continue-game'
         },
         classes = {
             main: 'az-main',
@@ -717,9 +723,9 @@ window.INTERFACE = (function () {
 
                 if (CMD == null || CMD.action == null) {
                     print('Не совсем понятно, что вы хотите сделать.');
-					AZ.saveActionToLog(CMD.phrase, false);
+                    AZ.saveActionToLog(CMD.phrase, false);
                 } else {
-					AZ.saveActionToLog(CMD.phrase, true);
+                    AZ.saveActionToLog(CMD.phrase, true);
                     // Вызываем событие "Перед выполнением действия с объектом"
                     var check = true;
                     if (AZ.outputLayers.length == 0) {
@@ -868,6 +874,12 @@ window.INTERFACE = (function () {
                     applySuggestion(event.target.innerHTML.trim());
                 }
             });
+
+            dom.on(elements.body, 'click', function (event) {
+                if (dom.is(event.target, selectors.gameContinue)) {
+                    settings.onContinue && typeof settings.onContinue === 'function' && settings.onContinue();
+                }
+            });
         },
 
         autocomplete = function () {
@@ -917,6 +929,7 @@ window.INTERFACE = (function () {
                         hideStart();
                     }
                 });
+                toggleContinue();
             }
         },
 
@@ -937,6 +950,26 @@ window.INTERFACE = (function () {
         hideStart = function () {
             dom.removeClass(elements.body, classes.startSplashVisible);
             elements.input.focus();
+        },
+
+        toggleContinue = function (state) {
+            var buttons = dom.query(selectors.gameContinue);
+
+            if (!buttons || !buttons.length) {
+                return;
+            }
+
+            if (state === undefined) {
+                state = settings.canContinue();
+            }
+
+            dom.each(buttons, function (button) {
+                if (state) {
+                    button.style.display = 'block';
+                } else {
+                    button.style.removeProperty('display');
+                }
+            });
         },
 
         openWindow = function (url, options) {
@@ -1002,6 +1035,7 @@ window.INTERFACE = (function () {
         showStart: showStart,
         showEnding: showEnding,
         openWindow: openWindow,
+        toggleContinue: toggleContinue,
         updateCommandPanel: function (mode) {
             // Обновление командной панели игрока
             if (mode === 'text') {
