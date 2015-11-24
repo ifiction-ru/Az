@@ -877,6 +877,7 @@ window.INTERFACE = (function () {
 
             dom.on(elements.body, 'click', function (event) {
                 if (dom.is(event.target, selectors.gameContinue)) {
+                    AZ.continueGame && AZ.continueGame();
                     settings.onContinue && typeof settings.onContinue === 'function' && settings.onContinue();
                 }
             });
@@ -927,6 +928,7 @@ window.INTERFACE = (function () {
                 dom.on(elements.body, 'click', function (event) {
                     if (dom.is(event.target, selectors.gameStart)) {
                         hideStart();
+                        AZ.startNewGame && AZ.startNewGame();
                     }
                 });
                 toggleContinue();
