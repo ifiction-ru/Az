@@ -16,7 +16,8 @@ window.AZ = (function() {
     //----------
     var objects_list = {}; // Ассоциативный массив для хранения ссылок на объекты игры по их строковому ID.
     //----------
-    var toDoOnStart  = null; // С чего начать игру +++ Переделать на внутреннее свойство.
+    var toDoOnStart         = null; // С чего начать игру +++ Переделать на внутреннее свойство.
+    var executeAfterStart   = null;
     //----------
     var outputLayers = [];   // Перечень слоёв "с чем имеет дело игрок", для переключения парсера, области видимости объектов и т.п.
     //--------------------------------------------------
@@ -105,42 +106,78 @@ window.AZ = (function() {
         //--------------------------------------------------
         outputLayers: outputLayers,
         //----------
-        toDoOnStart:  toDoOnStart,
+        toDoOnStart:       toDoOnStart,
+        executeAfterStart: executeAfterStart,
         updateAvailableObjects: updateAvailableObjects,
         //----------
         silence: silence,
         //--------------------------------------------------
-		__getSessionID: function () {
-			if (document.location.hostname != 'games.ifiction.ru') {return;}
-			//----------
-			var req = new XMLHttpRequest();
-			//----------
-			req.onreadystatechange = function() {
-				if (req.readyState == 4) { 
-					if (req.status == 200) {
-						var obj = document.getElementById('sessionID');
-						window.AZGameSessionID = req.responseText;
-					}
-				}
-			}
-			//----------
-			req.open('GET','./gamelogs.php?a=getID', true);
-			//----------
-			req.send(null);
-		}, // end function "AZ.__getSessionID"
-		//--------------------------------------------------
-		saveActionToLog: function (command, result) {
-			if (document.location.hostname != 'games.ifiction.ru') {return;}
-			//----------
-			if	(window.AZGameSessionID == '') {return;}
-			//----------
-			var req = new XMLHttpRequest();
-			//----------
-			req.open('GET','./gamelogs.php?a=add&s='+window.AZGameSessionID+'&r='+(result==true?'t':'f')+'&c='+command, true);
-			//----------
-			req.send(null);
-		},
-		//--------------------------------------------------
+        getSessionID: function () {
+            if (document.location.hostname != 'games.ifiction.ru') {
+                window.AZGameSessionID = 'test';
+                return;
+            }
+            //----------
+            var req = new XMLHttpRequest();
+            //----------
+            req.onreadystatechange = function() {
+                if (req.readyState == 4) { 
+                    if (req.status == 200) {
+                        window.AZGameSessionID = req.responseText;
+                        //----------
+                        STORAGE.setSessionID(window.AZGameSessionID); // Устанавливаем в хранилище новый ID сессии
+                        STORAGE.clearCommands(); // Очищаем в хранлище историю команд
+                    }
+                }
+            }
+            //----------
+            req.open('GET','gamelogs.php?a=getID', true);
+            //----------
+            req.send(null);
+        }, // end function "AZ.getSessionID"
+        //--------------------------------------------------
+        canContinue: function () {
+            return (STORAGE.getSessionID() == null ? false : true);
+        },
+        //--------------------------------------------------
+        startNewGame: function () {
+            window.AZGameSessionID = null;
+            //----------
+            AZ.getSessionID(); // Получаем ID сессии с сервера
+            //----------
+        },
+        //--------------------------------------------------
+        continueGame: function () {
+            window.AZGameSessionID = STORAGE.getSessionID();
+            //----------
+            if (AZGameSessionID == null) {
+                startNewGame();
+            } else {
+                var list = STORAGE.getCommands();
+                for (var x=0; x<list.length; x++) {
+                    var command = list[x];
+                    AZ.executeCommand(command, false);
+                } // end for
+                INTERFACE.clearSuggestions();
+                PARSER.pre_parse();
+                INTERFACE.autocomplete();
+            } // end if
+        },
+        //--------------------------------------------------
+        saveActionToLog: function (command, result) {
+            if (result == true) {STORAGE.addCommand(command);} // end if
+            //----------
+            if (document.location.hostname != 'games.ifiction.ru') {return;}
+            //----------
+            if  (window.AZGameSessionID == '') {return;}
+            //----------
+            var req = new XMLHttpRequest();
+            //----------
+            req.open('GET','gamelogs.php?a=add&s='+window.AZGameSessionID+'&r='+(result==true?'t':'f')+'&c='+command, true);
+            //----------
+            req.send(null);
+        },
+        //--------------------------------------------------
         // РАБОТА С БАЗОВЫМИ ОБЪЕКТАМИ
             //--------------------------------------------------
             // Добавляем объект в "objects_list", чтобы можно было всегда получить по строковому ID сам объект.
@@ -319,6 +356,10 @@ window.AZ = (function() {
             this.toDoOnStart = _module;
         }, // end function "AZ.startWith"
         //--------------------------------------------------
+        executeAfter: function(_module) {
+            this.executeAfterStart = _module;
+        }, // end function "AZ.executeAfter"
+        //--------------------------------------------------
         availObjects: function (_only_id, _limited) {
             if (_limited == true) {
                 return (_only_id == true ? available_objects.limited_IDs.slice() : available_objects.limited.slice());
@@ -327,6 +368,40 @@ window.AZ = (function() {
             } // end if
         }, // end function "AZ.availObjects"
         /* --------------------------------------------------------------------------- */
+        executeCommand: function (_command, _real) {
+            if (_command.length == 0) {return;} // end if
+            _real = _real || false;
+            //----------
+            printCommand(_command);
+            var CMD = PARSER.parse(_command);
+            if (CMD == null || CMD.action == null) {
+                print('Не совсем понятно, что вы хотите сделать.');
+                if (_real == true) {AZ.saveActionToLog(CMD.phrase, false);} // Сохраняем команду в лог
+            } else {
+                if (_real == true) {AZ.saveActionToLog(CMD.phrase, true);} // Сохраняем команду в лог
+                //----------
+                // Вызываем событие "Перед выполнением действия с объектом"
+                var check = true;
+                if (AZ.outputLayers.length == 0) {
+                    check = EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.object, 'when':EVENTS.BEFORE}, {'parameter': CMD});
+                } // end if
+                if (check == true) {
+                    //----------
+                    incProperty('turns.all');
+                    incProperty('turns.loc');
+                    //----------
+                    CMD.action(CMD);
+                    //----------
+                    // Вызываем событие "После выполнением действия с объектом"
+                    if (AZ.outputLayers.length == 0) {
+                        EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.object, 'when':EVENTS.AFTER}, {'parameter': CMD});
+                    } // end if
+                } // end if
+            } // end if
+            //----------
+            AZ.startNewTurn();
+            if (_real == true) {PARSER.pre_parse();};
+        }, // end function "AZ.executeCommand"
     };
 })(); // end object "AZ"
 /* --------------------------------------------------------------------------- */
@@ -335,34 +410,7 @@ window.startWith = function (_module) {
 }
 /* --------------------------------------------------------------------------- */
 window.Execute = function(text) {
-    if (text.length == 0) {return;} // end if
-    //----------
-    printCommand(text);
-    var CMD = PARSER.parse(text);
-    if (CMD == null || CMD.action == null) {
-        print('Не совсем понятно, что вы хотите сделать.');
-    } else {
-        // Вызываем событие "Перед выполнением действия с объектом"
-        var check = true;
-        if (AZ.outputLayers.length == 0) {
-            check = EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.object, 'when':EVENTS.BEFORE}, {'parameter': CMD});
-        } // end if
-        if (check == true) {
-            //----------
-            incProperty('turns.all');
-            incProperty('turns.loc');
-            //----------
-            CMD.action(CMD);
-            //----------
-            // Вызываем событие "После выполнением действия с объектом"
-            if (AZ.outputLayers.length == 0) {
-                EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.object, 'when':EVENTS.AFTER}, {'parameter': CMD});
-            } // end if
-        } // end if
-    } // end if
-    //----------
-    AZ.startNewTurn();
-    PARSER.pre_parse();
+    AZ.executeCommand(text, false);
 }
 /* --------------------------------------------------------------------------- */
 window.START = function (_param) {
@@ -402,9 +450,13 @@ window.START = function (_param) {
         DEBUG.updateWordsFullList();
         DEBUG.updateWordsShortList();
         //----------
-        AZ.__getSessionID();
+        //AZ.getSessionID();
+        //----------
+        if (typeof(AZ.executeAfterStart) == 'function') {
+            AZ.executeAfterStart();
+        }
+        //----------
     });
 }; // end function "START"
 /* --------------------------------------------------------------------------- */
-
 window.addEventListener('load', window.START, false);

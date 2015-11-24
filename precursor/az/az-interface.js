@@ -467,11 +467,6 @@ window.INTERFACE = (function () {
                                         {{ this.content }}\
                                     </div>\
                                   </div>',
-
-            onContinue: function () {},
-            canContinue: function () {
-                return false;
-            }
         },
 
         selectors = {
@@ -713,41 +708,11 @@ window.INTERFACE = (function () {
             } // end if
 
             if (text) {
-                printCommand(text);
-
-                var CMD = PARSER.parse(text);
-
                 clearInput();
                 clearSuggestions();
-                // text && triggerEvent('submit', { value: text });
-
-                if (CMD == null || CMD.action == null) {
-                    print('Не совсем понятно, что вы хотите сделать.');
-                    AZ.saveActionToLog(CMD.phrase, false);
-                } else {
-                    AZ.saveActionToLog(CMD.phrase, true);
-                    // Вызываем событие "Перед выполнением действия с объектом"
-                    var check = true;
-                    if (AZ.outputLayers.length == 0) {
-                        check = EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.object, 'when':EVENTS.BEFORE}, {'parameter': CMD});
-                    } // end if
-                    if (check == true) {
-                        //----------
-                        incProperty('turns.all');
-                        incProperty('turns.loc');
-                        //----------
-                        CMD.action(CMD);
-                        //----------
-                        // Вызываем событие "После выполнением действия с объектом"
-                        if (AZ.outputLayers.length == 0) {
-                            EVENTS.checkReactions(EVENTS.ACTION, {'what':CMD.object, 'when':EVENTS.AFTER}, {'parameter': CMD});
-                        } // end if
-                    } // end if
-                } // end if
                 //----------
-                AZ.startNewTurn();
-                PARSER.pre_parse();
-
+                AZ.executeCommand(text, true);
+                //----------
                 autocomplete();
                 commandsHistory.add(text);
             }
@@ -877,8 +842,8 @@ window.INTERFACE = (function () {
 
             dom.on(elements.body, 'click', function (event) {
                 if (dom.is(event.target, selectors.gameContinue)) {
+                    hideStart();
                     AZ.continueGame && AZ.continueGame();
-                    settings.onContinue && typeof settings.onContinue === 'function' && settings.onContinue();
                 }
             });
         },
@@ -962,7 +927,7 @@ window.INTERFACE = (function () {
             }
 
             if (state === undefined) {
-                state = settings.canContinue();
+                state = AZ.canContinue();
             }
 
             dom.each(buttons, function (button) {
@@ -1030,6 +995,8 @@ window.INTERFACE = (function () {
         write: write,
         clear: clear,
         clearInput: clearInput,
+        autocomplete: autocomplete,
+        clearSuggestions: clearSuggestions,
         setSuggestions: setSuggestions,
         render: render,
         on: on,
