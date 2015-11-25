@@ -18,7 +18,13 @@
 /* --------------------------------------------------------------------------- */
 window.AUTOCOMPLETE = (function() {
     //--------------------------------------------------
-    var ac_data;
+    var prevData = {
+        tabPressed: false,  // Флаг, была ли нажата последней клавиша Tab
+        list:       [],     // Перечень слов для циклического автодополнения по Tab
+        pos:        0       // Позиция внутри перечня
+    };
+    //----------
+    var ac_data = null;
     var ac_morphs;
     //----------
     var ac_exclude;
@@ -27,6 +33,8 @@ window.AUTOCOMPLETE = (function() {
     var acStatus = 0; // Статус автодополнения: 0 - ничего, -1 - ошибка в команде, 1 - есть что выполнить
     //----------
     var ac_chars = 0;
+    //----------
+    var lastKeyCode = 0;
     //--------------------------------------------------
     /* Формат базы данных "db_autocomplete":
         bid     Уникальный числовой идентификатор слова
@@ -37,10 +45,21 @@ window.AUTOCOMPLETE = (function() {
     //--------------------------------------------------
     _init();
     //--------------------------------------------------
+    /*
+        При нажатии Tab:
+            Если это первое нажатие, то
+                1. Запоминаем текущий список автодополнения.
+                2. Дополняем фразу первым словом.
+                3. 
+            Если это второе нажатие, то:
+                1. Стираем последнее слово (пробел, слово - до пробела)
+                2. Дополняем фразу очередным словом
+        */
     // Инициализация данных модуля. Вызывается в модуле PARSER в функции препарсинга.
     function _init (_bids_list) {
         //----------
         ac_data = [];
+        ac_data.push({list:{'full':[], 'Г':[], 'С':[], 'other':[]}});
         ac_data.push({list:{'full':[], 'Г':[], 'С':[], 'other':[]}});
         ac_data.push({list:{'full':[], 'Г':[], 'С':[], 'other':[]}});
         //----------
@@ -88,8 +107,38 @@ window.AUTOCOMPLETE = (function() {
     //--------------------------------------------------
     return {
         //--------------------------------------------------
-        // Синоним для внутренней функции
+        // Инициализация списков. Синоним для внутренней функции
         init: _init,
+        //--------------------------------------------------
+        getOnTab: function () {
+            var result = '';
+            //----------
+            if (prevData.tabPressed == false) {
+                prevData.tabPressed = true;
+                prevData.list       = ac_data[1].list['full'].slice();
+                prevData.pos        = 0;
+            } else {
+                prevData.pos++;
+                if (prevData.pos == prevData.list.length) {
+                    prevData.pos = 0;
+                } // end if
+            } // end if
+            //----------
+            if (prevData.list.length == 0) {
+                prevData.tabPressed = false;
+                prevData.pos        = 0;
+            } else {
+                result = prevData.list[prevData.pos];
+            }// end if
+            //----------
+            return result;
+        },
+        //--------------------------------------------------
+        resetTab: function () {
+            prevData.tabPressed = false;
+            prevData.list       = [];
+            prevData.pos        = 0;
+        },
         //--------------------------------------------------
         // Исключение (в основном) слова в автодополнение. Вызывается из модуля DICTIONARY.
         addWordWithFlag: function (_bid, _fid, _inc) {

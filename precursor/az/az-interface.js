@@ -679,7 +679,7 @@ window.INTERFACE = (function () {
 
                 PARSER.parse(elements.input.value, true);
                 checkMaySubmit();
-                clearSuggestions();
+                //clearSuggestions(); Для цикличного Tab
             }
         },
 
@@ -776,11 +776,13 @@ window.INTERFACE = (function () {
                     commandsHistory.reset();
                 } else if (key === 9) { // Tab
                     event.preventDefault();
-                    item = dom.query(selectors.suggestionItem)[0];
+                    /*item = dom.query(selectors.suggestionItem)[0];
 
                     if (item) {
                         applySuggestion(item.innerHTML);
-                    }
+                    }*/
+                    item = AUTOCOMPLETE.getOnTab();
+                    if (item != '') {applySuggestion(item)} // end if
 
                     commandsHistory.reset();
                 } else if (key === 38) { // Up
@@ -790,6 +792,9 @@ window.INTERFACE = (function () {
                     elements.input.value = commandsHistory.down();
                     event.preventDefault();
                 }
+                if (key !== 9) {
+                    AUTOCOMPLETE.resetTab(); // Если нажата не Tab, то обнуляем цикл по табу
+                } // end if
             });
 
             dom.on(elements.body, 'keydown', function (event) {
