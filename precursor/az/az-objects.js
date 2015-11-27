@@ -381,11 +381,16 @@ window.tSimpleObject = function (_id) {
                                     var words_list = any2arr(rec['слова'], true);
                                     //----------
                                     for (var p=0; p<preps_list.length; p++) {
-                                        var prep = DICTIONARY.getWord(preps_list[p]);
-                                        //----------
-                                        if (prep === null) {
-                                            console.warn('У объекта "'+this.ID+'" в качестве предлога указано неизвестное слово: "'+preps_list[p]+'"!');
-                                            continue;
+                                        var prep = preps_list[p];
+                                        if (prep != null) {
+                                            prep = DICTIONARY.getWord(preps_list[p]);
+                                            //----------
+                                            if (prep === null) {
+                                                console.warn('У объекта "'+this.ID+'" в качестве предлога указано неизвестное слово: "'+preps_list[p]+'"!');
+                                                continue;
+                                            } // end if
+                                            //----------
+                                            prep = prep.bid;
                                         } // end if
                                         //----------
                                         for (var w=0; w<words_list.length; w++) {
@@ -400,7 +405,7 @@ window.tSimpleObject = function (_id) {
                                                 } // end if
                                                 //----------
                                                 var e = {};
-                                                e['pid'+priority] = prep.bid;
+                                                e['pid'+priority] = prep;
                                                 e['wid'+priority] = word.bid;
                                                 e['fid'+priority] = word.fid;
                                                 rec_elems.push(e);
@@ -408,7 +413,7 @@ window.tSimpleObject = function (_id) {
                                             } else if (typeof(word) == 'object' && word != null) {
                                                 if (AZ.isObject(word) == true) {
                                                     var e = {};
-                                                    e['pid'+priority] = prep.bid;
+                                                    e['pid'+priority] = prep;
                                                     e['to'+priority] = AZ.getID(word);
                                                     rec_elems.push(e);
                                                 } // end if

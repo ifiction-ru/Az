@@ -832,13 +832,14 @@ window.PARSER = (function() {
         }, // end function "parse"
         //--------------------------------------------------
         pre_parse: function (word_str, verb_id, prep_id, CMD) {
-            word_str    = word_str || '';
+            word_str = word_str || '';
             //----------
-            if (word_str.length == 0 && AUTOCOMPLETE.getCharsMin() > 0 && DEBUG.isEnable() == false) {
-                AUTOCOMPLETE.init();
-                return;
+            if (DEBUG.isEnable() == false) {
+                if (word_str.length < AUTOCOMPLETE.getCharsMin()) {
+                    AUTOCOMPLETE.init();
+                    return;
+                } // end if
             } // end if
-            //word_str = word_str.replace('ё', 'е');
             //----------
             verb_id     = verb_id || null;
             prep_id     = prep_id || null;
@@ -857,10 +858,12 @@ window.PARSER = (function() {
             // Добавляем слово в список на выдачу (+ доп. информация в values)
             function _add_bid (_list, _data, _bid, _values) {
                 if (availableBIDs !== null) {
-                    if (availableBIDs.indexOf(_bid) == -1) {return;} // end if
+                    if (availableBIDs.indexOf(_bid) == -1) {return false;} // end if
                 } // end if
                 //----------
-                if (_list.indexOf(_bid) == -1) {
+                if (_list.indexOf(_bid) >= 0) {
+                    return false;
+                } else {
                     _list.push(_bid);
                     //----------
                     var word = DICTIONARY.getBase(_bid);
@@ -873,6 +876,8 @@ window.PARSER = (function() {
                     } // end if
                     //----------
                     _data.push(rec);
+                    //----------
+                    return true;
                 } // end if
                 
             } // end function "_add_bid"
@@ -1009,6 +1014,8 @@ window.PARSER = (function() {
                 //'loc':      [LOC_ID, null],
                 };
             if (verb_id !== null) {search.vid = verb_id;} // end if
+            //if (prep_id !== null) {search.vid = verb_id;} // end if
+            //availableBIDs
             if (isText == false)  {search.loc = [LOC_ID, null];} // end if
             //----------
             // Отбираем все комбинации слов, используемых в действиях с доступными объектами
@@ -1065,11 +1072,6 @@ window.PARSER = (function() {
                         //  2. Глагола нет ни в данных, ни в команде. Предлог есть и в данных, и в команде.
                         //  3. Глагол есть и в данных, и в команде. Предлога нет ни в данных, ни в команде.
                         //  4. Глагол есть и в данных, и в команде. Предлог есть и в данных, и в команде.
-                        /*if (rec.vid == verb_id && rec['pid'+priority] == prep_id) {
-                            bids_to_add.push({'bid':rec['wid'+priority], 'value':{'fid':rec['fid'+priority]}});
-                            //----------
-                            words_to_pass.push(rec['wid'+priority]);
-                        } // end if*/
                         if (verb_id == null) {
                             // Если глагола в команде нет, то предлог данных должен совпадать с предлогом в команде
                             if (rec['pid'+priority] != prep_id) {pass_this_rec = true; continue;} // end if
@@ -1117,9 +1119,9 @@ window.PARSER = (function() {
                                 for (var y=0; y<preps_of_verbs[idx].length; y++) {
                                     var prep2 = preps_of_verbs[idx][y];
                                     if (preps_to_pass.indexOf(prep2) == -1) {
-                                        _add_bid(bids_list, bids_data, prep2);
-                                        //----------
-                                        preps_to_pass.push(prep2);
+                                        if (_add_bid(bids_list, bids_data, prep2) == true) {
+                                            preps_to_pass.push(prep2);
+                                        } // end if
                                     } // end if
                                 } // end for
                             } // end if
@@ -1137,9 +1139,11 @@ window.PARSER = (function() {
                 if (pass_this_rec == false) {
                     for (var bx=0; bx<bids_to_add.length; bx++) {
                         var brec = bids_to_add[bx];
-                        _add_bid(bids_list, bids_data, brec.bid, brec.value);
-                        if (brec.cases !== undefined) {
-                            _cases2word(words_cases, brec.bid, brec.cases); // Добавляем падежи для данного слова
+                        // DICTIONARY.getObjectsOfVerbs({'bid':rec.vid, 'priority':[1,2,3]})
+                        if (_add_bid(bids_list, bids_data, brec.bid, brec.value) == true) {
+                            if (brec.cases !== undefined) {
+                                _cases2word(words_cases, brec.bid, brec.cases); // Добавляем падежи для данного слова
+                            } // end if
                         } // end if
                     } // end for
                 } // end if

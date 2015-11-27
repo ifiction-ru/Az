@@ -722,30 +722,30 @@ window.DICTIONARY = (function() {
             //------------------------------
             // Функция возвращает тип объекта (1-2-3) для глагола по fid предлога и падежу
             // Возвращает число 1-2-3 или null.
-            getNounPriority: function (_verb, _noun, _prep_bid, already) {
-                var result = null;
+            getNounPriority: function (_verb, _noun, _pid, already) {
+                //var result = null;
+                //----------
+                var result = [false,null,null,null]; // 0-й не считаем
                 //----------
                 // Отбираем данные по объектам всех типов для переданного глагола
-                var objects_list = db_objects_of_verbs({'bid': _verb.bid}).get();
+                var list = db_objects_of_verbs({'bid':_verb.bid, 'prep':_pid}).get(); // 'cases':{'!is':null}
                 //----------
-                for (var x=0; x<objects_list.length; x++) {
-                    var object = objects_list[x];
+                for (var x=0; x<list.length; x++) {
+                    var rec = list[x];
+                    var recPrior = rec.priority;
                     //----------
-                    if (already.indexOf(object.priority) >=0 ) {continue;} // end if
+                    if (already.indexOf(recPrior) >= 0 || result[recPrior] != null) {continue;} // end if
                     //----------
-                    var cases = object.cases || [];
+                    var cases = rec.cases || [];
                     //----------
-                    if (object.prep !== null && object.prep !== _prep_bid) {continue;} // end if
+                    //if (rec.prep !== null && rec.prep !== _pid) {continue;} // end if
                     //----------
                     if (_noun.morph == 'С') {
                         for (var z=0; z<cases.length; z++) {
-                            var case_obj = cases[z];
-                            if (_noun.cases.united.indexOf(case_obj) >= 0) {
-                                result = {
-                                    'priority': object.priority,
-                                    'noun':     _noun,
-                                };
-                                break;
+                            if (_noun.cases.united.indexOf(cases[z]) >= 0) {
+                                if (result[recPrior] == null) {
+                                    result[recPrior] = {'priority':recPrior, 'noun':_noun};
+                                } // end if
                             } // end if
                         } // end for
                         
@@ -754,34 +754,35 @@ window.DICTIONARY = (function() {
                             var noun2 = _noun.nouns_list[y];
                             //----------
                             for (var z=0; z<cases.length; z++) {
-                                var case_obj = cases[z];
-                                if (noun2.cases.indexOf(case_obj) >= 0) {
-                                    result = {
-                                        'priority': object.priority,
-                                        'noun':     noun2,
-                                    };
-                                    break;
+                                if (noun2.cases.indexOf(cases[z]) >= 0) {
+                                    if (result[recPrior] == null) {
+                                        result[recPrior] = {'priority':recPrior, 'noun':noun2};
+                                    } // end if
                                 } // end if
                             } // end for z
                             //----------
                             if (result != null) {break;} // end if
                         } // end for y
                     } else if (_noun.morph == 'Н') {
-                        var adverbs = object.adverbs || [];
+                        var adverbs = rec.adverbs || [];
                         //----------
                         if (adverbs.length > 0) {
-                            if (adverbs.indexOf(_noun.bid) >=0 ) {
-                                result = {
-                                    'priority': object.priority,
-                                    'noun':     _noun,
-                                };
-                                break;
+                            if (adverbs.indexOf(_noun.bid) >= 0) {
+                                if (result[recPrior] == null) {
+                                    result[recPrior] = {'priority':recPrior, 'noun':_noun};
+                                } // end if
                             } // end if
                         } // end if
                     } // end if
                 } // end for x
                 //----------
-                return result;
+                for (var x=1; x<result.length; x++) {
+                    if (result[x] != null) {
+                        return result[x];
+                    } // end if
+                } // end for
+                //----------
+                return null;
                 //----------
             }, // end function "getNounPriority"
         //------------------------------
