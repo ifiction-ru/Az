@@ -4,7 +4,3 @@ node_modules
 .editorconfig
 config
 config.rb
-precursor/_tmp/game-tmp.js
-precursor/_tmp/walkthrough.js
-precursor/_tmp/probe.js
-precursor/_tmp/probe.html
