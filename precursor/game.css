@@ -24,7 +24,7 @@ body,
 .az-header,
 .az-footer:before,
 .az-splash {
-    background: rgb(237, 185, 102) 0 100% no-repeat fixed url(images/bg-page.png);
+    background: rgb(237, 185, 102) 0 100% no-repeat fixed url(images/bg-page.jpg);
     background-size: auto 100%;
 }
 
