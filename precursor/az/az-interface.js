@@ -209,13 +209,21 @@ window.INTERFACE = (function () {
         },
 
         create: function (str, properties) {
-            var elem;
+            var doc,
+                range,
+                elem;
 
             str = str ? str.toString() : undefined;
 
             if (str) {
                 if (str.indexOf('<') >=0 && str.indexOf('>') >=0) {
-                    elem = document.createRange().createContextualFragment(str);
+                    doc = document.implementation.createHTMLDocument('');
+                    range = doc.createRange();
+
+                    doc.body.innerHTML = str;
+                    range.selectNodeContents(doc.body);
+                    elem = range.extractContents();
+                  //  elem = document.createRange().createContextualFragment(str);
                 } else {
                     elem = document.createElement(str);
 
